@@ -1,0 +1,444 @@
+// This is your Prisma schema file
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ============================================================
+// 1. USERS & ROLES
+// ============================================================
+model User {
+  id           Int      @id @default(autoincrement())
+  nama         String   @db.VarChar(100)
+  username     String   @unique @db.VarChar(50)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  role         UserRole
+  factory      Factory
+  shift        Shift?
+  nik          String?  @db.VarChar(20)
+  tempatLahir  String?  @map("tempat_lahir") @db.VarChar(100)
+  tanggalLahir DateTime? @map("tanggal_lahir") @db.Date
+  createdAt    DateTime @default(now()) @map("created_at")
+  email        String?  @unique @db.VarChar(100)
+  resetOtp     String?  @map("reset_otp") @db.VarChar(10)
+  resetOtpExpires DateTime? @map("reset_otp_expires")
+  resetStatus  String?  @default("NONE") @map("reset_status") @db.VarChar(20) // "NONE", "PENDING", "APPROVED"
+  
+  // Rate limiting Lupa Password
+  otpAttempts  Int       @default(0) @map("otp_attempts")
+  lockedUntil  DateTime? @map("locked_until")
+  lockoutStage Int       @default(0) @map("lockout_stage") // 0: none, 1: 1h, 2: 8h, 3: 24h
+
+  laporan         Laporan[]
+  jadwal          JadwalMingguan[]
+  overtimeEntry   OvertimeEntry[]
+  approvals       ChecksheetApproval[]
+  moldBookUpdates MoldBook[]
+  revisiRequests  ChecksheetRevisi[] @relation("RevisiRequester")
+  revisiResponses ChecksheetRevisi[] @relation("RevisiResponder")
+  notifikasi      Notifikasi[]
+  auditLogs       AuditLog[]
+  safetyModified  SafetyRecord[]  @relation("SafetyModifier")
+  safetyHistory   SafetyHistory[] @relation("SafetyHistoryCreator")
+
+  @@map("users")
+}
+
+enum UserRole {
+  PIC
+  TL
+  GL
+  CL
+  ADM
+  SUPER_ADMIN
+}
+
+enum Factory {
+  F2
+  F3
+  F4
+}
+
+enum Shift {
+  Nonshift
+  Shift_A @map("Shift A")
+  Shift_B @map("Shift B")
+}
+
+// ============================================================
+// 2. LAPORAN MAINTENANCE
+// ============================================================
+model Laporan {
+  id        Int          @id @default(autoincrement())
+  noMold    String       @map("no_mold") @db.VarChar(50)
+  jenis     JenisLaporan
+  factory   Factory
+  shift     Shift?
+  picId     Int          @map("pic_id")
+  tanggal   DateTime     @db.Date
+  part      String?      @db.VarChar(100)
+  komentar  String?      @db.Text
+  jadwalId  Int?         @map("jadwal_id")
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  coreActual   String? @map("core_actual") @db.VarChar(20)
+  cavActual    String? @map("cav_actual") @db.VarChar(20)
+  heaterActual Json?   @map("heater_actual")
+  shotCycle    String? @map("shot_cycle") @db.VarChar(50)
+  shotMonth    String? @map("shot_month") @db.VarChar(50)
+  info         String? @db.Text
+  countermeasure String? @db.Text
+
+  pic        User            @relation(fields: [picId], references: [id])
+  jadwal     JadwalMingguan? @relation(fields: [jadwalId], references: [id])
+  checksheet Checksheet?
+
+  @@index([noMold], map: "idx_no_mold")
+  @@index([tanggal], map: "idx_tanggal")
+  @@index([factory], map: "idx_factory")
+  @@map("laporan")
+}
+
+enum JenisLaporan {
+  OH_MOLD  @map("OH MOLD")
+  BM       @map("B/M")
+  IM       @map("I/M")
+  PM
+  BM_CHUCK @map("BM CHUCK")
+  LAINNYA
+}
+
+// ============================================================
+// 3. CHECKSHEET (1:1 dengan laporan)
+// ============================================================
+model Checksheet {
+  id          Int      @id @default(autoincrement())
+  laporanId   Int      @unique @map("laporan_id")
+  checklist   Json?
+  jamMulai    String?  @map("jam_mulai") @db.VarChar(5)
+  jamSelesai  String?  @map("jam_selesai") @db.VarChar(5)
+  jumlahOrang Int      @default(1) @map("jumlah_orang")
+  tarifPerJam Decimal? @map("tarif_per_jam") @db.Decimal(12, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  laporan    Laporan              @relation(fields: [laporanId], references: [id], onDelete: Cascade)
+  spareparts ChecksheetSparepart[]
+  foto       ChecksheetFoto[]
+  approvals  ChecksheetApproval[]
+  revisi     ChecksheetRevisi[]
+
+  @@map("checksheet")
+}
+
+model ChecksheetSparepart {
+  id            Int     @id @default(autoincrement())
+  checksheetId  Int     @map("checksheet_id")
+  namaSparepart String  @map("nama_sparepart") @db.VarChar(150)
+  qty           Int     @default(1)
+  hargaSatuan   Decimal @map("harga_satuan") @db.Decimal(12, 2)
+
+  checksheet Checksheet @relation(fields: [checksheetId], references: [id], onDelete: Cascade)
+
+  @@map("checksheet_sparepart")
+}
+
+model ChecksheetFoto {
+  id           Int      @id @default(autoincrement())
+  checksheetId Int      @map("checksheet_id")
+  filePath     String   @map("file_path") @db.VarChar(255)
+  uploadedAt   DateTime @default(now()) @map("uploaded_at")
+
+  checksheet Checksheet @relation(fields: [checksheetId], references: [id], onDelete: Cascade)
+
+  @@map("checksheet_foto")
+}
+
+// ============================================================
+// 4. APPROVAL (baris per role)
+// ============================================================
+model ChecksheetApproval {
+  id           Int       @id @default(autoincrement())
+  checksheetId Int       @map("checksheet_id")
+  role         UserRole
+  userId       Int?      @map("user_id")
+  signedAt     DateTime? @map("signed_at")
+
+  checksheet Checksheet @relation(fields: [checksheetId], references: [id], onDelete: Cascade)
+  user       User?      @relation(fields: [userId], references: [id])
+
+  @@unique([checksheetId, role], map: "uniq_checksheet_role")
+  @@map("checksheet_approval")
+}
+
+// ============================================================
+// 4b. REVISI CHECKSHEET
+// ============================================================
+model ChecksheetRevisi {
+  id            Int          @id @default(autoincrement())
+  checksheetId  Int          @map("checksheet_id")
+  requestById   Int          @map("request_by_id")
+  alasan        String       @db.Text
+  status        RevisiStatus @default(MENUNGGU)
+  respondedById Int?         @map("responded_by_id")
+  respondedAt   DateTime?    @map("responded_at")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  checksheet  Checksheet @relation(fields: [checksheetId], references: [id], onDelete: Cascade)
+  requestBy   User       @relation("RevisiRequester", fields: [requestById], references: [id])
+  respondedBy User?      @relation("RevisiResponder", fields: [respondedById], references: [id])
+
+  @@map("checksheet_revisi")
+}
+
+enum RevisiStatus {
+  MENUNGGU
+  DISETUJUI
+  DITOLAK
+}
+
+// ============================================================
+// 4c. NOTIFIKASI
+// ============================================================
+model Notifikasi {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  judul     String    @db.VarChar(150)
+  pesan     String    @db.Text
+  tipe      TipeNotif
+  refId     Int?      @map("ref_id")
+  refType   String?   @map("ref_type") @db.VarChar(50)
+  dibaca    Boolean   @default(false)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dibaca], map: "idx_notif_user")
+  @@map("notifikasi")
+}
+
+enum TipeNotif {
+  APPROVAL
+  REVISI
+  MOLD_BOOK
+  INFO
+}
+
+// ============================================================
+// 5. JADWAL MINGGUAN
+// ============================================================
+model JadwalMingguan {
+  id             Int          @id @default(autoincrement())
+  mingguKe       Int          @map("minggu_ke")
+  tahun          Int
+  noMold         String       @map("no_mold") @db.VarChar(50)
+  picId          Int          @map("pic_id")
+  hari           String?      @db.VarChar(10)
+  jenis          String?      @db.VarChar(20)
+  catatan        String?      @db.Text
+  tanggalRencana DateTime?    @map("tanggal_rencana") @db.Date
+  status         StatusJadwal @default(Belum_Dikerjakan)
+
+  pic     User      @relation(fields: [picId], references: [id])
+  laporan Laporan[]
+
+  @@index([mingguKe, tahun], map: "idx_minggu")
+  @@map("jadwal_mingguan")
+}
+
+enum StatusJadwal {
+  Belum_Dikerjakan @map("Belum Dikerjakan")
+  Proses_Approval  @map("Proses Approval")
+  Sudah_Dikerjakan @map("Sudah Dikerjakan")
+}
+
+// ============================================================
+// 6. MOLD BOOK
+// ============================================================
+model MoldBook {
+  noMold      String    @id @map("no_mold") @db.VarChar(50)
+  mc          String?   @db.VarChar(20)
+  factory     Factory
+  part        String?   @db.VarChar(200)
+  tonase      String?   @db.VarChar(50)
+  customer    String?   @db.VarChar(100)
+  model       String?   @db.VarChar(100)
+  coreStd     String?   @map("core_std") @db.VarChar(20)
+  cavStd      String?   @map("cav_std") @db.VarChar(20)
+  heaterStd   Json?     @map("heater_std")
+  lokasiMold  String?   @map("lokasi_mold") @db.VarChar(200)
+  outhouseId  Int?      @map("outhouse_id")
+  dimensiW    String?   @map("dimensi_w") @db.VarChar(20)
+  dimensiH    String?   @map("dimensi_h") @db.VarChar(20)
+  dimensiT    String?   @map("dimensi_t") @db.VarChar(20)
+  fotoMold    Json?     @map("foto_mold")
+  fotoProduk  Json?     @map("foto_produk")
+  updatedBy   Int?      @map("updated_by")
+  updatedAt   DateTime? @map("updated_at")
+
+  updatedByUser User?     @relation(fields: [updatedBy], references: [id])
+  outhouse      Outhouse? @relation(fields: [outhouseId], references: [id])
+
+  @@map("mold_book")
+}
+
+// ============================================================
+// 6b. OUTHOUSE
+// ============================================================
+model Outhouse {
+  id     Int      @id @default(autoincrement())
+  nama   String   @db.VarChar(100)
+  alamat String?  @db.Text
+  kota   String?  @db.VarChar(100)
+  molds  MoldBook[]
+
+  @@map("outhouse")
+}
+
+// ============================================================
+// 7. OVERTIME & PLANNING TARGET
+// ============================================================
+model OvertimeEntry {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  tanggal    DateTime @db.Date
+  bulan      DateTime @db.Date
+  jamRencana Decimal  @default(0) @map("jam_rencana") @db.Decimal(6, 2)
+  jamAktual  Decimal  @default(0) @map("jam_aktual") @db.Decimal(6, 2)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, tanggal], map: "uniq_user_tanggal")
+  @@map("overtime_entry")
+}
+
+model PlanningTarget {
+  id       Int      @id @default(autoincrement())
+  bulan    DateTime @db.Date
+  shift    Shift    @default(Nonshift)
+  targetOh Int      @map("target_oh")
+
+  @@unique([bulan, shift], map: "uniq_bulan_shift")
+  @@map("planning_target")
+}
+
+// ============================================================
+// 8. SAFETY CALENDAR
+// ============================================================
+model SafetyLog {
+  id         Int          @id @default(autoincrement())
+  tanggal    DateTime     @unique @db.Date
+  status     SafetyStatus
+  keterangan String?      @db.Text
+
+  @@map("safety_log")
+}
+
+enum SafetyStatus {
+  No_Accident @map("No Accident")
+  Accident
+}
+
+// ============================================================
+// 9. KEHADIRAN
+// ============================================================
+model Kehadiran {
+  id          Int      @id @default(autoincrement())
+  tanggal     DateTime @db.Date
+  shift       String   @db.VarChar(10)
+  statusArea  Json?    @map("status_area")
+  dataPegawai Json?    @map("data_pegawai")
+  persenHadir Decimal? @map("persen_hadir") @db.Decimal(5, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([tanggal, shift], map: "uniq_tanggal_shift")
+  @@map("kehadiran")
+}
+
+// ============================================================
+// 10. KATALOG SPAREPART
+// ============================================================
+model KatalogSparepart {
+  id          Int      @id @default(autoincrement())
+  nama        String   @unique @db.VarChar(150)
+  hargaSatuan Decimal  @map("harga_satuan") @db.Decimal(12, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("katalog_sparepart")
+}
+
+// ============================================================
+// 9. DYNAMIC REPORT OPTIONS
+// ============================================================
+model ReportOption {
+  id        Int      @id @default(autoincrement())
+  category  String   @db.VarChar(50) // "PROBLEM" atau "COUNTERMEASURE"
+  value     String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("report_option")
+}
+
+// ============================================================
+// 12. AUDIT LOG & SYSTEM SETTINGS
+// ============================================================
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id") // Boleh null jika sistem yang melakukan
+  aktivitas String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId], map: "idx_audit_user")
+  @@map("audit_log")
+}
+
+model SystemSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(50)
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_setting")
+}
+
+// ============================================================
+// 13. KALENDER SAFETY & HISTORY
+// ============================================================
+model SafetyRecord {
+  id         Int      @id @default(autoincrement())
+  date       String   @unique @db.VarChar(10) // Format: "YYYY-MM-DD"
+  year       Int
+  month      Int      // 1 - 12
+  day        Int      // 1 - 31
+  status     String   @db.VarChar(20)         // "NO_ACCIDENT", "ACCIDENT"
+  keterangan String?  @db.Text
+  updatedBy  Int      @map("updated_by")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user User @relation("SafetyModifier", fields: [updatedBy], references: [id])
+
+  @@index([year, month], map: "idx_safety_ym")
+  @@map("safety_records")
+}
+
+model SafetyHistory {
+  id         Int      @id @default(autoincrement())
+  date       String   @db.VarChar(10) // Format: "YYYY-MM-DD" target date
+  status     String   @db.VarChar(20) // "NO_ACCIDENT", "ACCIDENT"
+  keterangan String?  @db.Text
+  action     String   @db.VarChar(50) // e.g. "UPDATE_DAY", "BULK_FILL_MONTH"
+  modifiedBy Int      @map("modified_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation("SafetyHistoryCreator", fields: [modifiedBy], references: [id])
+
+  @@index([date], map: "idx_history_date")
+  @@map("safety_history")
+}

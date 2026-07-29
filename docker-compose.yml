@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: sugity_mold_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_DATABASE: 
+      MYSQL_USER:
+      MYSQL_PASSWORD: 
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # Use native password plugin for Prisma compatibility with MySQL 8
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Next.js Application Service (Optional/Development)
+  # Uncomment the block below to run the Next.js app via Docker
+  # app:
+  #   image: node:18-alpine
+  #   container_name: sugity_mold_app
+  #   working_dir: /app
+  #   volumes:
+  #     - ./:/app
+  #     - /app/node_modules
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - DATABASE_URL=mysql://sugity:sugitypassword@db:3306/sugity_mold
+  #   command: sh -c "npm install && npx prisma generate && npm run dev"
+  #   depends_on:
+  #     - db
+
+volumes:
+  mysql_data:
