@@ -12,15 +12,18 @@ function createPrismaClient() {
   // Parse mysql://user:password@host:port/database
   const parsed = new URL(url)
   
+  const isRemote = parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1'
   const adapter = new PrismaMariaDb({
     host: parsed.hostname || 'localhost',
     port: parsed.port ? parseInt(parsed.port, 10) : 3306,
     user: decodeURIComponent(parsed.username || 'root'),
     password: decodeURIComponent(parsed.password || ''),
     database: parsed.pathname ? decodeURIComponent(parsed.pathname.substring(1)) : '',
-    connectionLimit: 50,
+    connectionLimit: 30,
     idleTimeout: 5,
-  })
+    connectTimeout: 15000,
+    ssl: isRemote ? { rejectUnauthorized: false } : false,
+  } as any)
 
   return new PrismaClient({
     adapter,
