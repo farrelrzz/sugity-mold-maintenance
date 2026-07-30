@@ -236,7 +236,7 @@ export default function RegularUI({
             🎉 Tidak ada jadwal maintenance mingguan yang tertunda atau belum selesai. Seluruh mesin dalam kondisi prima!
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '18px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '18px' }}>
             {data.todayMaintenance.map((m: any) => {
               const isOH = (m.jenis || '').toUpperCase().includes('OH') || (m.jenis || '').toUpperCase().includes('OVERHAUL');
               const status = m.status || 'Belum_Dikerjakan';
@@ -350,10 +350,10 @@ export default function RegularUI({
       </div>
 
       {/* ==================== ROW 2: ASYMMETRIC METRICS & DONUT GRID (LIKE PHOTO) ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: '20px' }}>
         
         {/* LEFT BLOCK: 2x2 METRIC CARDS */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
           
           {/* Card 1: Total Kegiatan */}
           <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -436,7 +436,7 @@ export default function RegularUI({
         </div>
 
         {/* RIGHT BLOCK: 2 SIDE-BY-SIDE DONUT CARDS (EXACTLY LIKE PHOTO) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '16px' }}>
           
           {/* Donut Card 1: Approval Status */}
           <div className="kartu kartu-glow-hijau" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -447,9 +447,9 @@ export default function RegularUI({
               </h3>
               <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '14px' }}>Periode: {data.approvalRatios.period}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '16px' }}>
               
-              {/* Legend Dots on Left */}
+              {/* Legend Dots on Left / Top */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
@@ -509,9 +509,9 @@ export default function RegularUI({
               </h3>
               <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '14px' }}>Kumulatif bulan ini</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '16px' }}>
               
-              {/* Legend Dots on Left */}
+              {/* Legend Dots on Left / Top */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
@@ -559,7 +559,7 @@ export default function RegularUI({
       </div>
 
       {/* ==================== ROW 3: CHARTS ON LEFT, WIDGETS & RECENT FEED ON RIGHT (LIKE PHOTO) ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(460px, 1fr))', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))', gap: '20px' }}>
         
         {/* LEFT COLUMN: TWO LARGE ANALYTICAL CHARTS STACKED */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -651,7 +651,7 @@ export default function RegularUI({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           {/* TWO SIDE-BY-SIDE WIDGET CARDS */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
             
             {/* Widget 1: Accident Free Days - Tersinkron ke Kalender Safety */}
             <Link 
@@ -841,7 +841,7 @@ export default function RegularUI({
       </div>
 
       {/* ==================== ROW 4: OVERTIME PIC & KELOLA TARGET MAINTENANCE ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(440px, 1fr))', gap: '20px', marginTop: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 440px), 1fr))', gap: '20px', marginTop: '8px' }}>
         
         {/* Akumulasi Jam Lembur */}
         <div className="kartu" style={{ margin: 0, padding: '22px', display: 'flex', flexDirection: 'column' }}>
@@ -936,7 +936,7 @@ export default function RegularUI({
               </div>
             </div>
             <form onSubmit={handleSaveTarget} style={{ marginTop: '14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '14px' }}>
                 <div>
                   <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155', display: 'block', marginBottom: '6px' }}>Target Shift A (Mold)</label>
                   <input
