@@ -309,7 +309,6 @@ html, body {
   position: relative;
   margin: 0;
   padding: 0;
-  touch-action: pan-y !important;
 }
 
 /* ============================================================
@@ -2080,7 +2079,6 @@ table {
     max-width: 100% !important;
     overflow-x: hidden !important;
     box-sizing: border-box !important;
-    touch-action: pan-y !important;
   }
 
   /* Prevent horizontal scrolling & force single column for all dashboard grids */
@@ -2093,16 +2091,59 @@ table {
     box-sizing: border-box !important;
   }
 
-  /* Force all flex/grid children and cards in Dashboard and Mold Book to stay strictly within screen width */
-  .kartu, .card, div[style*="min-width:"], div[style*="minWidth:"] {
+  /* Force cards in Dashboard and Mold Book to stay strictly within screen width */
+  .kartu, .card {
     min-width: 0 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-  }
-
-  .kartu, .card {
     padding: 16px 14px !important;
     border-radius: 12px !important;
+  }
+
+  /* Flexible, neat Checksheet and table swiping on mobile touchscreens */
+  .cs-table-scroll, .tabel-wrap, .table-responsive, div[style*="overflow-x: auto"], div[style*="overflow-x: scroll"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x pan-y !important;
+    display: block !important;
+    position: relative !important;
+    margin: 8px 0 !important;
+    padding-bottom: 12px !important;
+  }
+
+  .cs-check-tbl, table.cs-check-tbl {
+    width: max-content !important;
+    min-width: 620px !important;
+    max-width: none !important;
+    display: table !important;
+    margin: 0 !important;
+    border-collapse: collapse !important;
+    background: #ffffff !important;
+  }
+
+  .cs-check-tbl th, .cs-check-tbl td {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    vertical-align: middle !important;
+  }
+
+  .cs-check-tbl input[type="radio"], .cs-check-tbl input[type="checkbox"], .cs-okng input {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .cs-check-tbl label, .cs-okng label {
+    font-size: 13px !important;
+    padding: 4px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    cursor: pointer;
+    white-space: nowrap;
   }
 
   .hide-mobile {
