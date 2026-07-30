@@ -176,6 +176,16 @@ export default function DashboardPage() {
     return <div className="kosong">Memuat data dashboard analitik...</div>
   }
 
+  if (!stats) {
+    return (
+      <div style={{ padding: '40px', textAlign: 'center', color: '#ef4444' }}>
+        <h2>Gagal memuat data dashboard.</h2>
+        <p>Terjadi kesalahan pada server atau database.</p>
+        <button onClick={fetchStats} style={{ padding: '10px 20px', marginTop: '20px', cursor: 'pointer' }}>Coba Lagi</button>
+      </div>
+    )
+  }
+
   const props = {
     data: stats!,
     bulan,
