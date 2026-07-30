@@ -97,6 +97,35 @@ export default function LaporanBaruPage() {
   const [daftarJadwal, setDaftarJadwal] = useState<JadwalEntry[]>([])
   const [bannerJadwal, setBannerJadwal] = useState<JadwalEntry | null>(null)
 
+  // Auto load dari URL parameter saat tombol "Kerjakan" diketuk
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const noMoldParam = params.get('noMold')
+    const jenisParam = params.get('jenis')
+    const jadwalIdParam = params.get('jadwalId')
+
+    if (noMoldParam) {
+      if (jadwalIdParam) {
+        setBannerJadwal({ id: Number(jadwalIdParam), noMold: noMoldParam, jenis: jenisParam || 'OH MOLD' } as any)
+      }
+      if (jenisParam) {
+        setJenis(jenisParam)
+      }
+      fetch(`/api/mold-book?query=${encodeURIComponent(noMoldParam)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            const mold = data.find((m: any) => m.noMold.toLowerCase() === noMoldParam.toLowerCase()) || data[0]
+            setSelectedMold(mold)
+            setMoldSearch(mold.noMold)
+            showToast(`Data mold ${mold.noMold} dari jadwal otomatis ter-load!`, 'info')
+          }
+        })
+        .catch(console.error)
+    }
+  }, [])
+
   // Modal Tambah & Hapus Mold
   const [showTambahMold, setShowTambahMold] = useState(false)
   const [newMoldNo, setNewMoldNo] = useState('')
@@ -767,186 +796,6 @@ export default function LaporanBaruPage() {
             </p>
           </div>
         )}
-
-        {/* Jadwal Maintenance Mingguan Card */}
-        <div className="kartu" id="kartu-jadwal-mingguan">
-          <div
-            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
-            onClick={() => setShowJadwal(!showJadwal)}
-          >
-            <p className="label-besar" style={{ margin: 0 }}>📅 Jadwal Maintenance Mingguan</p>
-            <span style={{ fontSize: '18px', color: 'var(--teks-redup)', transform: showJadwal ? 'rotate(180deg)' : 'none', transition: '.2s' }}>
-              ▼
-            </span>
-          </div>
-
-          {showJadwal && (
-            <div style={{ marginTop: '14px' }} id="jadwal-mingguan-isi">
-              <p className="pertanyaan">Buat rencana maintenance mingguan per mold. Jadwal ini tersimpan bersama dan terlihat oleh seluruh anggota.</p>
-
-              {/* Rencana Input Jadwal Baru */}
-              <div style={{ background: 'var(--krem)', padding: '14px', borderRadius: 'var(--radius)', marginBottom: '16px' }}>
-                <b style={{ color: 'var(--hijau-tua)', fontSize: '14px', display: 'block', marginBottom: '8px' }}>+ Tambah Jadwal Rencana</b>
-                
-                <div className="baris2">
-                  <div>
-                    <label className="kecil" style={{ marginTop: 0 }}>Bulan Rencana</label>
-                    <input type="month" value={bulanJadwal} onChange={(e) => setBulanJadwal(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="kecil" style={{ marginTop: 0 }}>Minggu Ke-</label>
-                    <select value={mingguJadwal} onChange={(e) => setMingguJadwal(Number(e.target.value))}>
-                      {weeksOfSelectedMonth.map((_, i) => (
-                        <option key={i} value={i}>Minggu ke-{i + 1}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div ref={jmDropdownRef}>
-                    <label className="kecil" style={{ marginTop: 0 }}>Nomor Mold</label>
-                    <div className="mold-search-wrap">
-                      <input
-                        type="text"
-                        placeholder="Cari Mold..."
-                        autoComplete="off"
-                        value={jmMoldSearch}
-                        onChange={(e) => {
-                          setJmMoldSearch(e.target.value)
-                          setShowJmMoldDropdown(true)
-                        }}
-                        onFocus={() => setShowJmMoldDropdown(true)}
-                      />
-                      {showJmMoldDropdown && jmMoldOptions.length > 0 && (
-                        <div className="mold-dropdown" style={{ position: 'relative', marginTop: '4px', zIndex: 9999 }}>
-                          {jmMoldOptions.map((opt) => (
-                            <div key={opt.noMold} className="mold-opt" onClick={() => {
-                              setJmSelectedMold(opt)
-                              setJmMoldSearch(opt.noMold)
-                              setShowJmMoldDropdown(false)
-                            }}>
-                              <span className="mold-opt-no">{opt.noMold}</span>
-                              <span className="mold-opt-nama">{opt.part}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="baris2" style={{ marginTop: '10px' }}>
-                  <div>
-                    <label className="kecil" style={{ marginTop: 0 }}>Tanggal / Hari</label>
-                    <select value={jmTanggal} onChange={(e) => setJmTanggal(e.target.value)}>
-                      {selectedWeekDays.map((d, i) => {
-                        const namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][d.getDay()]
-                        const tglFormat = formatTanggalLokal(d)
-                        const tglDisplay = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-                        return (
-                          <option key={i} value={tglFormat}>{namaHari}, {tglDisplay}</option>
-                        )
-                      })}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="kecil" style={{ marginTop: 0 }}>Jenis Pekerjaan</label>
-                    <select value={jmJenis} onChange={(e) => setJmJenis(e.target.value)}>
-                      <option value="OH MOLD">OH Mold</option>
-                      <option value="PM">PM (Preventive)</option>
-                      <option value="I/M">I/M</option>
-                      <option value="B/M">B/M</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="baris2" style={{ marginTop: '10px' }}>
-                  <div>
-                    <label className="kecil" style={{ marginTop: 0 }}>PIC Ditugaskan</label>
-                    <select value={jmPicId} onChange={(e) => setJmPicId(e.target.value)}>
-                      <option value="">-- Pilih PIC --</option>
-                      {picOptions.map((u) => (
-                        <option key={u.id} value={u.id}>{u.nama}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="kecil" style={{ marginTop: 0 }}>Catatan (opsional)</label>
-                    <input type="text" placeholder="Catatan tambahan" value={jmCatatan} onChange={(e) => setJmCatatan(e.target.value)} />
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="tombol-utama"
-                  style={{ marginTop: '14px', padding: '10px' }}
-                  onClick={handleSimpanJadwalMingguan}
-                >
-                  + Tambah ke Jadwal
-                </button>
-              </div>
-
-              {/* Header List Minggu Ini */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderTop: '1px dashed var(--garis)', paddingTop: '14px' }}>
-                <b style={{ fontSize: '14px', color: 'var(--hijau-tua)' }}>
-                  Jadwal Minggu ke-{mingguJadwal + 1} ({selectedWeekDays.length > 0 ? `${formatTanggalLokal(selectedWeekDays[0])} s/d ${formatTanggalLokal(selectedWeekDays[selectedWeekDays.length - 1])}` : ''})
-                </b>
-              </div>
-
-              {/* List Jadwal Mingguan */}
-              <div id="jadwal-daftar" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {daftarJadwal.length === 0 ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: 'var(--teks-redup)' }}>
-                    Belum ada rencana jadwal untuk minggu ini.
-                  </div>
-                ) : (
-                  daftarJadwal.map((item) => (
-                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fafaf9', border: '1px solid var(--garis)', borderRadius: '8px', padding: '10px 14px' }}>
-                      <div>
-                        <span className="tag oranye" style={{ fontSize: '11px', padding: '2px 8px' }}>{item.jenis}</span>
-                        <span className="tag netral" style={{ fontSize: '11px', padding: '2px 8px' }}>
-                          {item.hari}, {item.tanggalRencana ? new Date(item.tanggalRencana).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) : ''}
-                        </span>
-                        <div style={{ fontSize: '15px', fontWeight: 'bold', marginTop: '4px' }}>
-                          {item.noMold} <span style={{ fontWeight: 'normal', fontSize: '13px', color: 'var(--teks-redup)' }}>&mdash; PIC: {item.pic.nama}</span>
-                        </div>
-                        {item.catatan && <div style={{ fontSize: '12px', color: 'var(--teks-redup)', marginTop: '2px' }}>Note: {item.catatan}</div>}
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        {item.status === 'Belum_Dikerjakan' && (
-                          <button
-                            type="button"
-                            className="pilih-btn terpilih"
-                            style={{ padding: '6px 10px', fontSize: '12px' }}
-                            onClick={() => handleIsiDariJadwal(item)}
-                          >
-                            Isi Laporan
-                          </button>
-                        )}
-                        {(item.status === 'Sudah_Dikerjakan' || item.status === 'Sudah Dikerjakan') && (
-                          <span className="tag hijau" style={{ margin: 0, padding: '6px 10px', borderRadius: '6px', background: '#c6f6d5', color: '#166534' }}>Selesai ✓</span>
-                        )}
-                        {(item.status === 'Proses_Approval' || item.status === 'Proses Approval') && (
-                          <span className="tag oranye" style={{ margin: 0, padding: '6px 10px', borderRadius: '6px', background: '#fef3c7', color: '#92400e' }}>Proses Approval ⏳</span>
-                        )}
-                        {['ADM', 'GL', 'TL', 'CL', 'SUPER_ADMIN'].includes((session?.user as any)?.role || '') && (
-                          <button
-                            type="button"
-                            className="pilih-btn"
-                            style={{ padding: '6px 10px', fontSize: '12px', color: 'var(--merah)', borderColor: '#eac9c4' }}
-                            onClick={() => handleHapusJadwal(item.id)}
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-            </div>
-          )}
-        </div>
 
         {/* Section 1: Tanggal & Shift */}
         <div className="kartu" id="kartu-tanggal-shift">

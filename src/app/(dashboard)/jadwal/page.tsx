@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useSession } from 'next-auth/react'
 import { showToast } from '@/components/ui/Toast'
 import Pagination from '@/components/ui/Pagination'
 
@@ -14,6 +15,7 @@ interface MoldSpec {
 const HARI_NAMES = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 
 export default function JadwalPage() {
+  const { data: session } = useSession()
   const [jadwal, setJadwal] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   
@@ -507,21 +509,29 @@ export default function JadwalPage() {
               </tr>
             ) : (
               jadwal.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((j) => {
-                const isApprovedAdm = j.status === 'Sudah_Dikerjakan' || j.status === 'Sudah Dikerjakan'
+                const userRole = ((session?.user as any)?.role || '').toUpperCase()
+                const canDelete = ['GL', 'CL', 'ADM', 'SUPER_ADMIN', 'SUPERADMIN'].includes(userRole)
+
+                const isApprovedAdm = j.status === 'Sudah_Dikerjakan' || j.status === 'Sudah Dikerjakan' || j.status === 'Selesai'
                 const isProses = j.status === 'Proses_Approval' || j.status === 'Proses Approval'
+                const isSedang = j.status === 'Sedang_Dikerjakan' || j.status === 'Sedang Dikerjakan'
                 
-                let bgBadge = '#fed7d7'
-                let colorBadge = '#822727'
-                let textBadge = 'Belum_Dikerjakan'
+                let bgBadge = '#fee2e2'
+                let colorBadge = '#991b1b'
+                let textBadge = 'Belum Dikerjakan 🔴'
 
                 if (isApprovedAdm) {
-                  bgBadge = '#c6f6d5'
+                  bgBadge = '#dcfce7'
                   colorBadge = '#166534'
                   textBadge = 'Selesai (Approved ADM) ✓'
                 } else if (isProses) {
                   bgBadge = '#fef3c7'
                   colorBadge = '#92400e'
                   textBadge = 'Proses Approval ⏳'
+                } else if (isSedang) {
+                  bgBadge = '#dbeafe'
+                  colorBadge = '#1e40af'
+                  textBadge = 'Sedang Dikerjakan 🔵'
                 }
 
                 return (
@@ -556,26 +566,55 @@ export default function JadwalPage() {
                       </span>
                     </td>
                     <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteJadwal(j.id, j.noMold)}
-                        style={{
-                          background: '#fff',
-                          border: '1px solid #ef4444',
-                          color: '#ef4444',
-                          padding: '6px 10px',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#ef4444'; }}
-                        title="Hapus jadwal Rencana"
-                      >
-                        🗑️ Hapus
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.location.href = `/laporan/baru?noMold=${encodeURIComponent(j.noMold)}&jenis=${encodeURIComponent(j.jenis || 'OH MOLD')}&jadwalId=${j.id}`
+                          }}
+                          style={{
+                            background: '#16a34a',
+                            border: '1px solid #15803d',
+                            color: '#ffffff',
+                            padding: '6px 14px',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            boxShadow: '0 2px 5px rgba(22, 163, 74, 0.25)',
+                            whiteSpace: 'nowrap'
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#15803d'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = '#16a34a'; }}
+                          title="Kerjakan Laporan (Bisa diakses oleh semua member/PIC)"
+                        >
+                          🚀 Kerjakan
+                        </button>
+                        {canDelete && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteJadwal(j.id, j.noMold)}
+                            style={{
+                              background: '#fff',
+                              border: '1px solid #ef4444',
+                              color: '#ef4444',
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              whiteSpace: 'nowrap'
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#ef4444'; }}
+                            title="Hapus jadwal Rencana (Hanya GL, CL, ADM)"
+                          >
+                            🗑️ Hapus
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 )

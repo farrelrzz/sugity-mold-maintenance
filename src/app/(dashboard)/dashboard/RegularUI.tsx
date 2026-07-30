@@ -184,93 +184,168 @@ export default function RegularUI({
         </button>
       </div>
 
-      {/* ==================== ROW 1.5: TODAY'S REMINDER (IF ANY) ==================== */}
+      {/* ==================== ROW 1.5: TODAY & WEEKLY ACTIVE SCHEDULES (OPTIMIZED FOR TV / MONITOR) ==================== */}
       <div style={{
         backgroundColor: data.todayMaintenance && data.todayMaintenance.length > 0 ? '#f0fdf4' : '#ffffff',
-        border: `1px solid ${data.todayMaintenance && data.todayMaintenance.length > 0 ? '#86efac' : '#e2e8f0'}`,
-        borderRadius: '16px',
-        padding: '16px 20px',
+        border: `1.5px solid ${data.todayMaintenance && data.todayMaintenance.length > 0 ? '#4ade80' : '#e2e8f0'}`,
+        borderRadius: '20px',
+        padding: '24px',
+        boxShadow: data.todayMaintenance && data.todayMaintenance.length > 0 ? '0 10px 30px rgba(74, 222, 128, 0.12)' : '0 2px 8px rgba(0,0,0,0.04)',
         display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-        flexWrap: 'wrap',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+        flexDirection: 'column',
+        gap: '20px'
       }}>
-        <div style={{ fontSize: '24px', flexShrink: 0 }}>
-          {data.todayMaintenance && data.todayMaintenance.length > 0 ? '⏰' : '✅'}
-        </div>
-        <div style={{ flex: 1, minWidth: '240px' }}>
-          <h3 style={{ margin: '0 0 4px 0', color: '#0f172a', fontSize: '15px', fontWeight: 800 }}>
-            Jadwal Maintenance Hari Ini ({new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })})
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-            {(!data.todayMaintenance || data.todayMaintenance.length === 0) ? (
-              <span style={{ fontSize: '13.5px', color: '#64748b', fontWeight: 500 }}>
-                Tidak ada jadwal maintenance yang harus dikerjakan hari ini. Selalu pertahankan performa!
-              </span>
-            ) : (
-              data.todayMaintenance.map((m: any) => (
-                <div key={m.id} style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #bbf7d0',
-                  padding: '10px 16px',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '12px',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-                }}>
-                  <span style={{ fontSize: '14px', fontWeight: 800, color: '#15803d', backgroundColor: '#dcfce7', padding: '4px 10px', borderRadius: '8px' }}>
-                    {m.noMold}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '32px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>
+              {data.todayMaintenance && data.todayMaintenance.length > 0 ? '🔥' : '✅'}
+            </span>
+            <div>
+              <h2 style={{ margin: 0, color: '#0f172a', fontSize: '20px', fontWeight: 900, letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                JADWAL MAINTENANCE MINGGUAN & URGENT
+                {data.todayMaintenance && data.todayMaintenance.length > 0 && (
+                  <span style={{ backgroundColor: '#16a34a', color: '#fff', fontSize: '12px', fontWeight: 800, padding: '4px 12px', borderRadius: '20px' }}>
+                    {data.todayMaintenance.length} MOLD AKTIF
                   </span>
-                  {m.factory && m.factory !== '-' && (
-                    <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#475569', backgroundColor: '#f1f5f9', padding: '3px 8px', borderRadius: '6px' }}>
-                      {m.factory}
-                    </span>
-                  )}
-                  <div style={{ flex: 1, minWidth: '180px' }}>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>
-                      {m.part !== '-' ? m.part : 'Nama Part Tidak Diketahui'}
-                    </div>
-                    <div style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>
-                      PIC: <span style={{ fontWeight: 600, color: '#334155' }}>{m.pic?.nama || 'Unknown PIC'}</span>
-                    </div>
-                  </div>
-                  {m.jenis && (
-                    <span style={{ 
-                      fontSize: '12.5px', 
-                      fontWeight: 800, 
-                      color: '#ffffff', 
-                      backgroundColor: '#ef4444', 
-                      padding: '4px 12px', 
-                      borderRadius: '20px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.3px'
-                    }}>
-                      🛠️ {m.jenis}
-                    </span>
-                  )}
-                </div>
-              ))
-            )}
+                )}
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '13.5px', fontWeight: 600 }}>
+                Diurutkan berdasarkan hari terdekat &amp; prioritas kerja (OH diutamakan). Semua member berhak berpartisipasi mengerjakannya.
+              </p>
+            </div>
           </div>
-        </div>
-        {data.todayMaintenance && data.todayMaintenance.length > 0 && (
-          <a href="/laporan/baru" style={{
-            backgroundColor: '#16a34a',
-            color: 'white',
+          <a href="/jadwal" style={{
+            backgroundColor: '#ffffff',
+            color: '#16a34a',
+            border: '1.5px solid #16a34a',
             padding: '10px 18px',
             borderRadius: '12px',
             fontSize: '13.5px',
-            fontWeight: 700,
+            fontWeight: 800,
             textDecoration: 'none',
-            whiteSpace: 'nowrap',
-            boxShadow: '0 4px 10px rgba(22, 163, 74, 0.25)',
-            transition: 'transform 0.2s'
-          }}>
-            Buat Laporan Sekarang →
+            transition: 'all 0.2s',
+            boxShadow: '0 2px 6px rgba(22, 163, 74, 0.1)',
+            whiteSpace: 'nowrap'
+          }} onMouseEnter={(e) => { e.currentTarget.style.background = '#f0fdf4'; }} onMouseLeave={(e) => { e.currentTarget.style.background = '#ffffff'; }}>
+            📅 Kelola Jadwal Mingguan →
           </a>
+        </div>
+
+        {(!data.todayMaintenance || data.todayMaintenance.length === 0) ? (
+          <div style={{ backgroundColor: '#ffffff', border: '1px dashed #cbd5e1', borderRadius: '14px', padding: '30px', textAlign: 'center', color: '#64748b', fontSize: '15px', fontWeight: 600 }}>
+            🎉 Tidak ada jadwal maintenance mingguan yang tertunda atau belum selesai. Seluruh mesin dalam kondisi prima!
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '18px' }}>
+            {data.todayMaintenance.map((m: any) => {
+              const isOH = (m.jenis || '').toUpperCase().includes('OH') || (m.jenis || '').toUpperCase().includes('OVERHAUL');
+              const status = m.status || 'Belum_Dikerjakan';
+              
+              let statusBg = '#fee2e2';
+              let statusColor = '#991b1b';
+              let statusText = 'Belum Dikerjakan 🔴';
+              if (status === 'Sedang_Dikerjakan' || status === 'Sedang Dikerjakan') {
+                statusBg = '#dbeafe';
+                statusColor = '#1e40af';
+                statusText = 'Sedang Dikerjakan 🔵';
+              } else if (status === 'Proses_Approval' || status === 'Proses Approval') {
+                statusBg = '#fef3c7';
+                statusColor = '#92400e';
+                statusText = 'Proses Approval ⏳';
+              }
+
+              return (
+                <div key={m.id} style={{
+                  backgroundColor: '#ffffff',
+                  border: isOH ? '2px solid #fdba74' : '1.5px solid #cbd5e1',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: isOH ? '0 8px 20px rgba(249, 115, 22, 0.12)' : '0 4px 12px rgba(0,0,0,0.04)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'transform 0.2s, box-shadow 0.2s'
+                }}>
+                  {/* Top Bar: Date & Status */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #f1f5f9', paddingBottom: '12px', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      📆 {m.hari ? `${m.hari}, ` : ''}{m.tanggalRencana ? new Date(m.tanggalRencana).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) : 'Minggu Ini'}
+                    </span>
+                    <span style={{ backgroundColor: statusBg, color: statusColor, fontSize: '12px', fontWeight: 800, padding: '4px 10px', borderRadius: '12px', whiteSpace: 'nowrap' }}>
+                      {statusText}
+                    </span>
+                  </div>
+
+                  {/* Center: Mold Info */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '24px', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.5px' }}>
+                        {m.noMold}
+                      </span>
+                      {m.factory && m.factory !== '-' && (
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#475569', backgroundColor: '#e2e8f0', padding: '3px 9px', borderRadius: '6px' }}>
+                          {m.factory}
+                        </span>
+                      )}
+                      <span style={{
+                        marginLeft: 'auto',
+                        fontSize: '12.5px',
+                        fontWeight: 900,
+                        color: '#ffffff',
+                        background: isOH ? 'linear-gradient(135deg, #ea580c, #c2410c)' : 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                        padding: '5px 12px',
+                        borderRadius: '20px',
+                        letterSpacing: '0.5px',
+                        boxShadow: isOH ? '0 2px 6px rgba(234, 88, 12, 0.3)' : '0 2px 6px rgba(37, 99, 235, 0.3)'
+                      }}>
+                        {m.jenis || 'OH'}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', lineHeight: 1.3 }}>
+                      {m.part !== '-' ? m.part : 'Part Tidak Diketahui'}
+                    </div>
+                    <div style={{ fontSize: '13.5px', color: '#64748b', marginTop: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      👤 PIC Ditugaskan: <span style={{ color: '#0f172a', fontWeight: 800 }}>{m.pic?.nama || 'Semua PIC'}</span>
+                    </div>
+                    {m.catatan && (
+                      <div style={{ fontSize: '12.5px', color: '#dc2626', backgroundColor: '#fef2f2', padding: '6px 10px', borderRadius: '6px', marginTop: '8px', fontWeight: 600, border: '1px dashed #fecaca' }}>
+                        📌 Note: &ldquo;{m.catatan}&rdquo;
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bottom Bar: Action Button */}
+                  <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                    <a
+                      href={`/laporan/baru?noMold=${encodeURIComponent(m.noMold)}&jenis=${encodeURIComponent(m.jenis || 'OH MOLD')}&jadwalId=${m.id}`}
+                      style={{
+                        display: 'block',
+                        textAlign: 'center',
+                        backgroundColor: '#16a34a',
+                        color: '#ffffff',
+                        padding: '12px 20px',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        fontWeight: 800,
+                        textDecoration: 'none',
+                        boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)',
+                        transition: 'all 0.2s',
+                        width: '100%',
+                        boxSizing: 'border-box'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#15803d'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#16a34a'; e.currentTarget.style.transform = 'none'; }}
+                    >
+                      🚀 Kerjakan Sekarang ➔
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 

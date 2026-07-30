@@ -166,8 +166,22 @@ export async function GET(req: Request) {
         include: { pic: { select: { nama: true } } },
       }),
       prisma.jadwalMingguan.findMany({
-        where: { status: 'Belum_Dikerjakan' },
-        include: { pic: { select: { nama: true } } },
+        where: { status: { notIn: ['Sudah_Dikerjakan' as any, 'Sudah Dikerjakan' as any, 'Selesai' as any] } },
+        include: {
+          pic: { select: { id: true, nama: true } },
+          laporan: {
+            select: {
+              id: true,
+              tanggal: true,
+              noMold: true,
+              checksheet: {
+                select: {
+                  approvals: { select: { role: true, signedAt: true } }
+                }
+              }
+            }
+          }
+        },
       }),
     ])
 
@@ -353,20 +367,67 @@ export async function GET(req: Request) {
 
     const monthlyCosts = rawMonthlyCosts.map((val) => Math.round(val / 1000))
 
-    // 8. Jadwal Maintenance Hari Ini
-    const todayStr = formatDateLocal(new Date())
-    const daysId = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
-    const todayName = daysId[new Date().getDay()]
+    // 8. Jadwal Maintenance Mingguan & Urgent
+    const activeSchedules = pendingMaintenance.map(j => {
+      const linked = (j as any).laporan || []
+      const matching = linked.length > 0 ? linked : laporanBulanIni.filter((rep: any) => {
+        if (rep.noMold.trim().toLowerCase() !== j.noMold.trim().toLowerCase()) return false
+        if (!j.tanggalRencana) return true
+        const jDate = new Date(j.tanggalRencana)
+        const repDate = new Date(rep.tanggal)
+        const diffDays = Math.abs(repDate.getTime() - jDate.getTime()) / (1000 * 3600 * 24)
+        return diffDays <= 2
+      })
 
-    const todaySchedules = pendingMaintenance.filter(m => {
-      if (m.tanggalRencana) {
-        const mDateStr = new Date(m.tanggalRencana).toISOString().slice(0, 10)
-        return mDateStr === todayStr
+      let computedStatus = 'Belum_Dikerjakan'
+      if (matching.length > 0) {
+        const isApprovedByAdm = matching.some((rep: any) => {
+          const approvals = rep.checksheet?.approvals || []
+          const admApp = approvals.find((a: any) => a.role === 'ADM')
+          return admApp && admApp.signedAt !== null
+        })
+        const isApprovedByPic = matching.some((rep: any) => {
+          const approvals = rep.checksheet?.approvals || []
+          const picApp = approvals.find((a: any) => a.role === 'PIC')
+          return picApp && picApp.signedAt !== null
+        })
+
+        if (isApprovedByAdm) {
+          computedStatus = 'Sudah_Dikerjakan'
+        } else if (isApprovedByPic) {
+          computedStatus = 'Proses_Approval'
+        } else {
+          computedStatus = 'Sedang_Dikerjakan'
+        }
       }
-      return m.hari === todayName
+
+      return {
+        ...j,
+        status: computedStatus
+      }
+    }).filter(j => j.status !== 'Sudah_Dikerjakan' && j.status !== 'Sudah Dikerjakan' && j.status !== 'Selesai')
+
+    // Urutkan sesuai hari/tanggal (urgent pertama), jika hari sama dahulukan OH dibanding PM dll.
+    const getJenisPriority = (jenis?: string) => {
+      const j = (jenis || '').toUpperCase()
+      if (j.includes('OH') || j.includes('OVERHAUL')) return 1
+      if (j.includes('PM')) return 2
+      if (j.includes('I/M')) return 3
+      if (j.includes('B/M')) return 4
+      return 5
+    }
+
+    activeSchedules.sort((a, b) => {
+      const dateA = a.tanggalRencana ? new Date(a.tanggalRencana).getTime() : 0
+      const dateB = b.tanggalRencana ? new Date(b.tanggalRencana).getTime() : 0
+      if (dateA !== dateB) return dateA - dateB
+      
+      const prioA = getJenisPriority(a.jenis)
+      const prioB = getJenisPriority(b.jenis)
+      return prioA - prioB
     })
 
-    const moldNumbers = todaySchedules.map(m => m.noMold)
+    const moldNumbers = activeSchedules.map(m => m.noMold)
     const molds = moldNumbers.length > 0 ? await prisma.moldBook.findMany({
       where: { noMold: { in: moldNumbers } },
       select: { noMold: true, part: true, factory: true }
@@ -375,7 +436,7 @@ export async function GET(req: Request) {
     const moldDict: Record<string, any> = {}
     molds.forEach(m => moldDict[m.noMold] = m)
 
-    const todayMaintenance = todaySchedules.map(m => ({
+    const todayMaintenance = activeSchedules.map(m => ({
       ...m,
       part: moldDict[m.noMold]?.part || '-',
       factory: moldDict[m.noMold]?.factory || '-'

@@ -175,11 +175,11 @@ export async function POST(req: Request) {
         })),
       })
 
-      // 4. Update status jadwal mingguan (menjadi Proses_Approval karena menunggu approval sampai ADM)
+      // 4. Update status jadwal mingguan (menjadi Sedang_Dikerjakan karena baru submit dan menunggu approval PIC)
       if (jadwalId) {
         await tx.jadwalMingguan.update({
           where: { id: Number(jadwalId) },
-          data: { status: 'Proses_Approval' as any },
+          data: { status: 'Sedang_Dikerjakan' as any },
         })
       } else {
         // Cari jadwal mingguan dengan mold yang sama dan berstatus Belum_Dikerjakan
@@ -194,10 +194,10 @@ export async function POST(req: Request) {
           if (!sched.tanggalRencana) continue
           const sDate = new Date(sched.tanggalRencana)
           const diffDays = Math.abs(lDate.getTime() - sDate.getTime()) / (1000 * 3600 * 24)
-          if ((sDate.getMonth() === lDate.getMonth() && sDate.getFullYear() === lDate.getFullYear()) || diffDays <= 14) {
+          if (diffDays <= 2) {
             await tx.jadwalMingguan.update({
               where: { id: sched.id },
-              data: { status: 'Proses_Approval' as any }
+              data: { status: 'Sedang_Dikerjakan' as any }
             })
           }
         }

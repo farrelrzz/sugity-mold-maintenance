@@ -10,6 +10,11 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const userRole = ((session?.user as any)?.role || '').toUpperCase()
+    if (!['GL', 'CL', 'ADM', 'SUPER_ADMIN', 'SUPERADMIN'].includes(userRole)) {
+      return NextResponse.json({ error: 'Unauthorized. Hanya GL, CL, dan ADM yang berhak menghapus jadwal.' }, { status: 403 })
+    }
+
     const { id: idParam } = await params
     const id = Number(idParam)
     if (isNaN(id)) {

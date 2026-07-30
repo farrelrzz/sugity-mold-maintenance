@@ -277,69 +277,152 @@ export default function SuperAdminUI({
         </div>
       </div>
 
-      {/* Maintenance Reminder */}
+      {/* Maintenance Reminder (Optimized for Monitor / TV) */}
       <div className="sa-card" style={{
         marginBottom: '24px',
-        borderColor: data.todayMaintenance && data.todayMaintenance.length > 0 ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255,255,255,0.08)',
-        boxShadow: data.todayMaintenance && data.todayMaintenance.length > 0 ? '0 0 30px rgba(74, 222, 128, 0.05)' : 'none'
+        borderColor: data.todayMaintenance && data.todayMaintenance.length > 0 ? 'rgba(74, 222, 128, 0.4)' : 'rgba(255,255,255,0.08)',
+        boxShadow: data.todayMaintenance && data.todayMaintenance.length > 0 ? '0 0 40px rgba(74, 222, 128, 0.1)' : 'none',
+        padding: '24px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-          <div style={{ fontSize: '28px', filter: 'drop-shadow(0 0 10px rgba(74, 222, 128, 0.5))' }}>
-            {data.todayMaintenance && data.todayMaintenance.length > 0 ? '⚠️' : '✅'}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <span style={{ fontSize: '32px', filter: 'drop-shadow(0 0 10px rgba(74, 222, 128, 0.6))' }}>
+              {data.todayMaintenance && data.todayMaintenance.length > 0 ? '⚡' : '✅'}
+            </span>
+            <div>
+              <h2 style={{ margin: '0', color: data.todayMaintenance && data.todayMaintenance.length > 0 ? '#4ade80' : '#94a3b8', fontSize: '19px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                JADWAL EKSEKUSI & MINGGUAN AKTIF
+                {data.todayMaintenance && data.todayMaintenance.length > 0 && (
+                  <span style={{ background: 'rgba(74, 222, 128, 0.2)', border: '1px solid #4ade80', color: '#4ade80', fontSize: '12px', padding: '3px 10px', borderRadius: '20px', fontWeight: 800 }}>
+                    {data.todayMaintenance.length} TASK PENDING
+                  </span>
+                )}
+              </h2>
+              <p style={{ margin: '4px 0 0 0', color: '#94a3b8', fontSize: '13.5px' }}>
+                Prioritas Overhaul (OH) didahulukan. Semua PIC berhak eksekusi dan mengambil tugas laporan.
+              </p>
+            </div>
           </div>
-          <div style={{ flex: 1 }}>
-            <h3 style={{ margin: '0 0 12px 0', color: data.todayMaintenance && data.todayMaintenance.length > 0 ? '#4ade80' : '#94a3b8', fontSize: '15px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Jadwal Eksekusi Hari Ini ({new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })})
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {(!data.todayMaintenance || data.todayMaintenance.length === 0) ? (
-                <span style={{ fontSize: '14px', color: '#64748b' }}>Tidak ada tugas pending untuk hari ini. Sistem dalam kondisi optimal.</span>
-              ) : (
-                data.todayMaintenance.map((m: any) => (
-                  <div key={m.id} style={{
-                    background: 'rgba(0,0,0,0.3)',
-                    border: '1px solid rgba(74, 222, 128, 0.2)',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '12px'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <a href="/jadwal" className="sa-btn-primary" style={{ textDecoration: 'none', padding: '8px 16px', fontSize: '13px', borderRadius: '10px' }}>
+            📅 KELOLA JADWAL ➔
+          </a>
+        </div>
+
+        {(!data.todayMaintenance || data.todayMaintenance.length === 0) ? (
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: '12px', padding: '30px', textAlign: 'center', color: '#64748b', fontSize: '15px' }}>
+            ✨ Tidak ada tugas pending untuk saat ini. Sistem dalam kondisi optimal.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '18px' }}>
+            {data.todayMaintenance.map((m: any) => {
+              const isOH = (m.jenis || '').toUpperCase().includes('OH') || (m.jenis || '').toUpperCase().includes('OVERHAUL');
+              const status = m.status || 'Belum_Dikerjakan';
+              
+              let statusBg = 'rgba(239, 68, 68, 0.15)';
+              let statusColor = '#f87171';
+              let statusBorder = '#ef4444';
+              let statusText = 'Belum Dikerjakan 🔴';
+              if (status === 'Sedang_Dikerjakan' || status === 'Sedang Dikerjakan') {
+                statusBg = 'rgba(59, 130, 246, 0.15)';
+                statusColor = '#60a5fa';
+                statusBorder = '#3b82f6';
+                statusText = 'Sedang Dikerjakan 🔵';
+              } else if (status === 'Proses_Approval' || status === 'Proses Approval') {
+                statusBg = 'rgba(245, 158, 11, 0.15)';
+                statusColor = '#fbbf24';
+                statusBorder = '#f59e0b';
+                statusText = 'Proses Approval ⏳';
+              }
+
+              return (
+                <div key={m.id} style={{
+                  background: 'rgba(15, 23, 42, 0.8)',
+                  border: isOH ? '1.5px solid rgba(249, 115, 22, 0.6)' : '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: isOH ? '0 0 25px rgba(249, 115, 22, 0.1)' : 'none',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  {/* Top Bar: Date & Status */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '12px', gap: '8px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      📆 {m.hari ? `${m.hari}, ` : ''}{m.tanggalRencana ? new Date(m.tanggalRencana).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }) : 'Minggu Ini'}
+                    </span>
+                    <span style={{ backgroundColor: statusBg, color: statusColor, border: `1px solid ${statusBorder}`, fontSize: '12px', fontWeight: 800, padding: '3px 10px', borderRadius: '12px', whiteSpace: 'nowrap' }}>
+                      {statusText}
+                    </span>
+                  </div>
+
+                  {/* Center: Mold Info */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '24px', fontWeight: 900, color: '#10b981', filter: 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.4))' }}>
                         {m.noMold}
                       </span>
                       {m.factory && m.factory !== '-' && (
-                        <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#cbd5e1', background: 'rgba(255,255,255,0.1)', padding: '4px 8px', borderRadius: '4px' }}>
+                        <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#cbd5e1', background: 'rgba(255,255,255,0.1)', padding: '3px 9px', borderRadius: '6px' }}>
                           {m.factory}
                         </span>
                       )}
+                      <span style={{
+                        marginLeft: 'auto',
+                        fontSize: '12px',
+                        fontWeight: 900,
+                        color: '#ffffff',
+                        background: isOH ? 'linear-gradient(135deg, #ea580c, #c2410c)' : 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        letterSpacing: '0.5px'
+                      }}>
+                        {m.jenis || 'OH'}
+                      </span>
                     </div>
-                    <div style={{ flex: 1, minWidth: '200px' }}>
-                      <div style={{ fontSize: '14.5px', fontWeight: '600', color: '#f8fafc' }}>
-                        {m.part !== '-' ? m.part : 'Nama Part Tidak Diketahui'}
-                      </div>
-                      <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '4px' }}>
-                        PIC ASSIGNED: <span style={{ color: '#38bdf8' }}>{m.pic?.nama || 'UNASSIGNED'}</span>
-                      </div>
+
+                    <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc', lineHeight: 1.3 }}>
+                      {m.part !== '-' ? m.part : 'Part Tidak Diketahui'}
                     </div>
-                    {m.jenis && (
-                      <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#f87171', background: 'rgba(248, 113, 113, 0.1)', border: '1px solid rgba(248, 113, 113, 0.3)', padding: '4px 12px', borderRadius: '20px' }}>
-                        {m.jenis}
+                    <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '6px', fontWeight: 500 }}>
+                      PIC ASSIGNED: <span style={{ color: '#38bdf8', fontWeight: 700 }}>{m.pic?.nama || 'UNASSIGNED'}</span>
+                    </div>
+                    {m.catatan && (
+                      <div style={{ fontSize: '12.5px', color: '#fca5a5', background: 'rgba(239, 68, 68, 0.1)', padding: '6px 10px', borderRadius: '6px', marginTop: '8px', border: '1px dashed rgba(239, 68, 68, 0.3)' }}>
+                        📌 Note: &ldquo;{m.catatan}&rdquo;
                       </div>
                     )}
                   </div>
-                ))
-              )}
-            </div>
+
+                  {/* Bottom Bar: Action Button */}
+                  <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                    <a
+                      href={`/laporan/baru?noMold=${encodeURIComponent(m.noMold)}&jenis=${encodeURIComponent(m.jenis || 'OH MOLD')}&jadwalId=${m.id}`}
+                      style={{
+                        display: 'block',
+                        textAlign: 'center',
+                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                        color: '#ffffff',
+                        padding: '12px 20px',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        fontWeight: 800,
+                        textDecoration: 'none',
+                        boxShadow: '0 0 15px rgba(16, 185, 129, 0.3)',
+                        transition: 'all 0.2s',
+                        width: '100%',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      🚀 EKSEKUSI SEKARANG ➔
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          {data.todayMaintenance && data.todayMaintenance.length > 0 && (
-            <a href="/laporan/baru" className="sa-btn-primary" style={{ textDecoration: 'none' }}>
-              EKSEKUSI ➔
-            </a>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Primary Stats Grid */}

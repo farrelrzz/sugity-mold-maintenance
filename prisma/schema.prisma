@@ -252,9 +252,10 @@ model JadwalMingguan {
 }
 
 enum StatusJadwal {
-  Belum_Dikerjakan @map("Belum Dikerjakan")
-  Proses_Approval  @map("Proses Approval")
-  Sudah_Dikerjakan @map("Sudah Dikerjakan")
+  Belum_Dikerjakan  @map("Belum Dikerjakan")
+  Sedang_Dikerjakan @map("Sedang Dikerjakan")
+  Proses_Approval   @map("Proses Approval")
+  Sudah_Dikerjakan  @map("Sudah Dikerjakan")
 }
 
 // ============================================================

@@ -96,7 +96,7 @@ export async function GET(req: Request) {
         const jDate = new Date(j.tanggalRencana)
         const repDate = new Date(rep.tanggal)
         const diffDays = Math.abs(repDate.getTime() - jDate.getTime()) / (1000 * 3600 * 24)
-        return (repDate.getMonth() === jDate.getMonth() && repDate.getFullYear() === jDate.getFullYear()) || diffDays <= 14
+        return diffDays <= 2
       })
 
       let computedStatus = 'Belum_Dikerjakan'
@@ -106,7 +106,19 @@ export async function GET(req: Request) {
           const admApp = approvals.find((a: any) => a.role === 'ADM')
           return admApp && admApp.signedAt !== null
         })
-        computedStatus = isApprovedByAdm ? 'Sudah_Dikerjakan' : 'Proses_Approval'
+        const isApprovedByPic = matching.some((rep: any) => {
+          const approvals = rep.checksheet?.approvals || []
+          const picApp = approvals.find((a: any) => a.role === 'PIC')
+          return picApp && picApp.signedAt !== null
+        })
+
+        if (isApprovedByAdm) {
+          computedStatus = 'Sudah_Dikerjakan'
+        } else if (isApprovedByPic) {
+          computedStatus = 'Proses_Approval'
+        } else {
+          computedStatus = 'Sedang_Dikerjakan'
+        }
       }
 
       if (j.status !== computedStatus) {

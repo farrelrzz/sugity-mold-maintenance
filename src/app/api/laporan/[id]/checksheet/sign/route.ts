@@ -86,15 +86,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       },
     })
 
-    // Jika yang menandatangani adalah Admin (ADM - tahap akhir), otomatis selesaikan status jadwal mingguan yang terkait
-    if (userRole === 'ADM') {
+    // Update status jadwal mingguan saat PIC atau ADM menandatangani
+    if (userRole === 'PIC' || userRole === 'ADM') {
       try {
+        const targetStatus = userRole === 'ADM' ? 'Sudah_Dikerjakan' : 'Proses_Approval'
         const laporan = await prisma.laporan.findUnique({ where: { id } })
         if (laporan) {
           if (laporan.jadwalId) {
             await prisma.jadwalMingguan.update({
               where: { id: Number(laporan.jadwalId) },
-              data: { status: 'Sudah_Dikerjakan' as any }
+              data: { status: targetStatus as any }
             })
           } else {
             const lDate = new Date(laporan.tanggal)
@@ -105,17 +106,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
               if (!j.tanggalRencana) continue
               const jDate = new Date(j.tanggalRencana)
               const diffDays = Math.abs(lDate.getTime() - jDate.getTime()) / (1000 * 3600 * 24)
-              if ((jDate.getMonth() === lDate.getMonth() && jDate.getFullYear() === lDate.getFullYear()) || diffDays <= 14) {
+              if (diffDays <= 2) {
                 await prisma.jadwalMingguan.update({
                   where: { id: j.id },
-                  data: { status: 'Sudah_Dikerjakan' as any }
+                  data: { status: targetStatus as any }
                 })
               }
             }
           }
         }
       } catch (err) {
-        console.warn('Gagal memproses sinkronisasi jadwal dari ADM sign:', err)
+        console.warn('Gagal memproses sinkronisasi jadwal dari sign:', err)
       }
     }
 
