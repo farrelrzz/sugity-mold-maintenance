@@ -2037,18 +2037,30 @@ table {
     height: auto !important;
   }
 
-  /* Sticky Header on Mobile - High contrast dark emerald (tidak sama dengan background) */
+  /* Solid Fixed Header on Mobile - Full Screen Width Without Gaps, Never Scrolls Away */
+  .app-layout, .app-main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   .app-header {
-    padding: 12px 16px !important;
-    position: sticky !important;
-    top: 0;
-    z-index: 800;
+    padding: 14px 16px !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    z-index: 1000 !important;
     background: var(--hijau-tua) !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
-    max-width: 100vw !important;
-    width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
     box-sizing: border-box !important;
   }
 
@@ -2061,12 +2073,12 @@ table {
     color: #ffffff !important;
   }
 
-  /* Keep standard padding without bottom mobile navbar space & lock horizontal scrolling */
-  main.konten, .app-layout, .app-main {
-    padding: 16px 12px !important;
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
+  /* Fit to screen layout without unwanted gaps, compensated for fixed top header */
+  main.konten {
+    padding: 76px 10px 24px 10px !important;
     width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
     box-sizing: border-box !important;
     touch-action: pan-y !important;
   }
