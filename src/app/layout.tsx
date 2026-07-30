@@ -10,6 +10,14 @@ export const metadata: Metadata = {
   keywords: ['maintenance', 'mold', 'PT Sugity Creatives', 'laporan'],
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover' as const,
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
