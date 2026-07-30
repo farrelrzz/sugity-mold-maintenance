@@ -408,7 +408,7 @@ export async function GET(req: Request) {
     }).filter(j => j.status !== 'Sudah_Dikerjakan' && j.status !== 'Sudah Dikerjakan' && j.status !== 'Selesai')
 
     // Urutkan sesuai hari/tanggal (urgent pertama), jika hari sama dahulukan OH dibanding PM dll.
-    const getJenisPriority = (jenis?: string) => {
+    const getJenisPriority = (jenis?: string | null) => {
       const j = (jenis || '').toUpperCase()
       if (j.includes('OH') || j.includes('OVERHAUL')) return 1
       if (j.includes('PM')) return 2
