@@ -2091,17 +2091,28 @@ table {
     box-sizing: border-box !important;
   }
 
-  /* Force cards in Dashboard and Mold Book to stay strictly within screen width */
-  .kartu, .card {
+  /* Force cards in Dashboard and Mold Book to stay within screen width, but enable smooth horizontal swiping when columns exceed screen width */
+  .kartu, .card, .info-mold-grid {
     min-width: 0 !important;
     max-width: 100% !important;
+    width: 100% !important;
     box-sizing: border-box !important;
     padding: 16px 14px !important;
     border-radius: 12px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x pan-y !important;
   }
 
-  /* Flexible, neat Checksheet and table swiping on mobile touchscreens */
-  .cs-table-scroll, .tabel-wrap, .table-responsive, div[style*="overflow-x: auto"], div[style*="overflow-x: scroll"] {
+  .info-mold-grid {
+    padding: 6px 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  /* Flexible, neat Checksheet, CM Card, and table swiping on mobile touchscreens */
+  .cs-table-scroll, .tabel-wrap, .table-responsive, div[style*="overflow-x: auto"], div[style*="overflow-x: scroll"], fieldset, div[style*="background: #f8fafc"], div[style*="background: rgb(248, 250, 252)"] {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: auto !important;
@@ -2111,6 +2122,7 @@ table {
     position: relative !important;
     margin: 8px 0 !important;
     padding-bottom: 12px !important;
+    box-sizing: border-box !important;
   }
 
   .cs-check-tbl, table.cs-check-tbl {
