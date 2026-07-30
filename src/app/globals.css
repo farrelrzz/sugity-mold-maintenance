@@ -703,7 +703,7 @@ main.konten {
   flex: 1;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  padding: 24px;
+  padding: 40px 24px 32px 24px; /* INCREASED TOP PADDING TO PREVENT NAVBAR OVERLAP */
   max-width: 100% !important;
   width: 100% !important;
   box-sizing: border-box !important;
