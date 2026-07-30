@@ -117,7 +117,7 @@ export default function RegularUI({
   const totalAktualNon = data.planningWeekly?.aktualNonshift?.reduce((a: any, b: any) => Number(a) + Number(b), 0) || 0
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '32px', color: '#0f172a' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingTop: '32px', paddingBottom: '32px', color: '#0f172a' }}>
       
       {/* ==================== ROW 1: HEADER ANALYTICS & FILTER ==================== */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
