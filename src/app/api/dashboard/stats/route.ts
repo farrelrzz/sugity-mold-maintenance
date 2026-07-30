@@ -124,66 +124,70 @@ export async function GET(req: Request) {
     const startOfYear = new Date(tahun, 0, 1)
     const endOfYear = new Date(tahun, 11, 31, 23, 59, 59, 999)
 
-    // 🚀 ULTRA-FAST PARALLEL QUERY EXECUTION (Eliminates Cloud Latency)
-    const [
-      laporanBulanIni,
-      lastAccident,
-      totalNoAccident,
-      yearlyAccidents,
-      laporanMingguIni,
-      targets,
-      overtimeEntries,
-      laporanYtd,
-      recentLaporan,
-      pendingMaintenance
-    ] = await Promise.all([
-      prisma.laporan.findMany({
-        where: { tanggal: { gte: startDate, lte: endDate } },
-        include: { checksheet: { include: { spareparts: true, approvals: true } } },
-      }),
-      prisma.safetyRecord.findFirst({
-        where: { status: 'ACCIDENT' },
-        orderBy: { date: 'desc' },
-      }),
-      prisma.safetyRecord.count({ where: { status: 'NO_ACCIDENT' } }),
-      prisma.safetyRecord.count({ where: { year: currentYear, status: 'ACCIDENT' } }),
-      prisma.laporan.findMany({
-        where: { tanggal: { gte: startOfWeek, lte: endOfWeek } },
-        include: { checksheet: { include: { approvals: true } } },
-      }),
-      prisma.planningTarget.findMany({ where: { bulan: startDate } }),
-      prisma.overtimeEntry.findMany({
-        where: { tanggal: { gte: startDate, lte: endDate } },
-        include: { user: true },
-      }),
-      prisma.laporan.findMany({
-        where: { tanggal: { gte: startOfYear, lte: endOfYear } },
-        include: { checksheet: { include: { spareparts: true } } },
-      }),
-      prisma.laporan.findMany({
-        take: 10,
-        orderBy: { createdAt: 'desc' },
-        include: { pic: { select: { nama: true } } },
-      }),
-      prisma.jadwalMingguan.findMany({
-        where: { status: { notIn: ['Sudah_Dikerjakan' as any, 'Sudah Dikerjakan' as any, 'Selesai' as any] } },
-        include: {
-          pic: { select: { id: true, nama: true } },
-          laporan: {
-            select: {
-              id: true,
-              tanggal: true,
-              noMold: true,
-              checksheet: {
-                select: {
-                  approvals: { select: { role: true, signedAt: true } }
-                }
+    // 🚀 SEQUENTIAL QUERY EXECUTION (Prevents Serverless Connection Pool Timeout/Exhaustion)
+    // Because TiDB Cloud / Vercel Serverless limits concurrent connection spikes.
+    
+    const laporanBulanIni = await prisma.laporan.findMany({
+      where: { tanggal: { gte: startDate, lte: endDate } },
+      include: { checksheet: { include: { spareparts: true, approvals: true } } },
+    });
+
+    const lastAccident = await prisma.safetyRecord.findFirst({
+      where: { status: 'ACCIDENT' },
+      orderBy: { date: 'desc' },
+    });
+
+    const totalNoAccident = await prisma.safetyRecord.count({ 
+      where: { status: 'NO_ACCIDENT' } 
+    });
+
+    const yearlyAccidents = await prisma.safetyRecord.count({ 
+      where: { year: currentYear, status: 'ACCIDENT' } 
+    });
+
+    const laporanMingguIni = await prisma.laporan.findMany({
+      where: { tanggal: { gte: startOfWeek, lte: endOfWeek } },
+      include: { checksheet: { include: { approvals: true } } },
+    });
+
+    const targets = await prisma.planningTarget.findMany({ 
+      where: { bulan: startDate } 
+    });
+
+    const overtimeEntries = await prisma.overtimeEntry.findMany({
+      where: { tanggal: { gte: startDate, lte: endDate } },
+      include: { user: true },
+    });
+
+    const laporanYtd = await prisma.laporan.findMany({
+      where: { tanggal: { gte: startOfYear, lte: endOfYear } },
+      include: { checksheet: { include: { spareparts: true } } },
+    });
+
+    const recentLaporan = await prisma.laporan.findMany({
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: { pic: { select: { nama: true } } },
+    });
+
+    const pendingMaintenance = await prisma.jadwalMingguan.findMany({
+      where: { status: { notIn: ['Sudah_Dikerjakan' as any, 'Sudah Dikerjakan' as any, 'Selesai' as any] } },
+      include: {
+        pic: { select: { id: true, nama: true } },
+        laporan: {
+          select: {
+            id: true,
+            tanggal: true,
+            noMold: true,
+            checksheet: {
+              select: {
+                approvals: { select: { role: true, signedAt: true } }
               }
             }
           }
-        },
-      }),
-    ])
+        }
+      },
+    });
 
     // Hitung summary stats
     let totalActions = laporanBulanIni.length
