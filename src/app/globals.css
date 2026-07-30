@@ -303,9 +303,9 @@
 
 html, body {
   height: 100%;
-  max-width: 100vw !important;
-  width: 100% !important;
-  overflow-x: hidden !important;
+  max-width: 100vw;
+  width: 100%;
+  overflow-x: clip;
   position: relative;
   margin: 0;
   padding: 0;
@@ -2077,85 +2077,101 @@ table {
     padding: 76px 10px 24px 10px !important;
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: hidden !important;
     box-sizing: border-box !important;
   }
 
-  /* Prevent horizontal scrolling & force single column for all dashboard grids */
-  div[style*="gridTemplateColumns"], div[style*="grid-template-columns"],
-  div[style*="minmax("] {
-    grid-template-columns: minmax(0, 1fr) !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
+  /* Dashboard grids: stack to single column, EXCEPT inside scroll wrappers */
+  .baris2, .baris3, .grid-2, .grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
   }
 
-  /* Force cards in Dashboard and Mold Book to stay within screen width, but enable smooth horizontal swiping when columns exceed screen width */
-  .kartu, .card, .info-mold-grid {
+  /* Info mold grid: flexible, readable grid - NOT forced single column */
+  .info-mold-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
+    gap: 8px !important;
+    padding: 4px 0 !important;
+  }
+
+  /* Cards: fit screen width but do NOT block horizontal scroll */
+  .kartu, .card {
     min-width: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
     padding: 16px 14px !important;
     border-radius: 12px !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    touch-action: pan-x pan-y !important;
   }
 
-  .info-mold-grid {
-    padding: 6px 0 !important;
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)) !important;
-    gap: 10px !important;
-  }
-
-  /* Flexible, neat Checksheet, CM Card, and table swiping on mobile touchscreens */
-  .cs-table-scroll, .tabel-wrap, .table-responsive, div[style*="overflow-x: auto"], div[style*="overflow-x: scroll"], fieldset, div[style*="background: #f8fafc"], div[style*="background: rgb(248, 250, 252)"] {
+  /* 
+   * CHECKSHEET SCROLL FIX 
+   * The scroll wrapper clips with overflowX auto, inner table expands wider.
+   * CRITICAL: No parent can have overflow-x: hidden for this to work.
+   */
+  .cs-table-scroll {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: auto !important;
+    overflow-y: visible !important;
     -webkit-overflow-scrolling: touch !important;
     touch-action: pan-x pan-y !important;
     display: block !important;
     position: relative !important;
-    margin: 8px 0 !important;
-    padding-bottom: 12px !important;
+    padding-bottom: 14px !important;
     box-sizing: border-box !important;
+    /* Scrollbar visible so users know they can swipe */
+    scrollbar-width: thin !important;
+    scrollbar-color: #a0aec0 transparent !important;
   }
 
-  .cs-check-tbl, table.cs-check-tbl {
+  .cs-table-scroll::-webkit-scrollbar {
+    height: 6px !important;
+  }
+
+  .cs-table-scroll::-webkit-scrollbar-thumb {
+    background: #a0aec0 !important;
+    border-radius: 3px !important;
+  }
+
+  .cs-check-tbl {
     width: max-content !important;
     min-width: 620px !important;
     max-width: none !important;
     display: table !important;
-    margin: 0 !important;
     border-collapse: collapse !important;
     background: #ffffff !important;
+    table-layout: auto !important;
   }
 
   .cs-check-tbl th, .cs-check-tbl td {
     padding: 10px 12px !important;
     font-size: 13px !important;
     vertical-align: middle !important;
+    white-space: nowrap !important;
+  }
+
+  /* Item column wraps so it's readable */
+  .cs-check-tbl td.item, .cs-check-tbl th.item {
+    white-space: normal !important;
+    min-width: 180px !important;
+    max-width: 220px !important;
   }
 
   .cs-check-tbl input[type="radio"], .cs-check-tbl input[type="checkbox"], .cs-okng input {
     width: 18px !important;
     height: 18px !important;
-    flex-shrink: 0;
-    cursor: pointer;
+    flex-shrink: 0 !important;
+    cursor: pointer !important;
   }
 
   .cs-check-tbl label, .cs-okng label {
     font-size: 13px !important;
-    padding: 4px 0 !important;
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
-    cursor: pointer;
-    white-space: nowrap;
+    cursor: pointer !important;
+    white-space: nowrap !important;
   }
 
   .hide-mobile {
