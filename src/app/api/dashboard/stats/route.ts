@@ -171,7 +171,7 @@ export async function GET(req: Request) {
     });
 
     const pendingMaintenance = await prisma.jadwalMingguan.findMany({
-      where: { status: { notIn: ['Sudah_Dikerjakan' as any, 'Sudah Dikerjakan' as any, 'Selesai' as any] } },
+      where: { status: { notIn: ['Sudah_Dikerjakan'] } },
       include: {
         pic: { select: { id: true, nama: true } },
         laporan: {
@@ -409,7 +409,7 @@ export async function GET(req: Request) {
         ...j,
         status: computedStatus
       }
-    }).filter(j => j.status !== 'Sudah_Dikerjakan' && j.status !== 'Sudah Dikerjakan' && j.status !== 'Selesai')
+    }).filter(j => j.status !== 'Sudah_Dikerjakan')
 
     // Urutkan sesuai hari/tanggal (urgent pertama), jika hari sama dahulukan OH dibanding PM dll.
     const getJenisPriority = (jenis?: string | null) => {
