@@ -1709,32 +1709,49 @@ ${hasCoolingOrHeater ? `
   const renderChecklistTable = (secItems: any[], secKode: string, secJudul: string) => {
     const masterVal = checklist[`master_${secKode}`]
     return (
-      <div className="cs-table-scroll" style={{ marginTop: '10px' }}>
-        <table className="cs-check-tbl">
+      <div style={{
+        marginTop: '10px',
+        width: '100%',
+        overflowX: 'auto',
+        overflowY: 'visible',
+        WebkitOverflowScrolling: 'touch' as any,
+        position: 'relative',
+        paddingBottom: '10px',
+        borderRadius: '8px',
+        border: '1px solid #e2e8f0',
+      }}>
+        <table style={{
+          width: 'max-content',
+          minWidth: '640px',
+          borderCollapse: 'collapse',
+          fontSize: '12.5px',
+          background: '#fff',
+          tableLayout: 'auto',
+        }}>
           <thead>
             <tr>
-              <th style={{ width: '40px' }}>No</th>
-              <th>Item</th>
-              <th style={{ width: '100px' }}>Metode</th>
-              <th style={{ width: '130px' }}>Standard</th>
-              <th style={{ width: '90px' }}>Judge</th>
-              <th>Comment</th>
+              <th style={{ width: '36px', padding: '8px 10px', border: '1px solid #999', background: '#f3f0e4', fontSize: '11.5px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>No</th>
+              <th style={{ minWidth: '160px', maxWidth: '220px', padding: '8px 10px', border: '1px solid #999', background: '#f3f0e4', fontSize: '11.5px', fontWeight: 'bold' }}>Item</th>
+              <th style={{ width: '100px', padding: '8px 10px', border: '1px solid #999', background: '#f3f0e4', fontSize: '11.5px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Metode</th>
+              <th style={{ width: '120px', padding: '8px 10px', border: '1px solid #999', background: '#f3f0e4', fontSize: '11.5px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Standard</th>
+              <th style={{ width: '80px', padding: '8px 10px', border: '1px solid #999', background: '#f3f0e4', fontSize: '11.5px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Judge</th>
+              <th style={{ width: '140px', padding: '8px 10px', border: '1px solid #999', background: '#f3f0e4', fontSize: '11.5px', fontWeight: 'bold', whiteSpace: 'nowrap' }}>Comment</th>
             </tr>
           </thead>
           <tbody>
             <tr style={{ background: '#e0e0e0', fontWeight: 'bold' }}>
-              <td colSpan={4}>{secJudul}</td>
-              <td style={{ textAlign: 'center' }}>
+              <td colSpan={4} style={{ padding: '8px 10px', border: '1px solid #999' }}>{secJudul}</td>
+              <td style={{ textAlign: 'center', padding: '8px 10px', border: '1px solid #999' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
                     <input type="radio" checked={masterVal === 'OK'} onChange={() => handleMasterChecklistChange(secKode, secItems.length, 'OK')} /> OK ALL
                   </label>
-                  <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
                     <input type="radio" checked={masterVal === 'NG'} onChange={() => handleMasterChecklistChange(secKode, secItems.length, 'NG')} /> NG / Cek Manual
                   </label>
                 </div>
               </td>
-              <td></td>
+              <td style={{ padding: '8px 10px', border: '1px solid #999' }}></td>
             </tr>
             {masterVal !== 'OK' && secItems.map((item, idx) => {
               const key = `${secKode}|${idx}`
@@ -1743,13 +1760,13 @@ ${hasCoolingOrHeater ? `
 
               return (
                 <tr key={idx}>
-                  <td style={{ textAlign: 'center' }}>{idx + 1}</td>
-                  <td>{item.label}</td>
-                  <td style={{ color: 'var(--teks-redup)' }}>{item.metode || '-'}</td>
-                  <td style={{ color: 'var(--teks-redup)' }}>{item.standar || '-'}</td>
-                  <td>
+                  <td style={{ textAlign: 'center', padding: '8px 10px', border: '1px solid #999', whiteSpace: 'nowrap' }}>{idx + 1}</td>
+                  <td style={{ padding: '8px 10px', border: '1px solid #999', minWidth: '160px', maxWidth: '220px', wordBreak: 'break-word' }}>{item.label}</td>
+                  <td style={{ color: 'var(--teks-redup)', padding: '8px 10px', border: '1px solid #999', whiteSpace: 'nowrap' }}>{item.metode || '-'}</td>
+                  <td style={{ color: 'var(--teks-redup)', padding: '8px 10px', border: '1px solid #999', whiteSpace: 'nowrap' }}>{item.standar || '-'}</td>
+                  <td style={{ padding: '8px 10px', border: '1px solid #999' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', cursor: 'pointer' }}>
                         <input
                           type="radio"
                           name={`judge_${secKode}_${idx}`}
@@ -1758,7 +1775,7 @@ ${hasCoolingOrHeater ? `
                           onChange={() => handleChecklistChange(key, 'judge', 'OK')}
                         /> OK
                       </label>
-                      <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', cursor: 'pointer' }}>
                         <input
                           type="radio"
                           name={`judge_${secKode}_${idx}`}
@@ -1769,13 +1786,13 @@ ${hasCoolingOrHeater ? `
                       </label>
                     </div>
                   </td>
-                  <td>
+                  <td style={{ padding: '8px 10px', border: '1px solid #999' }}>
                     <input
                       type="text"
                       placeholder="Catatan..."
                       value={komentar}
                       onChange={(e) => handleChecklistChange(key, 'komentar', e.target.value)}
-                      style={{ width: '100%', fontSize: '12px', padding: '6px' }}
+                      style={{ width: '130px', fontSize: '12px', padding: '6px 8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
                     />
                   </td>
                 </tr>
@@ -1860,7 +1877,7 @@ ${hasCoolingOrHeater ? `
           </div>
         )}
 
-        <fieldset disabled={isLocked} style={{ border: 'none', padding: 0, margin: 0 }}>
+        <fieldset disabled={isLocked} style={{ border: 'none', padding: 0, margin: 0, overflow: 'visible', minWidth: 0 }}>
 
 
         {/* HEADER INFORMATION CARD */}
