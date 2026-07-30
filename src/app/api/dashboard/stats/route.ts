@@ -113,24 +113,63 @@ export async function GET(req: Request) {
     const [tahun, bln] = bulanParam.split('-').map(Number)
     const startDate = new Date(tahun, bln - 1, 1)
     const endDate = new Date(tahun, bln, 0, 23, 59, 59, 999)
+    const currentYear = new Date().getFullYear()
 
-    // 1. Ambil semua laporan pada bulan terpilih
-    const laporanBulanIni = await prisma.laporan.findMany({
-      where: {
-        tanggal: {
-          gte: startDate,
-          lte: endDate,
-        },
-      },
-      include: {
-        checksheet: {
-          include: {
-            spareparts: true,
-            approvals: true,
-          },
-        },
-      },
-    })
+    const monStr = mulaiMingguISO(new Date())
+    const startOfWeek = new Date(monStr)
+    const endOfWeek = new Date(startOfWeek)
+    endOfWeek.setDate(endOfWeek.getDate() + 6)
+    endOfWeek.setHours(23, 59, 59, 999)
+
+    const startOfYear = new Date(tahun, 0, 1)
+    const endOfYear = new Date(tahun, 11, 31, 23, 59, 59, 999)
+
+    // 🚀 ULTRA-FAST PARALLEL QUERY EXECUTION (Eliminates Cloud Latency)
+    const [
+      laporanBulanIni,
+      lastAccident,
+      totalNoAccident,
+      yearlyAccidents,
+      laporanMingguIni,
+      targets,
+      overtimeEntries,
+      laporanYtd,
+      recentLaporan,
+      pendingMaintenance
+    ] = await Promise.all([
+      prisma.laporan.findMany({
+        where: { tanggal: { gte: startDate, lte: endDate } },
+        include: { checksheet: { include: { spareparts: true, approvals: true } } },
+      }),
+      prisma.safetyRecord.findFirst({
+        where: { status: 'ACCIDENT' },
+        orderBy: { date: 'desc' },
+      }),
+      prisma.safetyRecord.count({ where: { status: 'NO_ACCIDENT' } }),
+      prisma.safetyRecord.count({ where: { year: currentYear, status: 'ACCIDENT' } }),
+      prisma.laporan.findMany({
+        where: { tanggal: { gte: startOfWeek, lte: endOfWeek } },
+        include: { checksheet: { include: { approvals: true } } },
+      }),
+      prisma.planningTarget.findMany({ where: { bulan: startDate } }),
+      prisma.overtimeEntry.findMany({
+        where: { tanggal: { gte: startDate, lte: endDate } },
+        include: { user: true },
+      }),
+      prisma.laporan.findMany({
+        where: { tanggal: { gte: startOfYear, lte: endOfYear } },
+        include: { checksheet: { include: { spareparts: true } } },
+      }),
+      prisma.laporan.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: { pic: { select: { nama: true } } },
+      }),
+      prisma.jadwalMingguan.findMany({
+        where: { status: 'Belum_Dikerjakan' },
+        include: { pic: { select: { nama: true } } },
+      }),
+    ])
 
     // Hitung summary stats
     let totalActions = laporanBulanIni.length
@@ -145,7 +184,6 @@ export async function GET(req: Request) {
         const costRes = hitungChecksheetCost(cs, isOh, 1, 1)
         totalCost += costRes.total
 
-        // Hitung maintenance yang sudah full approve (semua PIC, TL, GL, CL, ADM signed)
         const approvals = cs.approvals || []
         const isFullApproved = ['PIC', 'TL', 'GL', 'CL', 'ADM'].every((role) =>
           approvals.some((a) => a.role === role && a.signedAt !== null)
@@ -154,64 +192,25 @@ export async function GET(req: Request) {
           maintenanceDone++
         }
       } else {
-        // Fallback cost: hitung MP cost standard 1 jam
         const mpCost = Math.round(1 * 89595 * 1)
         totalCost += mpCost
       }
     })
 
-    // 2. Accident Free Days (Tersinkron langsung dengan tabel baru Kalender Safety / SafetyRecord)
-    const currentYear = new Date().getFullYear()
+    // 2. Accident Free Days
     let accidentFreeDays = 365
-
-    const lastAccident = await prisma.safetyRecord.findFirst({
-      where: { status: 'ACCIDENT' },
-      orderBy: { date: 'desc' },
-    })
-
     if (lastAccident) {
-      // Hitung jumlah hari sejak tanggal insiden accident terakhir sampai hari ini
       const diffTime = Math.abs(new Date().setHours(0,0,0,0) - new Date(lastAccident.date).setHours(0,0,0,0))
       accidentFreeDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
     } else {
-      // Jika tidak pernah ada accident, hitung jumlah total hari NO_ACCIDENT yang telah dicatat di sistem
-      const totalNoAccident = await prisma.safetyRecord.count({
-        where: { status: 'NO_ACCIDENT' },
-      })
       if (totalNoAccident > 0) {
         accidentFreeDays = totalNoAccident
       } else {
-        accidentFreeDays = 365 // Default nilai bebas accident sebelum data kalender terisi
+        accidentFreeDays = 365
       }
     }
 
-    const yearlyAccidents = await prisma.safetyRecord.count({
-      where: { year: currentYear, status: 'ACCIDENT' }
-    })
-
-    // 3. Approval Ratios untuk MINGGU BERJALAN (Monday to Sunday)
-    const monStr = mulaiMingguISO(new Date())
-    const startOfWeek = new Date(monStr)
-    const endOfWeek = new Date(startOfWeek)
-    endOfWeek.setDate(endOfWeek.getDate() + 6)
-    endOfWeek.setHours(23, 59, 59, 999)
-
-    const laporanMingguIni = await prisma.laporan.findMany({
-      where: {
-        tanggal: {
-          gte: startOfWeek,
-          lte: endOfWeek,
-        },
-      },
-      include: {
-        checksheet: {
-          include: {
-            approvals: true,
-          },
-        },
-      },
-    })
-
+    // 3. Approval Ratios untuk MINGGU BERJALAN
     const totalWeekly = laporanMingguIni.length
     let weeklyPic = 0
     let weeklyTl = 0
@@ -233,14 +232,6 @@ export async function GET(req: Request) {
 
     // 4. Planning Target vs Aktual per Minggu
     const weeks = hitungMingguDalamBulan(bulanParam)
-    
-    // Ambil target planning
-    const targets = await prisma.planningTarget.findMany({
-      where: {
-        bulan: startDate,
-      },
-    })
-
     const targetOhA = targets.find((t) => t.shift === 'Shift_A')?.targetOh || 0
     const targetOhB = targets.find((t) => t.shift === 'Shift_B')?.targetOh || 0
     
@@ -249,24 +240,20 @@ export async function GET(req: Request) {
 
     const targetsA = weeks.map(() => perMingguA)
     const targetsB = weeks.map(() => perMingguB)
-
     const aktualA = weeks.map(() => 0)
     const aktualB = weeks.map(() => 0)
     const aktualNonshift = weeks.map(() => 0)
 
-    // Hitung aktual bulanan
     laporanBulanIni.forEach((lap) => {
       const cs = lap.checksheet
       if (!cs) return
 
-      // Hitung hanya yang sudah full approved
       const approvals = cs.approvals || []
       const isFullApproved = ['PIC', 'TL', 'GL', 'CL', 'ADM'].every((role) =>
         approvals.some((a) => a.role === role && a.signedAt !== null)
       )
       if (!isFullApproved) return
 
-      // Cari index minggu
       const dateMon = mulaiMingguISO(new Date(lap.tanggal))
       const idx = weeks.indexOf(dateMon)
       if (idx !== -1) {
@@ -287,8 +274,6 @@ export async function GET(req: Request) {
 
     laporanBulanIni.forEach((lap) => {
       if (lap.jenis === 'OH_MOLD') {
-        // Optional: only count if full approved? User didn't specify, but let's count all OH_MOLD for that date.
-        // If we want only full approved:
         const isFullApproved = ['PIC', 'TL', 'GL', 'CL', 'ADM'].every((role) =>
           (lap.checksheet?.approvals || []).some((a) => a.role === role && a.signedAt !== null)
         )
@@ -304,23 +289,7 @@ export async function GET(req: Request) {
       count: dailyOhMap[Number(d)]
     }))
 
-    // 5. Lembur (Overtime) per PIC terkelompokkan
-    const startOfBulan = new Date(tahun, bln - 1, 1)
-    const endOfBulan = new Date(tahun, bln, 0, 23, 59, 59, 999)
-
-    const overtimeEntries = await prisma.overtimeEntry.findMany({
-      where: {
-        tanggal: {
-          gte: startOfBulan,
-          lte: endOfBulan,
-        },
-      },
-      include: {
-        user: true,
-      },
-    })
-
-    // Grouping lembur by shift
+    // 5. Lembur (Overtime) per PIC
     const overtimeGroup: Record<Shift, Record<string, { plan: number; aktual: number }>> = {
       Nonshift: {},
       Shift_A: {},
@@ -346,7 +315,6 @@ export async function GET(req: Request) {
       return { labels, plan, aktual }
     }
 
-    // Top Performer: user with highest total (plan + aktual) overtime this month
     const allOtUsers = Object.values(
       overtimeEntries.reduce((acc: Record<string, { nama: string; total: number }>, e) => {
         const key = e.user.nama
@@ -357,38 +325,17 @@ export async function GET(req: Request) {
     ).sort((a, b) => b.total - a.total)
     const topPerformer = allOtUsers[0] || null
 
-    // Maintenance Summary for the selected month
     const totalPlanMaintenance = targetOhA + targetOhB
     const totalAktualMaintenance = aktualA.reduce((a, b) => a + b, 0) + aktualB.reduce((a, b) => a + b, 0)
     const achievementPct = totalPlanMaintenance > 0 ? Math.round((totalAktualMaintenance / totalPlanMaintenance) * 100) : 0
 
     // 6. Tren Bulanan (YTD Jan - Dec)
-    const startOfYear = new Date(tahun, 0, 1)
-    const endOfYear = new Date(tahun, 11, 31, 23, 59, 59, 999)
-
-    const laporanYtd = await prisma.laporan.findMany({
-      where: {
-        tanggal: {
-          gte: startOfYear,
-          lte: endOfYear,
-        },
-      },
-      include: {
-        checksheet: {
-          include: {
-            spareparts: true,
-          },
-        },
-      },
-    })
-
     const rawMonthlyCosts = Array(12).fill(0)
     const monthlyActions = Array(12).fill(0)
 
     laporanYtd.forEach((lap) => {
-      // Pastikan index bulan akurat berdasarkan tanggal laporan
       const dateObj = new Date(lap.tanggal)
-      const monthIdx = dateObj.getMonth() // 0 = Jan, 11 = Dec
+      const monthIdx = dateObj.getMonth()
       const isOh = lap.jenis === 'OH_MOLD'
       const cs = lap.checksheet
       
@@ -404,35 +351,15 @@ export async function GET(req: Request) {
       monthlyActions[monthIdx]++
     })
 
-    // Total cost dalam ribu rupiah dihitung setelah akumulasi sebulan penuh dari seluruh laporan tersubmit
     const monthlyCosts = rawMonthlyCosts.map((val) => Math.round(val / 1000))
 
-    // 7. Recent Laporan Logs (10 Terakhir)
-    const recentLaporan = await prisma.laporan.findMany({
-      take: 10,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        pic: { select: { nama: true } },
-      },
-    })
-
     // 8. Jadwal Maintenance Hari Ini
-    const pendingMaintenance = await prisma.jadwalMingguan.findMany({
-      where: {
-        status: 'Belum_Dikerjakan'
-      },
-      include: {
-        pic: { select: { nama: true } }
-      }
-    })
-
     const todayStr = formatDateLocal(new Date())
     const daysId = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
     const todayName = daysId[new Date().getDay()]
 
     const todaySchedules = pendingMaintenance.filter(m => {
       if (m.tanggalRencana) {
-        // m.tanggalRencana comes as Date object, usually representing midnight UTC since it's @db.Date
         const mDateStr = new Date(m.tanggalRencana).toISOString().slice(0, 10)
         return mDateStr === todayStr
       }
@@ -440,10 +367,10 @@ export async function GET(req: Request) {
     })
 
     const moldNumbers = todaySchedules.map(m => m.noMold)
-    const molds = await prisma.moldBook.findMany({
+    const molds = moldNumbers.length > 0 ? await prisma.moldBook.findMany({
       where: { noMold: { in: moldNumbers } },
       select: { noMold: true, part: true, factory: true }
-    })
+    }) : []
     
     const moldDict: Record<string, any> = {}
     molds.forEach(m => moldDict[m.noMold] = m)
@@ -499,6 +426,10 @@ export async function GET(req: Request) {
       },
       recentLaporan,
       todayMaintenance,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=59',
+      },
     })
   } catch (error) {
     console.error('API Error in GET /api/dashboard/stats:', error)

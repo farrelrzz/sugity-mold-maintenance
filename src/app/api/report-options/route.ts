@@ -39,7 +39,11 @@ export async function GET(req: Request) {
       })
     }
 
-    return NextResponse.json(options)
+    return NextResponse.json(options, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    })
   } catch (error) {
     console.error('API Error in GET /api/report-options:', error)
     return NextResponse.json({ error: 'Gagal mengambil opsi' }, { status: 500 })

@@ -18,7 +18,11 @@ export async function GET(req: Request) {
       orderBy: { nama: 'asc' }
     })
 
-    return NextResponse.json(spareparts)
+    return NextResponse.json(spareparts, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120',
+      },
+    })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }

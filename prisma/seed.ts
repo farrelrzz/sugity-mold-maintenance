@@ -134,6 +134,7 @@ async function main() {
   }
 
   const users = [
+    { nama: 'Super Admin Sugity', username: 'superadmin', password: 'password123', role: 'SUPER_ADMIN' as UserRole, factory: 'F2' as Factory, shift: 'Nonshift' as Shift, nik: '9999999999999999', tempatLahir: 'Jakarta', tanggalLahir: new Date('1985-01-01') },
     { nama: 'Administrator', username: 'admin', password: 'admin123', role: 'ADM' as UserRole, factory: 'F2' as Factory, shift: 'Nonshift' as Shift, nik: '1234567890123456', tempatLahir: 'Jakarta', tanggalLahir: new Date('1990-01-01') },
     { nama: 'Group Leader F2', username: 'gl_f2', password: 'gl123', role: 'GL' as UserRole, factory: 'F2' as Factory, shift: 'Nonshift' as Shift, nik: '1234567890123457', tempatLahir: 'Bandung', tanggalLahir: new Date('1988-06-15') },
     { nama: 'Team Leader A', username: 'tl_a', password: 'tl123', role: 'TL' as UserRole, factory: 'F2' as Factory, shift: 'Shift_A' as Shift, nik: '1234567890123458', tempatLahir: 'Surabaya', tanggalLahir: new Date('1992-03-20') },
@@ -164,7 +165,11 @@ async function main() {
     const hash = await bcrypt.hash(u.password, 10)
     await prisma.user.upsert({
       where: { username: u.username },
-      update: {},
+      update: {
+        role: u.role,
+        nama: u.nama,
+        passwordHash: hash
+      },
       create: {
         nama: u.nama,
         username: u.username,
@@ -185,40 +190,94 @@ async function main() {
   // ============================================================
   console.log('📚 Seeding mold book...')
 
-  let moldCount = 0
-  for (const m of MOLD_DATA) {
-    const factory = toFactory(m.factory)
-    const shift = toShift(m.shift)
+  const fs = require('fs')
+  const path = require('path')
+  const jsonPath = path.join(__dirname, '../src/data/molds_v3.json')
+  
+  if (fs.existsSync(jsonPath)) {
+    const molds = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'))
+    console.log(`Found ${molds.length} molds in src/data/molds_v3.json!`)
 
-    await prisma.moldBook.upsert({
-      where: { noMold: m.no },
-      update: {
-        mc: String(m.mc),
-        part: m.part,
-        tonase: m.tonase,
-        customer: m.customer,
-        model: m.model,
-        coreStd: String(m.coreStd),
-        cavStd: String(m.cavStd),
-        heaterStd: m.heaterStd as any,
-        factory,
-      },
-      create: {
-        noMold: m.no,
-        mc: String(m.mc),
-        factory,
-        part: m.part,
-        tonase: m.tonase,
-        customer: m.customer,
-        model: m.model,
-        coreStd: String(m.coreStd),
-        cavStd: String(m.cavStd),
-        heaterStd: m.heaterStd as any,
-      },
-    })
-    moldCount++
+    // Create outhouse entries first
+    const outhouseMap = new Map<string, number>()
+    const distinctLokasi: string[] = [...new Set<string>(
+      molds.map((m: any) => m.lokasiMold).filter((l: any): l is string => !!l)
+    )]
+    
+    for (const lok of distinctLokasi) {
+      const existing = await prisma.outhouse.findFirst({ where: { nama: lok } })
+      if (existing) {
+        outhouseMap.set(lok, existing.id)
+      } else {
+        const created = await prisma.outhouse.create({ data: { nama: lok } })
+        outhouseMap.set(lok, created.id)
+      }
+    }
+
+    await prisma.moldBook.deleteMany()
+
+    const BATCH = 500
+    for (let i = 0; i < molds.length; i += BATCH) {
+      const batch = molds.slice(i, i + BATCH).map((m: any) => ({
+        noMold: m.noMold,
+        mc: m.mc || null,
+        factory: (['F2', 'F3', 'F4'].includes(m.factory) ? m.factory : 'F2') as any,
+        part: m.part || null,
+        tonase: m.tonase || null,
+        customer: m.customer || null,
+        model: m.model || null,
+        coreStd: m.coreStd || null,
+        cavStd: m.cavStd || null,
+        heaterStd: m.heaterStd || undefined,
+        lokasiMold: m.lokasiMold || null,
+        outhouseId: m.lokasiMold ? (outhouseMap.get(m.lokasiMold) || null) : null,
+        dimensiW: m.dimensiW || null,
+        dimensiH: m.dimensiH || null,
+        dimensiT: m.dimensiT || null,
+      }))
+
+      await prisma.moldBook.createMany({
+        data: batch,
+        skipDuplicates: true,
+      })
+      console.log(`Progress: ${Math.min(i + BATCH, molds.length)}/${molds.length} molds seeded...`)
+    }
+    const finalCount = await prisma.moldBook.count()
+    console.log(`✅ ${finalCount} molds seeded from JSON`)
+  } else {
+    let moldCount = 0
+    for (const m of MOLD_DATA) {
+      const factory = toFactory(m.factory)
+      await prisma.moldBook.upsert({
+        where: { noMold: m.no },
+        update: {
+          mc: String(m.mc),
+          part: m.part,
+          tonase: m.tonase,
+          customer: m.customer,
+          model: m.model,
+          coreStd: String(m.coreStd),
+          cavStd: String(m.cavStd),
+          heaterStd: m.heaterStd as any,
+          factory,
+        },
+        create: {
+          noMold: m.no,
+          mc: String(m.mc),
+          factory,
+          part: m.part,
+          tonase: m.tonase,
+          customer: m.customer,
+          model: m.model,
+          coreStd: String(m.coreStd),
+          cavStd: String(m.cavStd),
+          heaterStd: m.heaterStd as any,
+        },
+      })
+      moldCount++
+    }
+    console.log(`✅ ${moldCount} default molds seeded`)
   }
-  console.log(`✅ ${moldCount} molds seeded`)
 
   console.log('🎉 Seeding complete!')
 }

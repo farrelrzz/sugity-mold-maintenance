@@ -34,7 +34,11 @@ export async function GET(req: Request) {
       },
     })
 
-    return NextResponse.json(molds)
+    return NextResponse.json(molds, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120',
+      },
+    })
   } catch (error) {
     console.error('API Error in GET /api/mold-book:', error)
     return NextResponse.json({ error: 'Gagal mengambil data mold' }, { status: 500 })
