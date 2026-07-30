@@ -14,14 +14,20 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) return null
 
-        const cleanUsername = credentials.username.trim().toLowerCase()
+        const rawUsername = credentials.username.trim()
+        const cleanUsername = rawUsername.toLowerCase()
+        const upperUsername = rawUsername.toUpperCase()
+        const titleUsername = rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1).toLowerCase()
+        
         const inputPassword = credentials.password.trim()
 
         let user = await prisma.user.findFirst({
           where: {
             OR: [
-              { username: credentials.username.trim() },
-              { username: cleanUsername }
+              { username: rawUsername },
+              { username: cleanUsername },
+              { username: upperUsername },
+              { username: titleUsername },
             ]
           },
         })
