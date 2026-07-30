@@ -22,10 +22,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Tidak ada file yang dikirim' }, { status: 400 })
     }
 
+    const MAX_SIZE_MB = 5
+    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
     const savedPaths: string[] = []
 
     for (const file of files) {
       if (!file || typeof file === 'string') continue
+
+      if (file.size > MAX_SIZE_BYTES) {
+        return NextResponse.json({ 
+          error: `Ukuran foto "${file.name}" melebihi batas maksimal 5 MB! (Ukuran file: ${(file.size / (1024 * 1024)).toFixed(2)} MB)` 
+        }, { status: 400 })
+      }
 
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
       const timestamp = Date.now()

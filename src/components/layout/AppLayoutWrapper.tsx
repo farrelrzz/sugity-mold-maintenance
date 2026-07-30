@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
-import MobileBottomNav from './MobileBottomNav'
 import { useSession } from 'next-auth/react'
 
 export default function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -52,12 +51,11 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
         <DashboardHeader 
           onMenuClick={handleToggleMenu} 
         />
-        <main className="konten pb-mobile-nav">
-          <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+        <main className="konten">
+          <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', overflowX: 'hidden' }}>
             {children}
           </div>
         </main>
-        <MobileBottomNav onOpenMenu={() => setIsSidebarOpen(true)} />
       </div>
     </div>
   )

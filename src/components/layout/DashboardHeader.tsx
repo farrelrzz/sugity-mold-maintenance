@@ -116,8 +116,8 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
           aria-label="Toggle Menu Sidebar"
           title="Perkecil / Perbesar Sidebar"
           style={{ 
-            background: 'var(--kertas)', 
-            border: '1px solid var(--garis)', 
+            background: 'rgba(255, 255, 255, 0.18)', 
+            border: '1px solid rgba(255, 255, 255, 0.35)', 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -125,14 +125,14 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
             height: '38px',
             borderRadius: '8px',
             cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
             transition: 'all 0.2s',
-            color: 'var(--teks)'
+            color: '#ffffff'
           }}
         >
           <Menu size={20} strokeWidth={2.2} />
         </button>
-        <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--hijau-tua)', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '6px' }} className="header-app-title">
+        <span style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '6px' }} className="header-app-title">
           Sugity Mold Maintenance
         </span>
       </div>
@@ -146,8 +146,8 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
             onClick={handleBellClick}
             aria-label="Notifikasi"
             style={{ 
-              background: 'var(--kertas)', 
-              border: '1px solid var(--garis)', 
+              background: 'rgba(255, 255, 255, 0.18)', 
+              border: '1px solid rgba(255, 255, 255, 0.35)', 
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -156,12 +156,12 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
               borderRadius: '50%',
               cursor: 'pointer',
               position: 'relative',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
               transition: 'all 0.2s'
             }}
             className="header-bell-btn"
           >
-            <Bell size={18} strokeWidth={2} style={{ color: 'var(--teks)' }} />
+            <Bell size={18} strokeWidth={2} style={{ color: '#ffffff' }} />
             {unreadCount > 0 && (
               <span style={{
                 position: 'absolute', top: '-4px', right: '-4px',

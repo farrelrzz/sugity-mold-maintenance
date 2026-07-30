@@ -481,7 +481,13 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
     const files = e.target.files
     if (!files) return
 
+    const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
+
     Array.from(files).forEach((file) => {
+      if (file.size > MAX_SIZE) {
+        showToast(`Foto Checksheet "${file.name}" ditolak! Ukuran maksimal foto adalah 5 MB (Ukuran saat ini: ${(file.size / (1024 * 1024)).toFixed(2)} MB).`, 'error')
+        return
+      }
       const reader = new FileReader()
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {

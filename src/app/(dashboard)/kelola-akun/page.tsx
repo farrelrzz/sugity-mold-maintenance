@@ -43,19 +43,21 @@ export default function KelolaAkunPage() {
     }
   }
 
+  const canManage = ['SUPER_ADMIN', 'SUPERADMIN', 'ADM'].includes(session?.user?.role || '')
+
   useEffect(() => {
-    if (session?.user?.role === 'SUPER_ADMIN') {
+    if (canManage) {
       fetchUsers()
     }
-  }, [session])
+  }, [session, canManage])
 
   if (status === 'loading') return <p style={{ padding: '20px' }}>Loading...</p>
 
-  if (session?.user?.role !== 'SUPER_ADMIN') {
+  if (!canManage) {
     return (
       <div className="kartu" style={{ padding: '40px', textAlign: 'center' }}>
         <h2>Akses Ditolak</h2>
-        <p>Hanya Super Admin yang diizinkan untuk mengakses halaman ini.</p>
+        <p>Hanya Super Admin & Admin yang diizinkan untuk mengakses halaman ini.</p>
         <button className="tombol-utama" onClick={() => router.push('/dashboard')}>Kembali ke Dashboard</button>
       </div>
     )
@@ -243,8 +245,8 @@ export default function KelolaAkunPage() {
           </div>
 
           <div style={{ marginBottom: '14px' }}>
-            <label className="kecil">Password {editingId ? '(Abaikan jika tidak diubah)' : '*'}</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Minimal 4 karakter" disabled={!!editingId} title={editingId ? "Edit password tidak didukung saat ini" : ""} />
+            <label className="kecil">Password {editingId ? '(Isi jika ingin merubah password)' : '*'}</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder={editingId ? "Ketik password baru jika ingin merubah" : "Minimal 4 karakter"} />
           </div>
 
           <div className="baris2" style={{ marginBottom: '14px' }}>
@@ -256,6 +258,7 @@ export default function KelolaAkunPage() {
                 <option value="GL">Group Leader (GL)</option>
                 <option value="CL">Chief Leader (CL)</option>
                 <option value="ADM">Admin (ADM)</option>
+                <option value="SUPER_ADMIN">Super Admin (SUPER_ADMIN)</option>
               </select>
             </div>
             <div>
@@ -342,7 +345,8 @@ export default function KelolaAkunPage() {
               return (
                 <>
                   {paginatedUsers.map(u => {
-                    const roleName = u.role === 'PIC' ? 'Member' : u.role === 'TL' ? 'Team Leader' : u.role === 'GL' ? 'Group Leader' : u.role === 'CL' ? 'Chief Leader' : 'ADM'
+                    const isSuperAdmin = u.role === 'SUPER_ADMIN' || u.role === 'SUPERADMIN'
+                    const roleName = u.role === 'PIC' ? 'Member' : u.role === 'TL' ? 'Team Leader' : u.role === 'GL' ? 'Group Leader' : u.role === 'CL' ? 'Chief Leader' : isSuperAdmin ? 'Super Admin' : 'ADM'
                     return (
                       <div
                         key={u.id}
@@ -354,7 +358,7 @@ export default function KelolaAkunPage() {
                           padding: '14px 18px',
                           background: '#fff',
                           border: '1px solid #e2e8f0',
-                          borderLeft: '6px solid #14553b',
+                          borderLeft: `6px solid ${isSuperAdmin ? '#7c3aed' : '#14553b'}`,
                           borderRadius: '12px',
                           cursor: 'pointer',
                           transition: 'all 0.2s',
@@ -366,7 +370,7 @@ export default function KelolaAkunPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                             <span style={{
-                              background: '#de7a38',
+                              background: isSuperAdmin ? '#7c3aed' : '#de7a38',
                               color: '#fff',
                               padding: '4px 12px',
                               borderRadius: '20px',

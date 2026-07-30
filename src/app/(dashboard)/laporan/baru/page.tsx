@@ -958,7 +958,7 @@ export default function LaporanBaruPage() {
                 type="date"
                 value={tanggal}
                 onChange={(e) => setTanggal(e.target.value)}
-                style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block' }}
+                style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
               />
             </div>
             <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
@@ -1687,7 +1687,7 @@ export default function LaporanBaruPage() {
                 type="time"
                 value={jamMulai}
                 onChange={(e) => setJamMulai(e.target.value)}
-                style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block' }}
+                style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
               />
             </div>
             <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
@@ -1696,7 +1696,7 @@ export default function LaporanBaruPage() {
                 type="time"
                 value={jamSelesai}
                 onChange={(e) => setJamSelesai(e.target.value)}
-                style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', display: 'block' }}
+                style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
               />
             </div>
           </div>

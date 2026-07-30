@@ -46,15 +46,15 @@ function LoginForm() {
     setError('')
 
     const result = await signIn('credentials', {
-      username,
-      password,
+      username: username.trim(),
+      password: password.trim(),
       redirect: false,
     })
 
     setLoading(false)
 
     if (result?.error) {
-      setError('Username atau password salah. Coba lagi.')
+      setError('Username atau password salah. Pastikan tidak ada spasi berlebih atau salah mengetik huruf besar/kecil.')
     } else {
       router.replace(callbackUrl)
     }

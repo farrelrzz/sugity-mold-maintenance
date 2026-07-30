@@ -189,8 +189,21 @@ export default function MoldBookPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'mold' | 'produk') => {
     if (!e.target.files) return
     const files = Array.from(e.target.files)
-    if (type === 'mold') setFotoMoldFiles(prev => [...prev, ...files])
-    else setFotoProdukFiles(prev => [...prev, ...files])
+    const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
+    const validFiles: File[] = []
+
+    for (const f of files) {
+      if (f.size > MAX_SIZE) {
+        showToast(`Foto "${f.name}" ditolak! Ukuran maksimal foto adalah 5 MB (Ukuran saat ini: ${(f.size / (1024 * 1024)).toFixed(2)} MB).`, 'error')
+      } else {
+        validFiles.push(f)
+      }
+    }
+
+    if (validFiles.length > 0) {
+      if (type === 'mold') setFotoMoldFiles(prev => [...prev, ...validFiles])
+      else setFotoProdukFiles(prev => [...prev, ...validFiles])
+    }
   }
 
   const removeFile = (index: number, type: 'mold' | 'produk') => {
