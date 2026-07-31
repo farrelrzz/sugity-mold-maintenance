@@ -703,10 +703,16 @@ main.konten {
   flex: 1;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  padding: 40px 24px 32px 24px; /* INCREASED TOP PADDING TO PREVENT NAVBAR OVERLAP */
+  padding: 40px 54px 36px 54px; /* INCREASED HORIZONTAL PADDING TO CREATE A PROFESSIONAL GAP FROM SIDEBAR ON DESKTOP */
   max-width: 100% !important;
   width: 100% !important;
   box-sizing: border-box !important;
+}
+
+@media (min-width: 1280px) {
+  main.konten {
+    padding: 40px 64px 40px 64px !important;
+  }
 }
 
 /* ============================================================
