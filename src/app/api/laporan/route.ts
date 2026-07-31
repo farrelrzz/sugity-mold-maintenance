@@ -165,7 +165,7 @@ export async function POST(req: Request) {
       })
 
       // 3. Init Approval Rows (PIC -> TL -> GL -> CL -> ADM)
-      const roles = ['PIC', 'TL', 'GL', 'CL', 'ADM'] as const
+      const roles = ['PIC', 'TL', 'GL', 'ADM'] as const
       await tx.checksheetApproval.createMany({
         data: roles.map((role) => ({
           checksheetId: checksheet.id,

@@ -537,7 +537,6 @@ export default function SuperAdminUI({
           <div style={{ height: '140px' }}><Doughnut data={getDoughnutData(data.approvalRatios.pic, data.approvalRatios.total, '#38bdf8')} options={doughnutOptions('PIC', data.approvalRatios.pic, data.approvalRatios.total)} /></div>
           <div style={{ height: '140px' }}><Doughnut data={getDoughnutData(data.approvalRatios.tl, data.approvalRatios.total, '#818cf8')} options={doughnutOptions('TL', data.approvalRatios.tl, data.approvalRatios.total)} /></div>
           <div style={{ height: '140px' }}><Doughnut data={getDoughnutData(data.approvalRatios.gl, data.approvalRatios.total, '#a78bfa')} options={doughnutOptions('GL', data.approvalRatios.gl, data.approvalRatios.total)} /></div>
-          <div style={{ height: '140px' }}><Doughnut data={getDoughnutData(data.approvalRatios.cl, data.approvalRatios.total, '#c084fc')} options={doughnutOptions('CL', data.approvalRatios.cl, data.approvalRatios.total)} /></div>
           <div style={{ height: '140px' }}><Doughnut data={getDoughnutData(data.approvalRatios.adm, data.approvalRatios.total, '#f472b6')} options={doughnutOptions('ADM', data.approvalRatios.adm, data.approvalRatios.total)} /></div>
         </div>
       </div>

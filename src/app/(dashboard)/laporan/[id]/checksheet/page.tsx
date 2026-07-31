@@ -14,6 +14,7 @@ interface ApprovalEntry {
   signedAt: string | null
   user?: {
     nama: string
+    signature?: string | null
   } | null
 }
 
@@ -253,7 +254,7 @@ const CM_CARD_FIELDS = [
   "Hasil verifikasi setelah perbaikan"
 ]
 
-const ROLES_ORDER = ['PIC', 'TL', 'GL', 'CL', 'ADM']
+const ROLES_ORDER = ['PIC', 'TL', 'GL', 'ADM']
 
 const PERAN_LABEL: Record<string, string> = {
   PIC: 'Member (PIC)',
@@ -789,7 +790,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
         <div style="padding: 0 1px; font-size: 8px;">➔</div>
         <div style="flex: 1; min-width: 0;">
           <div style="font-size: 6.5px; font-weight: bold; border: 1px solid #000; border-bottom: none; background: #eee;">FRM/SPV</div>
-          <div style="height: 22px; border: 1px solid #000; font-size: 7px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; white-space: nowrap;">${getSignName('CL') || getSignName('TL')}</div>
+          <div style="height: 22px; border: 1px solid #000; font-size: 7px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; white-space: nowrap;">${getSignName('TL')}</div>
         </div>
         <div style="padding: 0 1px; font-size: 8px;">➔</div>
         <div style="flex: 1; min-width: 0;">
@@ -1042,7 +1043,6 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     const _picSign = approvals.find(a => a.role === 'PIC')
     const _tlSign  = approvals.find(a => a.role === 'TL')
     const _glSign  = approvals.find(a => a.role === 'GL')
-    const _clSign  = approvals.find(a => a.role === 'CL')
     const _admSign = approvals.find(a => a.role === 'ADM')
 
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
@@ -1052,6 +1052,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
 
     const sigBoxHtml = (sign?: ApprovalEntry | null, role?: string) =>
       `<div style="font-size:7.5px;font-weight:bold;margin-bottom:2px">${role||''}</div>
+       ${sign?.signedAt && sign.user?.signature ? `<div style="text-align:center;margin:2px 0"><img src="${sign.user.signature}" alt="TTD" style="max-height:35px;display:block;margin:0 auto;object-fit:contain;" /></div>` : ''}
        <div style="min-height:26px;border-bottom:1px solid #aaa;font-size:8px;display:flex;align-items:flex-end;padding-bottom:1px">
          ${sign?.signedAt ? sign.user?.nama||'Verified' : ''}
        </div>
@@ -1317,11 +1318,10 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     const signRowHtml =
       `<table style="width:100%;border-collapse:collapse;font-size:7.5px;margin-top:4px">
         <tr>
-          <td style="border:1px solid #333;padding:2px 5px;width:20%">${sigBoxHtml(_picSign,'PIC / Member')}</td>
-          <td style="border:1px solid #333;padding:2px 5px;width:20%">${sigBoxHtml(_tlSign,'Team Leader')}</td>
-          <td style="border:1px solid #333;padding:2px 5px;width:20%">${sigBoxHtml(_glSign,'Group Leader')}</td>
-          <td style="border:1px solid #333;padding:2px 5px;width:20%">${sigBoxHtml(_clSign,'Chief Leader')}</td>
-          <td style="border:1px solid #333;padding:2px 5px;width:20%">${sigBoxHtml(_admSign,'ADM')}</td>
+          <td style="border:1px solid #333;padding:2px 5px;width:25%">${sigBoxHtml(_picSign,'PIC / Member')}</td>
+          <td style="border:1px solid #333;padding:2px 5px;width:25%">${sigBoxHtml(_tlSign,'Team Leader')}</td>
+          <td style="border:1px solid #333;padding:2px 5px;width:25%">${sigBoxHtml(_glSign,'Group Leader')}</td>
+          <td style="border:1px solid #333;padding:2px 5px;width:25%">${sigBoxHtml(_admSign,'ADM')}</td>
         </tr>
       </table>`
 
@@ -1605,7 +1605,6 @@ ${hasCoolingOrHeater ? `
   const picSign = approvals.find((a) => a.role === 'PIC')
   const tlSign = approvals.find((a) => a.role === 'TL')
   const glSign = approvals.find((a) => a.role === 'GL')
-  const clSign = approvals.find((a) => a.role === 'CL')
   const admSign = approvals.find((a) => a.role === 'ADM')
 
   // Lock logic
@@ -1628,6 +1627,11 @@ ${hasCoolingOrHeater ? `
     return (
       <div className={`cs-ttd-box ${mySign?.signedAt ? 'sudah' : ''}`}>
         <div className="cs-ttd-label">{label}</div>
+        {mySign?.signedAt && mySign.user?.signature && (
+          <div style={{ margin: '6px 0', textAlign: 'center' }}>
+            <img src={mySign.user.signature} alt="TTD" style={{ maxHeight: '50px', objectFit: 'contain', margin: '0 auto', display: 'block' }} />
+          </div>
+        )}
         <div className="cs-ttd-nama">{mySign?.signedAt ? mySign.user?.nama || 'Verified' : '\u00A0'}</div>
         <div className="cs-ttd-tgl">{mySign?.signedAt ? new Date(mySign.signedAt).toLocaleDateString('id-ID') : ''}</div>
         <button
@@ -2721,8 +2725,7 @@ ${hasCoolingOrHeater ? `
             {getTtdBox('PIC', 'Member (PIC)', picSign, undefined)}
             {getTtdBox('TL', 'Team Leader', tlSign, picSign)}
             {getTtdBox('GL', 'Group Leader', glSign, tlSign)}
-            {getTtdBox('CL', 'Chief Leader', clSign, glSign)}
-            {getTtdBox('ADM', 'ADM', admSign, clSign)}
+            {getTtdBox('ADM', 'ADM', admSign, glSign)}
           </div>
         </div>
 
@@ -3035,32 +3038,47 @@ ${hasCoolingOrHeater ? `
         <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '22px', fontSize: '11px', textAlign: 'center' }} border={1}>
           <thead>
             <tr style={{ background: '#eee' }}>
-              <th style={{ width: '20%', padding: '6px' }}>Disiapkan Oleh (Member PIC)</th>
-              <th style={{ width: '20%', padding: '6px' }}>Diperiksa Oleh (Team Leader)</th>
-              <th style={{ width: '20%', padding: '6px' }}>Disetujui Oleh (Group Leader)</th>
-              <th style={{ width: '20%', padding: '6px' }}>Disetujui Oleh (Chief Leader)</th>
-              <th style={{ width: '20%', padding: '6px' }}>Diterima Oleh (ADM)</th>
+              <th style={{ width: '25%', padding: '6px' }}>Disiapkan Oleh (Member PIC)</th>
+              <th style={{ width: '25%', padding: '6px' }}>Diperiksa Oleh (Team Leader)</th>
+              <th style={{ width: '25%', padding: '6px' }}>Disetujui Oleh (Group Leader)</th>
+              <th style={{ width: '25%', padding: '6px' }}>Diterima Oleh (ADM)</th>
             </tr>
           </thead>
           <tbody>
-            <tr style={{ height: '70px' }}>
+            <tr style={{ height: '80px' }}>
               <td style={{ padding: '6px', verticalAlign: 'bottom' }}>
+                {picSign?.signedAt && picSign.user?.signature && (
+                  <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+                    <img src={picSign.user.signature} alt="TTD" style={{ maxHeight: '45px', objectFit: 'contain', margin: '0 auto', display: 'block' }} />
+                  </div>
+                )}
                 <div><b>{picSign?.signedAt ? picSign.user?.nama || 'Verified' : ''}</b></div>
                 <div style={{ fontSize: '10px', color: '#666' }}>{picSign?.signedAt ? new Date(picSign.signedAt).toLocaleDateString('id-ID') : 'Belum TTD'}</div>
               </td>
               <td style={{ padding: '6px', verticalAlign: 'bottom' }}>
+                {tlSign?.signedAt && tlSign.user?.signature && (
+                  <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+                    <img src={tlSign.user.signature} alt="TTD" style={{ maxHeight: '45px', objectFit: 'contain', margin: '0 auto', display: 'block' }} />
+                  </div>
+                )}
                 <div><b>{tlSign?.signedAt ? tlSign.user?.nama || 'Verified' : ''}</b></div>
                 <div style={{ fontSize: '10px', color: '#666' }}>{tlSign?.signedAt ? new Date(tlSign.signedAt).toLocaleDateString('id-ID') : 'Belum TTD'}</div>
               </td>
               <td style={{ padding: '6px', verticalAlign: 'bottom' }}>
+                {glSign?.signedAt && glSign.user?.signature && (
+                  <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+                    <img src={glSign.user.signature} alt="TTD" style={{ maxHeight: '45px', objectFit: 'contain', margin: '0 auto', display: 'block' }} />
+                  </div>
+                )}
                 <div><b>{glSign?.signedAt ? glSign.user?.nama || 'Verified' : ''}</b></div>
                 <div style={{ fontSize: '10px', color: '#666' }}>{glSign?.signedAt ? new Date(glSign.signedAt).toLocaleDateString('id-ID') : 'Belum TTD'}</div>
               </td>
               <td style={{ padding: '6px', verticalAlign: 'bottom' }}>
-                <div><b>{clSign?.signedAt ? clSign.user?.nama || 'Verified' : ''}</b></div>
-                <div style={{ fontSize: '10px', color: '#666' }}>{clSign?.signedAt ? new Date(clSign.signedAt).toLocaleDateString('id-ID') : 'Belum TTD'}</div>
-              </td>
-              <td style={{ padding: '6px', verticalAlign: 'bottom' }}>
+                {admSign?.signedAt && admSign.user?.signature && (
+                  <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+                    <img src={admSign.user.signature} alt="TTD" style={{ maxHeight: '45px', objectFit: 'contain', margin: '0 auto', display: 'block' }} />
+                  </div>
+                )}
                 <div><b>{admSign?.signedAt ? admSign.user?.nama || 'Verified' : ''}</b></div>
                 <div style={{ fontSize: '10px', color: '#666' }}>{admSign?.signedAt ? new Date(admSign.signedAt).toLocaleDateString('id-ID') : 'Belum TTD'}</div>
               </td>

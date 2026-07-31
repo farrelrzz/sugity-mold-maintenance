@@ -203,7 +203,7 @@ export async function GET(req: Request) {
         totalCost += costRes.total
 
         const approvals = cs.approvals || []
-        const isFullApproved = ['PIC', 'TL', 'GL', 'CL', 'ADM'].every((role) =>
+        const isFullApproved = ['PIC', 'TL', 'GL', 'ADM'].every((role) =>
           approvals.some((a) => a.role === role && a.signedAt !== null)
         )
         if (isFullApproved) {
@@ -233,7 +233,6 @@ export async function GET(req: Request) {
     let weeklyPic = 0
     let weeklyTl = 0
     let weeklyGl = 0
-    let weeklyCl = 0
     let weeklyAdm = 0
 
     laporanMingguIni.forEach((lap) => {
@@ -243,7 +242,6 @@ export async function GET(req: Request) {
         if (approvals.some((a) => a.role === 'PIC' && a.signedAt !== null)) weeklyPic++
         if (approvals.some((a) => a.role === 'TL' && a.signedAt !== null)) weeklyTl++
         if (approvals.some((a) => a.role === 'GL' && a.signedAt !== null)) weeklyGl++
-        if (approvals.some((a) => a.role === 'CL' && a.signedAt !== null)) weeklyCl++
         if (approvals.some((a) => a.role === 'ADM' && a.signedAt !== null)) weeklyAdm++
       }
     })
@@ -267,7 +265,7 @@ export async function GET(req: Request) {
       if (!cs) return
 
       const approvals = cs.approvals || []
-      const isFullApproved = ['PIC', 'TL', 'GL', 'CL', 'ADM'].every((role) =>
+      const isFullApproved = ['PIC', 'TL', 'GL', 'ADM'].every((role) =>
         approvals.some((a) => a.role === role && a.signedAt !== null)
       )
       if (!isFullApproved) return
@@ -292,7 +290,7 @@ export async function GET(req: Request) {
 
     laporanBulanIni.forEach((lap) => {
       if (lap.jenis === 'OH_MOLD') {
-        const isFullApproved = ['PIC', 'TL', 'GL', 'CL', 'ADM'].every((role) =>
+        const isFullApproved = ['PIC', 'TL', 'GL', 'ADM'].every((role) =>
           (lap.checksheet?.approvals || []).some((a) => a.role === role && a.signedAt !== null)
         )
         if (isFullApproved) {
@@ -466,7 +464,7 @@ export async function GET(req: Request) {
         pic: weeklyPic,
         tl: weeklyTl,
         gl: weeklyGl,
-        cl: weeklyCl,
+        cl: 0,
         adm: weeklyAdm,
         period: `${formatDateLocal(startOfWeek)} s/d ${formatDateLocal(endOfWeek)}`,
       },

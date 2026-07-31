@@ -28,6 +28,7 @@ model User {
   resetOtp     String?  @map("reset_otp") @db.VarChar(10)
   resetOtpExpires DateTime? @map("reset_otp_expires")
   resetStatus  String?  @default("NONE") @map("reset_status") @db.VarChar(20) // "NONE", "PENDING", "APPROVED"
+  signature    String?  @db.LongText // Tanda tangan dalam format Base64/URL
   
   // Rate limiting Lupa Password
   otpAttempts  Int       @default(0) @map("otp_attempts")

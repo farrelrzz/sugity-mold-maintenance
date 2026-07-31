@@ -55,7 +55,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: 'ID tidak valid' }, { status: 400 })
     }
 
-    const { nama, username, role, shift, nik, password, tempatLahir, tanggalLahir } = await req.json()
+    const { nama, username, role, shift, nik, password, tempatLahir, tanggalLahir, signature } = await req.json()
 
     if (!nama || !username || !role) {
       return NextResponse.json({ error: 'Data wajib belum lengkap.' }, { status: 400 })
@@ -74,6 +74,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     if (password && String(password).trim().length > 0) {
       updateData.passwordHash = await bcrypt.hash(String(password).trim(), 10)
+    }
+
+    if (signature !== undefined) {
+      updateData.signature = signature || null
     }
 
     await prisma.user.update({

@@ -25,6 +25,7 @@ export default function KelolaAkunPage() {
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('PIC')
   const [shift, setShift] = useState('Nonshift')
+  const [signature, setSignature] = useState<string | null>(null)
 
   const [loading, setLoading] = useState(false)
   const [loadingUsers, setLoadingUsers] = useState(true)
@@ -73,6 +74,7 @@ export default function KelolaAkunPage() {
     setPassword('')
     setRole('PIC')
     setShift('Nonshift')
+    setSignature(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,7 +98,7 @@ export default function KelolaAkunPage() {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          nama, nik, tempatLahir, tanggalLahir, username, password, role, shift
+          nama, nik, tempatLahir, tanggalLahir, username, password, role, shift, signature
         })
       })
 
@@ -125,6 +127,40 @@ export default function KelolaAkunPage() {
     setTempatLahir(u.tempatLahir || '')
     setTanggalLahir(u.tanggalLahir ? new Date(u.tanggalLahir).toISOString().slice(0, 10) : '')
     setPassword('') 
+    setSignature(u.signature || null)
+  }
+
+  const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Ukuran file tanda tangan maksimal 5 MB!', 'error')
+      e.target.value = ''
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const result = event.target?.result as string
+      // Resize menggunakan canvas agar ukuran file ringan di cloud
+      const img = new Image()
+      img.src = result
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const maxW = 350
+        const scale = img.width > maxW ? maxW / img.width : 1
+        canvas.width = img.width * scale
+        canvas.height = img.height * scale
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+          const optimized = canvas.toDataURL('image/png')
+          setSignature(optimized)
+        } else {
+          setSignature(result)
+        }
+      }
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleDelete = async (id: number) => {
@@ -256,7 +292,6 @@ export default function KelolaAkunPage() {
                 <option value="PIC">Member / PIC</option>
                 <option value="TL">Team Leader (TL)</option>
                 <option value="GL">Group Leader (GL)</option>
-                <option value="CL">Chief Leader (CL)</option>
                 <option value="ADM">Admin (ADM)</option>
                 <option value="SUPER_ADMIN">Super Admin (SUPER_ADMIN)</option>
               </select>
@@ -285,6 +320,41 @@ export default function KelolaAkunPage() {
               <label className="kecil">Tanggal Lahir (Opsional)</label>
               <input type="date" value={tanggalLahir} onChange={e => setTanggalLahir(e.target.value)} />
             </div>
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label className="kecil" style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>
+              Upload Tanda Tangan {editingId ? '(Opsional, Biarkan jika tidak ingin ubah)' : '(Opsional)'} - Max 5MB
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleSignatureUpload}
+              style={{
+                width: '100%',
+                padding: '8px',
+                borderRadius: '6px',
+                border: '1px solid #ccc',
+                background: '#fff',
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            />
+            {signature && (
+              <div style={{ marginTop: '10px', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#64748b' }}>Preview TTD:</span>
+                  <img src={signature} alt="TTD" style={{ maxHeight: '44px', objectFit: 'contain', border: '1px dashed #cbd5e1', padding: '2px', background: '#fff', borderRadius: '4px' }} />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSignature(null)}
+                  style={{ background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 12px', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold', transition: 'all 0.15s' }}
+                >
+                  ✕ Hapus TTD
+                </button>
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -346,7 +416,7 @@ export default function KelolaAkunPage() {
                 <>
                   {paginatedUsers.map(u => {
                     const isSuperAdmin = u.role === 'SUPER_ADMIN' || u.role === 'SUPERADMIN'
-                    const roleName = u.role === 'PIC' ? 'Member' : u.role === 'TL' ? 'Team Leader' : u.role === 'GL' ? 'Group Leader' : u.role === 'CL' ? 'Chief Leader' : isSuperAdmin ? 'Super Admin' : 'ADM'
+                    const roleName = u.role === 'PIC' ? 'Member' : u.role === 'TL' ? 'Team Leader' : u.role === 'GL' ? 'Group Leader' : isSuperAdmin ? 'Super Admin' : 'ADM'
                     return (
                       <div
                         key={u.id}
@@ -384,6 +454,11 @@ export default function KelolaAkunPage() {
                             <span style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
                               {u.nama}
                             </span>
+                            {u.signature && (
+                              <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: '12px', fontSize: '11.5px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                ✍️ TTD Ready
+                              </span>
+                            )}
                             {u.resetStatus === 'PENDING' && (
                               <span style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a', padding: '3px 10px', borderRadius: '12px', fontSize: '11.5px', fontWeight: 800 }}>
                                 ⏳ Reset Pending

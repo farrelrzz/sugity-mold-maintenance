@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { UserRole } from '@prisma/client'
 
-const ROLES_ORDER: UserRole[] = ['PIC', 'TL', 'GL', 'CL', 'ADM']
+const ROLES_ORDER: UserRole[] = ['PIC', 'TL', 'GL', 'ADM']
 
 const PERAN_LABEL: Record<UserRole, string> = {
   PIC: 'Member (PIC)',
@@ -19,8 +19,7 @@ const PERAN_LABEL: Record<UserRole, string> = {
 const NEXT_ROLE_MAP: Partial<Record<UserRole, UserRole>> = {
   PIC: 'TL',
   TL: 'GL',
-  GL: 'CL',
-  CL: 'ADM',
+  GL: 'ADM',
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {

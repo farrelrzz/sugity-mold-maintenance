@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
     }
 
-    const { nama, nik, tempatLahir, tanggalLahir, username, password, role, shift } = await req.json()
+    const { nama, nik, tempatLahir, tanggalLahir, username, password, role, shift, signature } = await req.json()
 
     // Jika membuat selain PIC, harus SUPER_ADMIN atau ADM
     const userRole = (session.user as any)?.role
@@ -44,6 +44,7 @@ export async function POST(req: Request) {
         shift: (shift as any) || 'Nonshift',
         tempatLahir: tempatLahir ? String(tempatLahir).trim() : null,
         tanggalLahir: tanggalLahir && !isNaN(Date.parse(String(tanggalLahir))) ? new Date(tanggalLahir) : null,
+        signature: signature || null,
       }
     })
 
@@ -83,6 +84,7 @@ export async function GET(req: Request) {
         shift: true,
         nik: true,
         resetStatus: true,
+        signature: true,
       },
       orderBy: { id: 'asc' }
     })

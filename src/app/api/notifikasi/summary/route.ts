@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     // 1. Tugas Approval (Require Approval from me)
     let requireApproval: any[] = []
-    if (['TL', 'GL', 'CL', 'ADM'].includes(role)) {
+    if (['TL', 'GL', 'ADM'].includes(role)) {
       const checksheets = await prisma.checksheet.findMany({
         include: {
           laporan: { include: { pic: true } },
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
         const myApproval = cs.approvals.find((a) => a.role === role)
         if (myApproval?.signedAt) return false // I already approved
 
-        const ROLES_ORDER = ['PIC', 'TL', 'GL', 'CL', 'ADM']
+        const ROLES_ORDER = ['PIC', 'TL', 'GL', 'ADM']
         const myIndex = ROLES_ORDER.indexOf(role)
         if (myIndex > 0) {
           const prevRole = ROLES_ORDER[myIndex - 1] as UserRole
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
 
     const myProgress = myReports.map(cs => {
       // Determine overall status
-      const ROLES_ORDER = ['PIC', 'TL', 'GL', 'CL', 'ADM']
+      const ROLES_ORDER = ['PIC', 'TL', 'GL', 'ADM']
       let currentStage = 'PIC'
       let isFullyApproved = true
 

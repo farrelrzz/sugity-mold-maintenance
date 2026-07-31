@@ -40,7 +40,7 @@ export async function GET(req: Request) {
         status = 'APPROVED'
       } else {
         // Sequential check
-        const ROLES_ORDER = ['PIC', 'TL', 'GL', 'CL', 'ADM']
+        const ROLES_ORDER = ['PIC', 'TL', 'GL', 'ADM']
         const myIndex = ROLES_ORDER.indexOf(role)
         if (myIndex > 0) {
           const prevRole = ROLES_ORDER[myIndex - 1]

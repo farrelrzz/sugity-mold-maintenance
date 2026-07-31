@@ -485,10 +485,6 @@ export default function RegularUI({
                   <span>GL ({data.approvalRatios.gl})</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#8b5cf6', flexShrink: 0 }} />
-                  <span>CL ({data.approvalRatios.cl})</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#f43f5e', flexShrink: 0 }} />
                   <span>ADM ({data.approvalRatios.adm})</span>
                 </div>
@@ -498,12 +494,12 @@ export default function RegularUI({
               <div className="tv-donut-box" style={{ width: 105, height: 105, position: 'relative', flexShrink: 0 }}>
                 <Doughnut
                   data={{
-                    labels: ['PIC/Member', 'TL', 'GL', 'CL', 'ADM'],
+                    labels: ['PIC/Member', 'TL', 'GL', 'ADM'],
                     datasets: [{
                       data: data.approvalRatios.total > 0 
-                        ? [data.approvalRatios.pic, data.approvalRatios.tl, data.approvalRatios.gl, data.approvalRatios.cl, data.approvalRatios.adm] 
+                        ? [data.approvalRatios.pic, data.approvalRatios.tl, data.approvalRatios.gl, data.approvalRatios.adm] 
                         : [1],
-                      backgroundColor: data.approvalRatios.total > 0 ? ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#f43f5e'] : ['#e2e8f0'],
+                      backgroundColor: data.approvalRatios.total > 0 ? ['#10b981', '#3b82f6', '#f59e0b', '#f43f5e'] : ['#e2e8f0'],
                       borderWidth: 2,
                       borderColor: '#ffffff',
                       hoverOffset: 4

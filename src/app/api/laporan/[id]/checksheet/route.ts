@@ -17,6 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             id: true,
             nama: true,
             role: true,
+            signature: true,
           },
         },
         checksheet: {
@@ -28,6 +29,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
                 user: {
                   select: {
                     nama: true,
+                    signature: true,
                   },
                 },
               },

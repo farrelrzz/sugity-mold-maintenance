@@ -36,7 +36,7 @@ export async function GET(req: Request) {
     for (let d = 1; d <= daysInMonth; d++) dailyOhMap[d] = 0
 
     laporanBulanIni.forEach((lap) => {
-      const isFullApproved = ['PIC', 'TL', 'GL', 'CL', 'ADM'].every((role) =>
+      const isFullApproved = ['PIC', 'TL', 'GL', 'ADM'].every((role) =>
         (lap.checksheet?.approvals || []).some((a) => a.role === role && a.signedAt !== null)
       )
       if (isFullApproved) {

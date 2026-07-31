@@ -11,6 +11,7 @@ interface ApprovalEntry {
   signedAt: string | null
   user?: {
     nama: string
+    signature?: string | null
   } | null
 }
 
@@ -597,7 +598,7 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
 
     const sigBox = (sign?: ApprovalEntry | null) =>
       sign?.signedAt
-        ? `<b>${sign.user?.nama || 'Verified'}</b><br><span style="font-size:10px;color:#666">${new Date(sign.signedAt).toLocaleDateString('id-ID')}</span>`
+        ? `${sign.user?.signature ? `<div style="text-align:center;margin-bottom:4px"><img src="${sign.user.signature}" alt="TTD" style="max-height:45px;display:block;margin:0 auto;object-fit:contain;" /></div>` : ''}<b>${sign.user?.nama || 'Verified'}</b><br><span style="font-size:10px;color:#666">${new Date(sign.signedAt).toLocaleDateString('id-ID')}</span>`
         : `<span style="font-size:10px;color:#999">Belum TTD</span>`
 
     const html = `<!DOCTYPE html>
@@ -743,6 +744,11 @@ ${_isOverhaul ? `
     return (
       <div className={`cs-ttd-box ${mySign?.signedAt ? 'sudah' : ''}`}>
         <div className="cs-ttd-label">{label}</div>
+        {mySign?.signedAt && mySign.user?.signature && (
+          <div style={{ margin: '6px 0', textAlign: 'center' }}>
+            <img src={mySign.user.signature} alt="TTD" style={{ maxHeight: '50px', objectFit: 'contain', margin: '0 auto', display: 'block' }} />
+          </div>
+        )}
         <div className="cs-ttd-nama">{mySign?.signedAt ? mySign.user?.nama || 'Verified' : '\u00A0'}</div>
         <div className="cs-ttd-tgl">{mySign?.signedAt ? new Date(mySign.signedAt).toLocaleDateString('id-ID') : ''}</div>
         <button
