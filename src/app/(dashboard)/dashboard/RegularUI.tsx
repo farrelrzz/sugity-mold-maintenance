@@ -117,12 +117,32 @@ export default function RegularUI({
   const totalAktualNon = data.planningWeekly?.aktualNonshift?.reduce((a: any, b: any) => Number(a) + Number(b), 0) || 0
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '32px', color: '#0f172a' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', paddingBottom: '32px', color: '#0f172a' }}>
+      <style>{`
+        @media (min-width: 1024px) {
+          .tv-page-title { font-size: 34px !important; }
+          .tv-section-title { font-size: 25px !important; }
+          .tv-section-sub { font-size: 15.5px !important; }
+          .tv-card-header { font-size: 16px !important; }
+          .tv-stat-num { font-size: 42px !important; }
+          .tv-cost-num { font-size: 32px !important; }
+          .tv-donut-num { font-size: 36px !important; }
+          .tv-mold-code { font-size: 32px !important; }
+          .tv-part-name { font-size: 20px !important; }
+          .tv-pic-label { font-size: 15.5px !important; }
+          .tv-btn-action { font-size: 16px !important; padding: 15px 24px !important; }
+          .tv-legend { font-size: 14px !important; }
+          .tv-chart-title { font-size: 19px !important; }
+          .tv-chart-sub { font-size: 14px !important; }
+          .tv-list-item { font-size: 15.5px !important; }
+          .tv-donut-box { width: 140px !important; height: 140px !important; }
+        }
+      `}</style>
       
       {/* ==================== ROW 1: HEADER ANALYTICS & FILTER ==================== */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--teks)', margin: 0, letterSpacing: '-0.5px' }}>
+          <h1 className="tv-page-title" style={{ fontSize: '26px', fontWeight: '800', color: 'var(--teks)', margin: 0, letterSpacing: '-0.5px' }}>
             Analytics
           </h1>
           
@@ -201,7 +221,7 @@ export default function RegularUI({
               {data.todayMaintenance && data.todayMaintenance.length > 0 ? '🔥' : '✅'}
             </span>
             <div>
-              <h2 style={{ margin: 0, color: '#0f172a', fontSize: '20px', fontWeight: 900, letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <h2 className="tv-section-title" style={{ margin: 0, color: '#0f172a', fontSize: '20px', fontWeight: 900, letterSpacing: '0.3px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 JADWAL MAINTENANCE MINGGUAN & URGENT
                 {data.todayMaintenance && data.todayMaintenance.length > 0 && (
                   <span style={{ backgroundColor: '#16a34a', color: '#fff', fontSize: '12px', fontWeight: 800, padding: '4px 12px', borderRadius: '20px' }}>
@@ -209,12 +229,12 @@ export default function RegularUI({
                   </span>
                 )}
               </h2>
-              <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '13.5px', fontWeight: 600 }}>
+              <p className="tv-section-sub" style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '13.5px', fontWeight: 600 }}>
                 Diurutkan berdasarkan hari terdekat &amp; prioritas kerja (OH diutamakan). Semua member berhak berpartisipasi mengerjakannya.
               </p>
             </div>
           </div>
-          <a href="/jadwal" style={{
+          <a href="/jadwal" className="tv-btn-action" style={{
             backgroundColor: '#ffffff',
             color: '#16a34a',
             border: '1.5px solid #16a34a',
@@ -281,7 +301,7 @@ export default function RegularUI({
                   {/* Center: Mold Info */}
                   <div style={{ marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '24px', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.5px' }}>
+                      <span className="tv-mold-code" style={{ fontSize: '24px', fontWeight: 950, color: '#0f172a', letterSpacing: '-0.5px' }}>
                         {m.noMold}
                       </span>
                       {m.factory && m.factory !== '-' && (
@@ -304,10 +324,10 @@ export default function RegularUI({
                       </span>
                     </div>
 
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', lineHeight: 1.3 }}>
+                    <div className="tv-part-name" style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', lineHeight: 1.3 }}>
                       {m.part !== '-' ? m.part : 'Part Tidak Diketahui'}
                     </div>
-                    <div style={{ fontSize: '13.5px', color: '#64748b', marginTop: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div className="tv-pic-label" style={{ fontSize: '13.5px', color: '#64748b', marginTop: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
                       👤 PIC Ditugaskan: <span style={{ color: '#0f172a', fontWeight: 800 }}>{m.pic?.nama || 'Semua PIC'}</span>
                     </div>
                     {m.catatan && (
@@ -321,6 +341,7 @@ export default function RegularUI({
                   <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                     <a
                       href={`/laporan/baru?noMold=${encodeURIComponent(m.noMold)}&jenis=${encodeURIComponent(m.jenis || 'OH MOLD')}&jadwalId=${m.id}`}
+                      className="tv-btn-action"
                       style={{
                         display: 'block',
                         textAlign: 'center',
@@ -358,13 +379,13 @@ export default function RegularUI({
           {/* Card 1: Total Kegiatan */}
           <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Total Kegiatan</span>
+              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Total Kegiatan</span>
               <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
                 <FileText size={17} style={{ color: '#3b82f6' }} />
               </div>
             </div>
             <div style={{ marginTop: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
+              <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
                 {data.cardStats.totalActions}
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#16a34a', fontWeight: 700 }}>
@@ -379,13 +400,13 @@ export default function RegularUI({
           {/* Card 2: Maintenance Selesai */}
           <div className="kartu kartu-glow-hijau" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Maintenance Selesai</span>
+              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Maintenance Selesai</span>
               <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
                 <CheckCircle2 size={17} style={{ color: '#10b981' }} />
               </div>
             </div>
             <div style={{ marginTop: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
+              <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
                 {data.cardStats.maintenanceDone}
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#10b981', fontWeight: 700 }}>
@@ -400,13 +421,13 @@ export default function RegularUI({
           {/* Card 3: Total Biaya Pemeliharaan */}
           <div className="kartu kartu-glow-oranye" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Total Biaya</span>
+              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Total Biaya</span>
               <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
                 <DollarSign size={17} style={{ color: '#f59e0b' }} />
               </div>
             </div>
             <div style={{ marginTop: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>
+              <h2 className="tv-cost-num" style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>
                 Rp {data.cardStats.totalCost.toLocaleString('id-ID')}
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
@@ -418,13 +439,13 @@ export default function RegularUI({
           {/* Card 4: Pencapaian Target */}
           <div className="kartu kartu-glow-indigo" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Pencapaian Target</span>
+              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Pencapaian Target</span>
               <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
                 <Activity size={17} style={{ color: '#6366f1' }} />
               </div>
             </div>
             <div style={{ marginTop: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: (data.maintenanceSummary?.achievementPct ?? 0) >= 100 ? '#10b981' : '#6366f1', letterSpacing: '-1px' }}>
+              <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: (data.maintenanceSummary?.achievementPct ?? 0) >= 100 ? '#10b981' : '#6366f1', letterSpacing: '-1px' }}>
                 {data.maintenanceSummary?.achievementPct ?? 0}%
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
@@ -441,8 +462,8 @@ export default function RegularUI({
           {/* Donut Card 1: Approval Status */}
           <div className="kartu kartu-glow-hijau" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', display: 'block' }}>Status Approval</span>
-              <h3 style={{ fontSize: '30px', fontWeight: 800, margin: '6px 0 2px 0', color: '#0f172a', letterSpacing: '-1px' }}>
+              <span className="tv-card-header" style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', display: 'block' }}>Status Approval</span>
+              <h3 className="tv-donut-num" style={{ fontSize: '30px', fontWeight: 800, margin: '6px 0 2px 0', color: '#0f172a', letterSpacing: '-1px' }}>
                 {data.approvalRatios.total} <span style={{ fontSize: '14px', fontWeight: 600, color: '#64748b' }}>Laporan</span>
               </h3>
               <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '14px' }}>Periode: {data.approvalRatios.period}</span>
@@ -450,7 +471,7 @@ export default function RegularUI({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '16px' }}>
               
               {/* Legend Dots on Left / Top */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
+              <div className="tv-legend" style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
                   <span>PIC/Member ({data.approvalRatios.pic})</span>
@@ -474,7 +495,7 @@ export default function RegularUI({
               </div>
 
               {/* Donut Ring on Right */}
-              <div style={{ width: 105, height: 105, position: 'relative', flexShrink: 0 }}>
+              <div className="tv-donut-box" style={{ width: 105, height: 105, position: 'relative', flexShrink: 0 }}>
                 <Doughnut
                   data={{
                     labels: ['PIC/Member', 'TL', 'GL', 'CL', 'ADM'],
@@ -503,8 +524,8 @@ export default function RegularUI({
           {/* Donut Card 2: Planning Target Shift */}
           <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', display: 'block' }}>Aktual vs Target</span>
-              <h3 style={{ fontSize: '30px', fontWeight: 800, margin: '6px 0 2px 0', color: '#0f172a', letterSpacing: '-1px' }}>
+              <span className="tv-card-header" style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', display: 'block' }}>Aktual vs Target</span>
+              <h3 className="tv-donut-num" style={{ fontSize: '30px', fontWeight: 800, margin: '6px 0 2px 0', color: '#0f172a', letterSpacing: '-1px' }}>
                 {data.planningWeekly.totalAktual} <span style={{ fontSize: '18px', fontWeight: 700, color: '#94a3b8' }}>/ {data.planningWeekly.totalTarget}</span>
               </h3>
               <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '14px' }}>Kumulatif bulan ini</span>
@@ -512,7 +533,7 @@ export default function RegularUI({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '16px' }}>
               
               {/* Legend Dots on Left / Top */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
+              <div className="tv-legend" style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
                   <span>Shift A ({totalAktualA})</span>
@@ -528,7 +549,7 @@ export default function RegularUI({
               </div>
 
               {/* Donut Ring on Right */}
-              <div style={{ width: 105, height: 105, position: 'relative', flexShrink: 0 }}>
+              <div className="tv-donut-box" style={{ width: 105, height: 105, position: 'relative', flexShrink: 0 }}>
                 <Doughnut
                   data={{
                     labels: ['Shift A', 'Shift B', 'Nonshift'],
@@ -568,8 +589,8 @@ export default function RegularUI({
           <div className="kartu" style={{ margin: 0, padding: '22px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Tren Biaya & Kegiatan YTD</h3>
-                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>Perbandingan akumulasi cost vs frekuensi pekerjaan bulanan</span>
+                <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Tren Biaya & Kegiatan YTD</h3>
+                <span className="tv-chart-sub" style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>Perbandingan akumulasi cost vs frekuensi pekerjaan bulanan</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: '#475569' }}>
                 <span>2026</span>
@@ -585,8 +606,8 @@ export default function RegularUI({
           <div className="kartu" style={{ margin: 0, padding: '22px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Grafik Overhaul Mold Harian</h3>
-                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
+                <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Grafik Overhaul Mold Harian</h3>
+                <span className="tv-chart-sub" style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
                   Penyelesaian overhaul mold (full approve) per tanggal ({bulan})
                 </span>
               </div>
@@ -696,7 +717,7 @@ export default function RegularUI({
                   </span>
                 </div>
                 <div style={{ marginTop: '16px' }}>
-                  <h3 style={{ 
+                  <h3 className="tv-stat-num" style={{ 
                     margin: 0, fontSize: '26px', fontWeight: 900, 
                     color: data.cardStats?.yearlyAccidents > 0 ? '#dc2626' : '#065f46', 
                     letterSpacing: '-0.5px',
@@ -730,10 +751,10 @@ export default function RegularUI({
                 </span>
               </div>
               <div style={{ marginTop: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <h3 className="tv-part-name" style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {data.maintenanceSummary?.topPerformer?.nama || '—'}
                 </h3>
-                <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, marginTop: '4px', display: 'block' }}>
+                <span className="tv-chart-sub" style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, marginTop: '4px', display: 'block' }}>
                   🏆 {data.maintenanceSummary?.topPerformer ? `${data.maintenanceSummary.topPerformer.total.toFixed(1)} Jam Lembur` : 'Belum ada data'}
                 </span>
               </div>
@@ -744,7 +765,7 @@ export default function RegularUI({
           {/* RECENT ACTIVITY FEED / LIST (Customer order equivalent in photo) */}
           <div className="kartu" style={{ margin: 0, padding: '22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Pekerjaan Maintenance Terkini</h3>
+              <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Pekerjaan Maintenance Terkini</h3>
               <a href="/riwayat" style={{ fontSize: '12.5px', color: '#3b82f6', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 Lihat Semua <ArrowUpRight size={14} />
               </a>
@@ -758,7 +779,7 @@ export default function RegularUI({
                 </div>
               ) : (
                 data.recentLaporan.slice(0, 6).map((lap: any) => (
-                  <div key={lap.id} style={{
+                  <div key={lap.id} className="tv-list-item" style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -847,8 +868,8 @@ export default function RegularUI({
         <div className="kartu" style={{ margin: 0, padding: '22px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>⏱️ Akumulasi Jam Lembur Anggota</h3>
-              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>Perbandingan jam lembur plan vs aktual bulan berjalan</span>
+              <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>⏱️ Akumulasi Jam Lembur Anggota</h3>
+              <span className="tv-chart-sub" style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>Perbandingan jam lembur plan vs aktual bulan berjalan</span>
             </div>
             <a href="/overtime" style={{ fontSize: '12.5px', color: '#10b981', fontWeight: 700, textDecoration: 'none', background: '#f0fdf4', padding: '6px 12px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
               Kelola Overtime →
@@ -898,8 +919,8 @@ export default function RegularUI({
           
           {/* Target vs Aktual Planning Chart */}
           <div className="kartu" style={{ margin: 0, padding: '22px' }}>
-            <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>📊 Target vs Aktual Maintenance Mingguan</h3>
-            <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
+            <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>📊 Target vs Aktual Maintenance Mingguan</h3>
+            <span className="tv-chart-sub" style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
               Target Bulan Ini: <b>{data.planningWeekly.totalTarget} mold</b> | Aktual Selesai: <b>{data.planningWeekly.totalAktual} mold</b>
             </span>
             <div style={{ height: '240px', marginTop: '16px' }}>

@@ -52,7 +52,7 @@ export default function AppLayoutWrapper({ children }: { children: React.ReactNo
           onMenuClick={handleToggleMenu} 
         />
         <main className="konten">
-          <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', paddingTop: '28px' }}>
+          <div style={{ width: '100%', margin: '0 auto', paddingTop: '28px' }}>
             {children}
           </div>
         </main>
