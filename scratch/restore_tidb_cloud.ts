@@ -3,6 +3,11 @@ import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 import bcrypt from 'bcryptjs'
 import * as fs from 'fs'
 import * as path from 'path'
+import { fileURLToPath } from 'url'
+
+// ESM-compatible __dirname shim
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const TIDB_URL = 'mysql://2UVNBvRtUAd5zyR.root:vFEouGzVawSvJ0hP@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sugity?sslaccept=strict&connect_timeout=30'
 
@@ -107,6 +112,7 @@ async function main() {
       part: m.part || null,
       tonase: m.tonase || null,
       customer: m.customer || null,
+      maker: (m as any).maker || null,
       model: m.model || null,
       coreStd: m.coreStd || null,
       cavStd: m.cavStd || null,

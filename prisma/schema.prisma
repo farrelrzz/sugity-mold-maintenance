@@ -268,6 +268,7 @@ model MoldBook {
   part        String?   @db.VarChar(200)
   tonase      String?   @db.VarChar(50)
   customer    String?   @db.VarChar(100)
+  maker       String?   @db.VarChar(100)
   model       String?   @db.VarChar(100)
   coreStd     String?   @map("core_std") @db.VarChar(20)
   cavStd      String?   @map("cav_std") @db.VarChar(20)
