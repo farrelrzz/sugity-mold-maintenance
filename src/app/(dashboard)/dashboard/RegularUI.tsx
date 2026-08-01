@@ -116,6 +116,13 @@ export default function RegularUI({
   const totalAktualB = data.planningWeekly?.aktualB?.reduce((a: any, b: any) => Number(a) + Number(b), 0) || 0
   const totalAktualNon = data.planningWeekly?.aktualNonshift?.reduce((a: any, b: any) => Number(a) + Number(b), 0) || 0
 
+  // Perhitungan tambahan untuk card baru agar grid tidak kosong saat sidebar di-minimize
+  const completionRate = (data.cardStats?.totalActions > 0)
+    ? Math.round((Number(data.cardStats?.maintenanceDone || 0) / Number(data.cardStats?.totalActions)) * 100)
+    : 100
+  const inProgressCount = Math.max(0, Number(data.cardStats?.totalActions || 0) - Number(data.cardStats?.maintenanceDone || 0))
+  const activeQueueCount = data.todayMaintenance?.length || 0
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', paddingBottom: '32px', color: '#0f172a' }}>
       <style>{`
@@ -373,8 +380,8 @@ export default function RegularUI({
       {/* ==================== ROW 2: ASYMMETRIC METRICS & DONUT GRID (LIKE PHOTO) ==================== */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: '20px' }}>
         
-        {/* LEFT BLOCK: 2x2 METRIC CARDS */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
+        {/* LEFT BLOCK: 2x3 or 3x2 METRIC CARDS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '16px' }}>
           
           {/* Card 1: Total Kegiatan */}
           <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -450,6 +457,59 @@ export default function RegularUI({
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
                 <span>Target: <b>{data.maintenanceSummary?.totalPlan ?? 0}</b></span> • <span>Aktual: <b>{data.maintenanceSummary?.totalAktual ?? 0}</b></span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 5: Efisiensi Kerja */}
+          <div className="kartu kartu-glow-ungu" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Efisiensi Kerja</span>
+              <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+                <Award size={17} style={{ color: '#a855f7' }} />
+              </div>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
+                {completionRate}%
+              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
+                <span style={{ display: 'flex', alignItems: 'center', background: '#f3e8ff', color: '#7e22ce', padding: '2px 6px', borderRadius: '12px', fontWeight: 700 }}>
+                  <Sparkles size={12} style={{ marginRight: '3px' }} /> Optimal
+                </span>
+                <span>Selesai: <b>{data.cardStats?.maintenanceDone || 0}</b> • Proses: <b>{inProgressCount}</b></span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 6: Antrean Maintenance */}
+          <div className="kartu kartu-glow-cyan" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Antrean Maintenance</span>
+              <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+                <Clock size={17} style={{ color: '#06b6d4' }} />
+              </div>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
+                {activeQueueCount} <span style={{ fontSize: '18px', fontWeight: 700, color: '#94a3b8' }}>Unit</span>
+              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
+                {activeQueueCount === 0 ? (
+                  <>
+                    <span style={{ display: 'flex', alignItems: 'center', background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '12px', fontWeight: 700 }}>
+                      ✓ All Clear
+                    </span>
+                    <span>Tidak ada antrean tertunda</span>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ display: 'flex', alignItems: 'center', background: '#cffafe', color: '#0e7490', padding: '2px 6px', borderRadius: '12px', fontWeight: 700 }}>
+                      ● In Progress
+                    </span>
+                    <span>Jadwal aktif bersiap</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
