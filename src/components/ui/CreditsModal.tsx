@@ -98,7 +98,7 @@ export default function CreditsModal() {
   if (!isOpen) return null
 
   // Slide transition variants
-  const slideVariants = {
+  const slideVariants: any = {
     enter: (dir: number) => ({
       x: dir > 0 ? 300 : -300,
       opacity: 0,
@@ -108,13 +108,13 @@ export default function CreditsModal() {
       x: 0,
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.4, ease: "easeOut" }
+      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
     },
     exit: (dir: number) => ({
       x: dir > 0 ? -300 : 300,
       opacity: 0,
       scale: 0.95,
-      transition: { duration: 0.3, ease: "easeIn" }
+      transition: { duration: 0.3 }
     })
   }
 
