@@ -38,11 +38,23 @@ export default function CreditsModal() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Sync logo overlay with video playback
+  // Sync logo overlay with video playback and handle reliable autoplay
   useEffect(() => {
     if (!isOpen) return
     const video = videoRef.current
     if (!video) return
+
+    // Attempt to play immediately when modal opens; fallback to muted if blocked by browser
+    const startPlay = async () => {
+      try {
+        await video.play()
+      } catch (err) {
+        console.log('Autoplay with sound blocked, falling back to muted play:', err)
+        video.muted = true
+        await video.play()
+      }
+    }
+    startPlay()
 
     const handleTimeUpdate = () => {
       // The Role & Division card slides in around 5.5s to 6.0s
@@ -86,7 +98,7 @@ export default function CreditsModal() {
               autoPlay 
               playsInline
               controls={false}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               onEnded={() => {
                 // Keep video on last frame when ended
                 if (videoRef.current) {
