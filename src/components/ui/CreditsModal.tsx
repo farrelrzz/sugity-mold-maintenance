@@ -64,12 +64,12 @@ export default function CreditsModal() {
   }
 
   // Animation variants
-  const backdropVariants = {
+  const backdropVariants: any = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 }
   }
 
-  const modalVariants = {
+  const modalVariants: any = {
     hidden: { scale: 0.8, opacity: 0, y: 50 },
     visible: { 
       scale: 1, 
@@ -86,7 +86,7 @@ export default function CreditsModal() {
     exit: { scale: 0.8, opacity: 0, y: 50, transition: { duration: 0.2 } }
   }
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, x: -20 },
     visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300 } }
   }
