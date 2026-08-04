@@ -263,7 +263,7 @@ export default function RegularUI({
             🎉 Tidak ada jadwal maintenance mingguan yang tertunda atau belum selesai. Seluruh mesin dalam kondisi prima!
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '18px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3" style={{ gap: '18px' }}>
             {data.todayMaintenance.map((m: any) => {
               const isOH = (m.jenis || '').toUpperCase().includes('OH') || (m.jenis || '').toUpperCase().includes('OVERHAUL');
               const status = m.status || 'Belum_Dikerjakan';
@@ -377,8 +377,8 @@ export default function RegularUI({
         )}
       </div>
 
-      {/* ==================== SECTION 1: KEY METRICS GRID ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '16px', marginBottom: '20px' }}>
+      {/* ==================== SECTION 1: KEY METRICS GRID (OPTIMIZED: 3 COLS DESKTOP, 2 COLS TABLET, 1 COL MOBILE - ZERO EMPTY SPACE) ==================== */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: '18px', marginBottom: '22px' }}>
           
           {/* Card 1: Total Kegiatan */}
           <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -514,7 +514,7 @@ export default function RegularUI({
         </div>
 
       {/* ==================== SECTION 2: COMPACT ANALYTICS & STATUS PIPELINE ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: '20px', marginBottom: '20px' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: '20px', marginBottom: '24px' }}>
         
         {/* Card 1: Approval Status Pipeline (Compact Horizontal) */}
         <div className="kartu kartu-glow-hijau" style={{ margin: 0, padding: '22px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -656,7 +656,7 @@ export default function RegularUI({
       </div>
 
       {/* ==================== ROW 3: CHARTS ON LEFT, WIDGETS & RECENT FEED ON RIGHT (LIKE PHOTO) ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))', gap: '20px' }}>
+      <div className="grid grid-cols-1 xl:grid-cols-2" style={{ gap: '22px' }}>
         
         {/* LEFT COLUMN: TWO LARGE ANALYTICAL CHARTS STACKED */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -748,7 +748,7 @@ export default function RegularUI({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           {/* TWO SIDE-BY-SIDE WIDGET CARDS */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: '16px' }}>
             
             {/* Widget 1: Accident Free Days - Tersinkron ke Kalender Safety */}
             <Link 
