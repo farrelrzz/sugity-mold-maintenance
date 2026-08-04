@@ -205,5 +205,5 @@ export default function DashboardPage() {
     return <SuperAdminUI {...props} session={session} />
   }
 
-  return <RegularUI {...props} session={session} />
+  return <RegularUI {...props} />
 }
