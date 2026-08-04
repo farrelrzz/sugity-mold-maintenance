@@ -518,7 +518,7 @@ export default function RegularUI({
       </div>
 
       {/* ==================== SECTION 2: COMPACT & MINIMALIST ANALYTICS (2 COLS SIDE-BY-SIDE) ==================== */}
-      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: '18px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', width: '100%', gap: '18px', marginBottom: '24px' }}>
         
         {/* Card 1: Status Approval (Minimalist & Aesthetic) */}
         <div 
