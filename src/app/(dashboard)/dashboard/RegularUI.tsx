@@ -708,8 +708,8 @@ export default function RegularUI({
 
       </div>
 
-      {/* ==================== MINIMALIST ROW 3A: CHARTS SIDE-BY-SIDE (1 ROW, NOT STACKED) ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-2" style={{ gap: '16px', marginBottom: '16px' }}>
+      {/* ==================== MINIMALIST ROW 3A: CHARTS SIDE-BY-SIDE (GUARANTEED 2 COLUMNS ON DESKTOP/LAPTOP) ==================== */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', width: '100%', gap: '18px', marginBottom: '20px' }}>
         
         {/* Chart 1: Tren Performa Pemeliharaan YTD */}
         <div className="kartu" style={{ margin: 0, padding: '18px 20px', display: 'flex', flexDirection: 'column', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
@@ -797,222 +797,219 @@ export default function RegularUI({
 
       </div>
 
-      {/* ==================== MINIMALIST ROW 3B: KPI WIDGETS & RECENT FEED IN 1 COMPACT SECTION ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12" style={{ gap: '16px', marginBottom: '22px' }}>
+      {/* ==================== MINIMALIST ROW 3B: ZERO ACCIDENT & TOP OT (SIDE-BY-SIDE 2 COLUMNS, NOT STACKED 2 ROWS) ==================== */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', width: '100%', gap: '18px', marginBottom: '20px' }}>
         
-        {/* LEFT COMPACT KPI WIDGETS (Takes 5 of 12 columns on large screens) */}
-        <div className="lg:col-span-5 xl:col-span-4" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          
-          {/* Widget 1: Zero Accident Compact Badge */}
-          <Link 
-            href="/kalender-safety" 
-            style={{ textDecoration: 'none', display: 'flex', flex: 1 }}
-            title="Klik untuk membuka Kalender Safety"
+        {/* Widget 1: Zero Accident Compact Badge */}
+        <Link 
+          href="/kalender-safety" 
+          style={{ textDecoration: 'none', display: 'flex', width: '100%' }}
+          title="Klik untuk membuka Kalender Safety"
+        >
+          <div 
+            className={`kartu ${data.cardStats?.yearlyAccidents > 0 ? 'kartu-glow-merah' : 'kartu-glow-hijau'}`} 
+            style={{ 
+              margin: 0, 
+              padding: '16px 20px', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'space-between',
+              width: '100%',
+              borderRadius: '16px',
+              transition: 'all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
+              cursor: 'pointer',
+              border: data.cardStats?.yearlyAccidents > 0 ? '1px solid #fca5a5' : '1px solid #6ee7b7',
+              background: data.cardStats?.yearlyAccidents > 0 ? 'linear-gradient(135deg, #fff5f5 0%, #ffffff 100%)' : 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.18)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.02)'; }}
           >
-            <div 
-              className={`kartu ${data.cardStats?.yearlyAccidents > 0 ? 'kartu-glow-merah' : 'kartu-glow-hijau'}`} 
-              style={{ 
-                margin: 0, 
-                padding: '16px 18px', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'space-between',
-                width: '100%',
-                borderRadius: '16px',
-                transition: 'all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                cursor: 'pointer',
-                border: data.cardStats?.yearlyAccidents > 0 ? '1px solid #fca5a5' : '1px solid #6ee7b7',
-                background: data.cardStats?.yearlyAccidents > 0 ? 'linear-gradient(135deg, #fff5f5 0%, #ffffff 100%)' : 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.18)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.02)'; }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ 
-                    width: 36, height: 36, borderRadius: '10px', 
-                    background: data.cardStats?.yearlyAccidents > 0 ? '#fef2f2' : '#d1fae5', 
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <ShieldCheck size={20} style={{ color: data.cardStats?.yearlyAccidents > 0 ? '#ef4444' : '#059669' }} />
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '12px', color: '#475569', fontWeight: 700, display: 'block', lineHeight: 1.2 }}>
-                      Accident Free Operation
-                    </span>
-                    <span style={{ fontSize: '11px', color: '#059669', fontWeight: 800 }}>Lihat Detail ↗</span>
-                  </div>
-                </div>
-                <span style={{ 
-                  fontSize: '10.5px', fontWeight: 800, 
-                  background: data.cardStats?.yearlyAccidents > 0 ? '#fef2f2' : '#ecfdf5', 
-                  color: data.cardStats?.yearlyAccidents > 0 ? '#dc2626' : '#047857', 
-                  padding: '4px 10px', borderRadius: '20px', 
-                  border: data.cardStats?.yearlyAccidents > 0 ? '1px solid #fca5a5' : '1px solid #a7f3d0'
-                }}>
-                  {data.cardStats?.yearlyAccidents > 0 ? `🔴 ${data.cardStats.yearlyAccidents} INSIDEN` : '🟢 ZERO ACCIDENT'}
-                </span>
-              </div>
-              
-              <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed rgba(0,0,0,0.06)' }}>
-                <h3 className="tv-stat-num" style={{ 
-                  margin: 0, fontSize: '24px', fontWeight: 900, 
-                  color: data.cardStats?.yearlyAccidents > 0 ? '#dc2626' : '#065f46', 
-                  letterSpacing: '-0.5px',
-                  display: 'flex',
-                  alignItems: 'baseline',
-                  gap: '6px'
-                }}>
-                  <span>{data.cardStats.accidentFreeDays}</span>
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: data.cardStats?.yearlyAccidents > 0 ? '#ef4444' : '#10b981' }}>Hari</span>
-                </h3>
-              </div>
-            </div>
-          </Link>
-
-          {/* Widget 2: Top Performer OT Compact Badge */}
-          <div className="kartu kartu-glow-oranye" style={{ 
-            margin: 0, 
-            padding: '16px 18px', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            justifyContent: 'space-between', 
-            flex: 1, 
-            borderRadius: '16px', 
-            background: 'linear-gradient(135deg, #fffbeb 0%, #ffffff 100%)', 
-            border: '1px solid #fde68a',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
-          }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: 36, height: 36, borderRadius: '10px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Award size={20} style={{ color: '#f59e0b' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ 
+                  width: 38, height: 38, borderRadius: '10px', 
+                  background: data.cardStats?.yearlyAccidents > 0 ? '#fef2f2' : '#d1fae5', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <ShieldCheck size={22} style={{ color: data.cardStats?.yearlyAccidents > 0 ? '#ef4444' : '#059669' }} />
                 </div>
                 <div>
-                  <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 700, display: 'block', lineHeight: 1.2 }}>
-                    Kontribusi Overtime Teraktif
+                  <span style={{ fontSize: '13px', color: '#475569', fontWeight: 700, display: 'block', lineHeight: 1.2 }}>
+                    Accident Free Operation
                   </span>
-                  <span style={{ fontSize: '11px', color: '#b45309', fontWeight: 700 }}>
-                    🏆 {data.maintenanceSummary?.topPerformer ? `${data.maintenanceSummary.topPerformer.total.toFixed(1)} Jam` : 'Belum ada data'}
-                  </span>
+                  <span style={{ fontSize: '11.5px', color: '#059669', fontWeight: 800 }}>Lihat Detail ↗</span>
                 </div>
               </div>
-              <span style={{ fontSize: '10.5px', fontWeight: 800, background: '#fef3c7', color: '#b45309', padding: '4px 10px', borderRadius: '20px', border: '1px solid #fde68a' }}>
-                TOP OT
+              <span style={{ 
+                fontSize: '11px', fontWeight: 800, 
+                background: data.cardStats?.yearlyAccidents > 0 ? '#fef2f2' : '#ecfdf5', 
+                color: data.cardStats?.yearlyAccidents > 0 ? '#dc2626' : '#047857', 
+                padding: '4px 10px', borderRadius: '20px', 
+                border: data.cardStats?.yearlyAccidents > 0 ? '1px solid #fca5a5' : '1px solid #a7f3d0'
+              }}>
+                {data.cardStats?.yearlyAccidents > 0 ? `🔴 ${data.cardStats.yearlyAccidents} INSIDEN` : '🟢 ZERO ACCIDENT'}
               </span>
             </div>
-
-            <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed rgba(0,0,0,0.06)' }}>
-              <h3 className="tv-part-name" style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', letterSpacing: '-0.3px' }}>
-                {data.maintenanceSummary?.topPerformer?.nama || '—'}
+            
+            <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px dashed rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <h3 className="tv-stat-num" style={{ 
+                margin: 0, fontSize: '24px', fontWeight: 900, 
+                color: data.cardStats?.yearlyAccidents > 0 ? '#dc2626' : '#065f46', 
+                letterSpacing: '-0.5px',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '6px'
+              }}>
+                <span>{data.cardStats.accidentFreeDays}</span>
+                <span style={{ fontSize: '15px', fontWeight: 700, color: data.cardStats?.yearlyAccidents > 0 ? '#ef4444' : '#10b981' }}>Hari</span>
               </h3>
+              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Tanpa Kecelakaan Kerja</span>
             </div>
           </div>
+        </Link>
 
-        </div>
-
-        {/* RIGHT COMPACT RECENT ACTIVITY FEED (Takes 7 of 12 columns on large screens) */}
-        <div className="lg:col-span-7 xl:col-span-8">
-          <div className="kartu" style={{ margin: 0, padding: '18px 20px', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }} />
-                <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>Pekerjaan Maintenance Terkini</h3>
+        {/* Widget 2: Top Performer OT Compact Badge */}
+        <div className="kartu kartu-glow-oranye" style={{ 
+          margin: 0, 
+          padding: '16px 20px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'space-between', 
+          width: '100%', 
+          borderRadius: '16px', 
+          background: 'linear-gradient(135deg, #fffbeb 0%, #ffffff 100%)', 
+          border: '1px solid #fde68a',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: 38, height: 38, borderRadius: '10px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Award size={22} style={{ color: '#f59e0b' }} />
               </div>
-              <a href="/riwayat" style={{ fontSize: '11.5px', color: '#3b82f6', fontWeight: 800, textDecoration: 'none', background: '#eff6ff', padding: '4px 10px', borderRadius: '20px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                Lihat Semua <ArrowUpRight size={13} />
-              </a>
+              <div>
+                <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700, display: 'block', lineHeight: 1.2 }}>
+                  Kontribusi Overtime Teraktif
+                </span>
+                <span style={{ fontSize: '11.5px', color: '#b45309', fontWeight: 700 }}>
+                  🏆 {data.maintenanceSummary?.topPerformer ? `${data.maintenanceSummary.topPerformer.total.toFixed(1)} Jam` : 'Belum ada data'}
+                </span>
+              </div>
             </div>
+            <span style={{ fontSize: '11px', fontWeight: 800, background: '#fef3c7', color: '#b45309', padding: '4px 10px', borderRadius: '20px', border: '1px solid #fde68a' }}>
+              TOP OT
+            </span>
+          </div>
 
-            {/* Compact Minimalist List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '290px', paddingRight: '4px', scrollbarWidth: 'thin' }}>
-              {data.recentLaporan.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '30px 14px', color: '#94a3b8', fontSize: '13px', fontWeight: 500 }}>
-                  Belum ada aktivitas maintenance terbaru terdaftar.
-                </div>
-              ) : (
-                data.recentLaporan.slice(0, 5).map((lap: any) => (
-                  <div key={lap.id} className="tv-list-item" style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '9px 12px',
-                    borderRadius: '10px',
-                    background: '#f8fafc',
-                    border: '1px solid #f1f5f9',
-                    gap: '10px',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#ffffff';
-                    e.currentTarget.style.boxShadow = '0 3px 10px rgba(0,0,0,0.04)';
-                    e.currentTarget.style.borderColor = '#e2e8f0';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#f8fafc';
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.borderColor = '#f1f5f9';
-                  }}
-                  >
-                    {/* Avatar Icon + Mold & Part info */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
-                      <div style={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: '9px',
-                        background: lap.jenis === 'OH_MOLD' ? '#fff7ed' : '#f0fdf4',
-                        color: lap.jenis === 'OH_MOLD' ? '#ea580c' : '#16a34a',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 900,
-                        fontSize: '11.5px',
-                        flexShrink: 0,
-                        border: `1px solid ${lap.jenis === 'OH_MOLD' ? '#ffedd5' : '#dcfce7'}`
-                      }}>
-                        {lap.jenis === 'OH_MOLD' ? 'OH' : lap.jenis === 'BM' ? 'BM' : lap.jenis === 'IM' ? 'IM' : 'M'}
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          Mold {lap.noMold} <span style={{ fontWeight: 500, color: '#64748b', fontSize: '12px' }}>— {lap.part || 'Part -'}</span>
-                        </div>
-                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '1px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <span>📍 {lap.factory} ({lap.shift || '-'})</span>
-                          <span>•</span>
-                          <span>📅 {new Date(lap.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right Info: Status & PIC */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, gap: '3px' }}>
-                      <span style={{
-                        fontSize: '10px',
-                        fontWeight: 800,
-                        padding: '2.5px 8px',
-                        borderRadius: '20px',
-                        background: lap.jenis === 'OH_MOLD' ? '#ea580c' : '#10b981',
-                        color: '#ffffff',
-                        letterSpacing: '0.3px',
-                        textTransform: 'uppercase'
-                      }}>
-                        {lap.jenis === 'OH_MOLD' ? 'OH MOLD' : lap.jenis === 'BM' ? 'B/M' : lap.jenis}
-                      </span>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569' }}>
-                        👤 {lap.pic?.nama || 'Member'}
-                      </span>
-                    </div>
-
-                  </div>
-                ))
-              )}
-            </div>
-
+          <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px dashed rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 className="tv-part-name" style={{ margin: 0, fontSize: '22px', fontWeight: 900, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', letterSpacing: '-0.3px' }}>
+              {data.maintenanceSummary?.topPerformer?.nama || '—'}
+            </h3>
+            <span style={{ fontSize: '12px', color: '#d97706', fontWeight: 700 }}>Bulan Ini</span>
           </div>
         </div>
 
+      </div>
+
+      {/* ==================== MINIMALIST ROW 3C: PEKERJAAN MAINTENANCE TERKINI (2-COLUMN GRID INSIDE CARD) ==================== */}
+      <div style={{ width: '100%', marginBottom: '24px' }}>
+        <div className="kartu" style={{ margin: 0, padding: '20px 22px', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }} />
+              <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>Pekerjaan Maintenance Terkini</h3>
+            </div>
+            <a href="/riwayat" style={{ fontSize: '12px', color: '#3b82f6', fontWeight: 800, textDecoration: 'none', background: '#eff6ff', padding: '5px 12px', borderRadius: '20px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Lihat Semua <ArrowUpRight size={14} />
+            </a>
+          </div>
+
+          {/* 2-Column Minimalist Card Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '12px', overflowY: 'auto', maxHeight: '300px', paddingRight: '4px', scrollbarWidth: 'thin' }}>
+            {data.recentLaporan.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '30px 14px', color: '#94a3b8', fontSize: '13.5px', fontWeight: 500, gridColumn: '1 / -1' }}>
+                Belum ada aktivitas maintenance terbaru terdaftar.
+              </div>
+            ) : (
+              data.recentLaporan.slice(0, 6).map((lap: any) => (
+                <div key={lap.id} className="tv-list-item" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 14px',
+                  borderRadius: '12px',
+                  background: '#f8fafc',
+                  border: '1px solid #f1f5f9',
+                  gap: '12px',
+                  transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.boxShadow = '0 3px 12px rgba(0,0,0,0.04)';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f8fafc';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.borderColor = '#f1f5f9';
+                }}
+                >
+                  {/* Avatar Icon + Mold & Part info */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+                    <div style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '10px',
+                      background: lap.jenis === 'OH_MOLD' ? '#fff7ed' : '#f0fdf4',
+                      color: lap.jenis === 'OH_MOLD' ? '#ea580c' : '#16a34a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 900,
+                      fontSize: '12px',
+                      flexShrink: 0,
+                      border: `1px solid ${lap.jenis === 'OH_MOLD' ? '#ffedd5' : '#dcfce7'}`
+                    }}>
+                      {lap.jenis === 'OH_MOLD' ? 'OH' : lap.jenis === 'BM' ? 'BM' : lap.jenis === 'IM' ? 'IM' : 'M'}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '13.5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        Mold {lap.noMold} <span style={{ fontWeight: 500, color: '#64748b', fontSize: '12.5px' }}>— {lap.part || 'Part -'}</span>
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>📍 {lap.factory} ({lap.shift || '-'})</span>
+                        <span>•</span>
+                        <span>📅 {new Date(lap.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Info: Status & PIC */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, gap: '4px' }}>
+                    <span style={{
+                      fontSize: '10.5px',
+                      fontWeight: 800,
+                      padding: '2.5px 9px',
+                      borderRadius: '20px',
+                      background: lap.jenis === 'OH_MOLD' ? '#ea580c' : '#10b981',
+                      color: '#ffffff',
+                      letterSpacing: '0.3px',
+                      textTransform: 'uppercase'
+                    }}>
+                      {lap.jenis === 'OH_MOLD' ? 'OH MOLD' : lap.jenis === 'BM' ? 'B/M' : lap.jenis}
+                    </span>
+                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
+                      👤 {lap.pic?.nama || 'Member'}
+                    </span>
+                  </div>
+
+                </div>
+              ))
+            )}
+          </div>
+
+        </div>
       </div>
 
       {/* ==================== ROW 4: OVERTIME PIC & KELOLA TARGET MAINTENANCE ==================== */}
