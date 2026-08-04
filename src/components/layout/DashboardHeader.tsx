@@ -2,7 +2,9 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useState, useEffect, useRef } from 'react'
-import { Bell, LogOut, User, Menu } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Bell, LogOut, User, Menu, Search, Sparkles, Shield, ChevronDown } from 'lucide-react'
 
 interface Notif {
   id: number
@@ -17,15 +19,16 @@ interface Notif {
 
 export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => void }) {
   const { data: session } = useSession()
+  const pathname = usePathname()
 
-  const nama = session?.user?.name ?? '...'
-  const role = session?.user?.role ?? ''
+  const nama = session?.user?.name ?? 'Farrel Rizky'
+  const role = session?.user?.role ?? 'SUPER_ADMIN'
 
   const ROLE_LABEL: Record<string, string> = {
-    PIC: 'PIC / Member',
-    TL: 'Team Leader (TL)',
-    GL: 'Group Leader (GL)',
-    CL: 'Coordinator / Chief (CL)',
+    PIC: 'PIC Member',
+    TL: 'Team Leader',
+    GL: 'Group Leader',
+    CL: 'Chief Coord',
     ADM: 'Administrator',
     SUPER_ADMIN: 'Super Admin',
     SUPERADMIN: 'Super Admin',
@@ -106,112 +109,118 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
     return d.toLocaleDateString('id-ID')
   }
 
+  const navLinks = [
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Reports', href: '/riwayat' },
+    { label: 'Mold Book', href: '/mold-book' },
+    { label: 'Maintenance', href: '/jadwal' },
+    { label: 'Approvals', href: '/approval' }
+  ]
+
   return (
-    <header className="app-header">
-      {/* Kiri: Tombol Hamburger untuk Toggle Sidebar (Desktop & Mobile) */}
-      <div className="app-header-left" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+    <header className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md rounded-[34px] px-5 py-3.5 border border-slate-200/80 dark:border-slate-800 shadow-[0_4px_25px_rgba(0,0,0,0.035)] flex items-center justify-between gap-4 sticky top-4 z-40 transition-all w-full max-w-[1650px] mx-auto mb-3">
+      {/* Left Area: Mobile Menu Button & Quixotic Brand Title */}
+      <div className="flex items-center gap-3.5">
         <button 
-          className="header-menu-btn" 
+          className="lg:hidden w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center shadow-sm active:scale-95 transition-all"
           onClick={onMenuClick} 
-          aria-label="Toggle Menu Sidebar"
-          title="Perkecil / Perbesar Sidebar"
-          style={{ 
-            background: 'rgba(255, 255, 255, 0.18)', 
-            border: '1px solid rgba(255, 255, 255, 0.35)', 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '38px',
-            height: '38px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-            transition: 'all 0.2s',
-            color: '#ffffff'
-          }}
+          aria-label="Toggle Menu"
         >
-          <Menu size={20} strokeWidth={2.2} />
+          <Menu size={20} strokeWidth={2.3} />
         </button>
-        <span style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '6px' }} className="header-app-title">
-          Sugity Mold Maintenance
-        </span>
+
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-emerald-700 text-white font-black flex items-center justify-center shadow-md text-base tracking-tight shrink-0">
+            Q
+          </div>
+          <div className="flex flex-col">
+            <span className="text-base md:text-lg font-black text-slate-800 dark:text-white tracking-tight leading-none flex items-center gap-1.5">
+              Sugity<span className="text-emerald-600 font-extrabold">Mold</span>
+            </span>
+            <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase hidden sm:block">PT Sugity Creatives</span>
+          </div>
+        </div>
       </div>
 
+      {/* Center Area: Quixotic Capsule Navigation Pills */}
+      <div className="hidden xl:inline-flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/90 p-1.5 rounded-full border border-slate-200/70 dark:border-slate-700/70 shadow-inner">
+        {navLinks.map((item) => {
+          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`px-5 py-2 rounded-full font-extrabold text-xs md:text-sm transition-all duration-300 ${
+                isActive
+                  ? 'bg-white dark:bg-slate-700 text-emerald-950 dark:text-white shadow-sm scale-[1.02]'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-white/50'
+              }`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
 
-      {/* Kanan: Notifikasi, Profil & Logout */}
-      <div className="app-header-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {/* Right Area: Search, Notifications & User Avatar Pill */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Search Icon */}
+        <button 
+          type="button"
+          aria-label="Search" 
+          className="w-10 h-10 rounded-full bg-slate-100/80 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 hover:border-emerald-500 hover:text-emerald-600 text-slate-600 dark:text-slate-300 flex items-center justify-center shadow-sm hover:scale-105 transition-all duration-200 shrink-0"
+          onClick={() => {
+            const searchInput = document.querySelector('input[type="search"]') as HTMLElement;
+            if (searchInput) searchInput.focus();
+          }}
+        >
+          <Search size={18} strokeWidth={2.2} />
+        </button>
+
         {/* Notification Bell */}
-        <div ref={notifRef} style={{ position: 'relative' }}>
+        <div ref={notifRef} className="relative">
           <button
             onClick={handleBellClick}
             aria-label="Notifikasi"
-            style={{ 
-              background: 'rgba(255, 255, 255, 0.18)', 
-              border: '1px solid rgba(255, 255, 255, 0.35)', 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              position: 'relative',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-              transition: 'all 0.2s'
-            }}
-            className="header-bell-btn"
+            className="w-10 h-10 rounded-full bg-slate-100/80 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 hover:border-emerald-500 hover:text-emerald-600 text-slate-600 dark:text-slate-300 flex items-center justify-center shadow-sm hover:scale-105 transition-all duration-200 relative shrink-0"
           >
-            <Bell size={18} strokeWidth={2} style={{ color: '#ffffff' }} />
+            <Bell size={18} strokeWidth={2.2} />
             {unreadCount > 0 && (
-              <span style={{
-                position: 'absolute', top: '-4px', right: '-4px',
-                background: 'var(--merah)', color: '#fff', fontSize: '10px',
-                fontWeight: 'bold', padding: '2px 6px', borderRadius: '10px',
-                border: '2px solid var(--header-bg)'
-              }}>
+              <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-900 animate-pulse">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
           </button>
 
           {showNotif && (
-            <div className="notif-dropdown" style={{
-              position: 'absolute', right: 0, top: '40px',
-              width: '320px', background: 'var(--kertas)', border: '1px solid var(--garis)',
-              borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              zIndex: 999, overflow: 'hidden', color: 'var(--teks)'
-            }}>
-              <div style={{ background: 'var(--krem)', padding: '10px 14px', fontWeight: 'bold', borderBottom: '1px solid var(--garis)' }}>
-                Notifikasi
+            <div className="absolute right-0 top-12 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl z-50 overflow-hidden text-slate-800 dark:text-slate-200 animate-fade-in">
+              <div className="bg-slate-50 dark:bg-slate-800/80 px-4 py-3 font-extrabold text-sm border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <span>Notifications</span>
+                <span className="text-[11px] bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 px-2.5 py-0.5 rounded-full font-bold">
+                  {notifs.length} Total
+                </span>
               </div>
-              <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+              <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                 {notifs.length === 0 ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontSize: '13px' }}>
-                    Belum ada notifikasi
+                  <div className="p-6 text-center text-slate-400 font-semibold text-xs">
+                    No new notifications
                   </div>
                 ) : (
                   notifs.map(n => (
-                    <a
+                    <Link
                       key={n.id}
                       href={getNotifLink(n) || '#'}
-                      style={{
-                        display: 'flex',
-                        padding: '12px 14px',
-                        borderBottom: '1px solid var(--garis)',
-                        textDecoration: 'none',
-                        color: 'inherit',
-                        background: n.dibaca ? 'var(--kertas)' : 'var(--krem)',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s'
-                      }}
+                      className={`flex items-start p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${
+                        !n.dibaca ? 'bg-emerald-50/40 dark:bg-emerald-950/20 font-bold' : ''
+                      }`}
                     >
-                      <div style={{ fontSize: '18px', marginRight: '12px' }}>{getTipeIcon(n.tipe)}</div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '13px', fontWeight: n.dibaca ? 'normal' : 'bold', color: 'var(--teks)' }}>{n.judul}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--teks-redup)', marginTop: '2px' }}>{n.pesan}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--teks-redup)', marginTop: '4px' }}>{formatTime(n.createdAt)}</div>
+                      <div className="text-lg mr-3 shrink-0">{getTipeIcon(n.tipe)}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{n.judul}</div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">{n.pesan}</div>
+                        <div className="text-[10px] text-emerald-600 font-semibold mt-1">{formatTime(n.createdAt)}</div>
                       </div>
-                    </a>
+                    </Link>
                   ))
                 )}
               </div>
@@ -219,28 +228,24 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
           )}
         </div>
 
-        {/* User Info Badge */}
-        <div className="hide-mobile">
-          <div className="user-badge">
-            <div className="user-avatar">
-              <User size={16} />
-            </div>
-            <div className="user-info">
-              <span className="nama-user">{nama}</span>
-              <span className="peran">{role === 'ADM' ? 'ADM' : (ROLE_LABEL[role] ?? role)}</span>
-            </div>
+        {/* User Profile Pill */}
+        <div className="bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 shadow-sm rounded-full py-1 sm:py-1.5 px-2.5 sm:px-3 flex items-center gap-2.5 hover:shadow-md transition-all">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0d6840] to-emerald-500 text-white font-extrabold text-xs flex items-center justify-center shadow-md shrink-0 border-2 border-white">
+            {nama.charAt(0).toUpperCase()}
           </div>
+          <div className="hidden md:flex flex-col leading-tight">
+            <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-white truncate max-w-[120px]">{nama}</span>
+            <span className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">{ROLE_LABEL[role] ?? role}</span>
+          </div>
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            title="Keluar / Sign Out"
+            aria-label="Sign Out"
+            className="w-7 h-7 rounded-full bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-500 text-rose-600 hover:text-white flex items-center justify-center transition-all duration-200 ml-1 shrink-0"
+          >
+            <LogOut size={13} strokeWidth={2.5} />
+          </button>
         </div>
-        
-        {/* Tombol Keluar */}
-        <button
-          onClick={() => signOut({ callbackUrl: '/login' })}
-          className="btn-keluar"
-          aria-label="Keluar dari sistem"
-        >
-          <LogOut size={16} />
-          <span className="hide-mobile">Keluar</span>
-        </button>
       </div>
     </header>
   )
