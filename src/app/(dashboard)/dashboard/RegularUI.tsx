@@ -122,6 +122,10 @@ export default function RegularUI({
     : 100
   const inProgressCount = Math.max(0, Number(data.cardStats?.totalActions || 0) - Number(data.cardStats?.maintenanceDone || 0))
   const activeQueueCount = data.todayMaintenance?.length || 0
+  const totalMoldsCount = data.cardStats?.totalMolds || 0
+  const readinessPct = totalMoldsCount > 0 
+    ? Math.max(0, Math.min(100, Math.round(((totalMoldsCount - activeQueueCount) / totalMoldsCount) * 100))) 
+    : 100
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', paddingBottom: '32px', color: '#0f172a' }}>
@@ -263,7 +267,7 @@ export default function RegularUI({
             🎉 Tidak ada jadwal maintenance mingguan yang tertunda atau belum selesai. Seluruh mesin dalam kondisi prima!
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3" style={{ gap: '18px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '18px' }}>
             {data.todayMaintenance.map((m: any) => {
               const isOH = (m.jenis || '').toUpperCase().includes('OH') || (m.jenis || '').toUpperCase().includes('OVERHAUL');
               const status = m.status || 'Belum_Dikerjakan';
@@ -377,8 +381,8 @@ export default function RegularUI({
         )}
       </div>
 
-      {/* ==================== SECTION 1: KEY METRICS GRID (OPTIMIZED: 3 COLS DESKTOP, 2 COLS TABLET, 1 COL MOBILE - ZERO EMPTY SPACE) ==================== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: '18px', marginBottom: '22px' }}>
+      {/* ==================== SECTION 1: KEY METRICS GRID ==================== */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '16px', marginBottom: '20px' }}>
           
           {/* Card 1: Total Kegiatan */}
           <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -507,6 +511,48 @@ export default function RegularUI({
                     <span>Jadwal aktif bersiap</span>
                   </>
                 )}
+              </div>
+            </div>
+          </div>
+
+          {/* Card 7: Total Aset Mold (Mengisi ruang kosong di baris 2) */}
+          <div className="kartu kartu-glow-oranye" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Total Aset Mold</span>
+              <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+                <Layers size={17} style={{ color: '#f59e0b' }} />
+              </div>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
+                {totalMoldsCount} <span style={{ fontSize: '18px', fontWeight: 700, color: '#94a3b8' }}>Unit</span>
+              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
+                <span style={{ display: 'flex', alignItems: 'center', background: '#fef3c7', color: '#b45309', padding: '2px 6px', borderRadius: '12px', fontWeight: 700 }}>
+                  📦 Terdaftar
+                </span>
+                <span>Database Mold Book</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 8: Kesiapan Operasional (Mengisi ruang kosong di baris 2) */}
+          <div className="kartu kartu-glow-hijau" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Kesiapan Operasional</span>
+              <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
+                <RefreshCw size={17} style={{ color: '#10b981' }} />
+              </div>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#10b981', letterSpacing: '-1px' }}>
+                {readinessPct}%
+              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
+                <span style={{ display: 'flex', alignItems: 'center', background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '12px', fontWeight: 700 }}>
+                  🟢 Siap Produksi
+                </span>
+                <span>Kondisi mold optimal</span>
               </div>
             </div>
           </div>
