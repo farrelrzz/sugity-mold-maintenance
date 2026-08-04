@@ -106,8 +106,18 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
     return d.toLocaleDateString('id-ID')
   }
 
+  const isSuperAdmin = role === 'SUPER_ADMIN' || role === 'SUPERADMIN';
+
   return (
-    <header className="app-header">
+    <header 
+      className={`app-header ${isSuperAdmin ? 'sa-header-idraft' : ''}`}
+      style={isSuperAdmin ? {
+        background: '#ffffff',
+        borderBottom: '1px solid #e2e8f0',
+        color: '#0f172a',
+        boxShadow: '0 2px 25px rgba(0,0,0,0.03)'
+      } : {}}
+    >
       {/* Kiri: Tombol Hamburger untuk Toggle Sidebar (Desktop & Mobile) */}
       <div className="app-header-left" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <button 
@@ -116,58 +126,58 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
           aria-label="Toggle Menu Sidebar"
           title="Perkecil / Perbesar Sidebar"
           style={{ 
-            background: 'rgba(255, 255, 255, 0.18)', 
-            border: '1px solid rgba(255, 255, 255, 0.35)', 
+            background: isSuperAdmin ? '#f8fafc' : 'rgba(255, 255, 255, 0.18)', 
+            border: isSuperAdmin ? '1px solid #e2e8f0' : '1px solid rgba(255, 255, 255, 0.35)', 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             width: '38px',
             height: '38px',
-            borderRadius: '8px',
+            borderRadius: '10px',
             cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
             transition: 'all 0.2s',
-            color: '#ffffff'
+            color: isSuperAdmin ? '#0f172a' : '#ffffff'
           }}
         >
           <Menu size={20} strokeWidth={2.2} />
         </button>
-        <span style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '6px' }} className="header-app-title">
-          Sugity Mold Maintenance
+        <span style={{ fontSize: '17px', fontWeight: 900, color: isSuperAdmin ? '#0f172a' : '#ffffff', letterSpacing: '-0.3px', display: 'flex', alignItems: 'center', gap: '6px' }} className="header-app-title">
+          {isSuperAdmin ? 'Command Center & Intelligence' : 'Sugity Mold Maintenance'}
         </span>
       </div>
 
 
       {/* Kanan: Notifikasi, Profil & Logout */}
-      <div className="app-header-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="app-header-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {/* Notification Bell */}
         <div ref={notifRef} style={{ position: 'relative' }}>
           <button
             onClick={handleBellClick}
             aria-label="Notifikasi"
             style={{ 
-              background: 'rgba(255, 255, 255, 0.18)', 
-              border: '1px solid rgba(255, 255, 255, 0.35)', 
+              background: isSuperAdmin ? '#f8fafc' : 'rgba(255, 255, 255, 0.18)', 
+              border: isSuperAdmin ? '1px solid #e2e8f0' : '1px solid rgba(255, 255, 255, 0.35)', 
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
+              width: '38px',
+              height: '38px',
+              borderRadius: isSuperAdmin ? '12px' : '50%',
               cursor: 'pointer',
               position: 'relative',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
               transition: 'all 0.2s'
             }}
             className="header-bell-btn"
           >
-            <Bell size={18} strokeWidth={2} style={{ color: '#ffffff' }} />
+            <Bell size={18} strokeWidth={2} style={{ color: isSuperAdmin ? '#0f172a' : '#ffffff' }} />
             {unreadCount > 0 && (
               <span style={{
                 position: 'absolute', top: '-4px', right: '-4px',
-                background: 'var(--merah)', color: '#fff', fontSize: '10px',
+                background: '#ef4444', color: '#fff', fontSize: '10px',
                 fontWeight: 'bold', padding: '2px 6px', borderRadius: '10px',
-                border: '2px solid var(--header-bg)'
+                border: '2px solid #ffffff'
               }}>
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
@@ -176,18 +186,18 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
 
           {showNotif && (
             <div className="notif-dropdown" style={{
-              position: 'absolute', right: 0, top: '40px',
-              width: '320px', background: 'var(--kertas)', border: '1px solid var(--garis)',
-              borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              zIndex: 999, overflow: 'hidden', color: 'var(--teks)'
+              position: 'absolute', right: 0, top: '44px',
+              width: '330px', background: '#ffffff', border: '1px solid #e2e8f0',
+              borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+              zIndex: 999, overflow: 'hidden', color: '#0f172a', textAlign: 'left'
             }}>
-              <div style={{ background: 'var(--krem)', padding: '10px 14px', fontWeight: 'bold', borderBottom: '1px solid var(--garis)' }}>
-                Notifikasi
+              <div style={{ background: '#f8fafc', padding: '12px 16px', fontWeight: 800, borderBottom: '1px solid #e2e8f0', fontSize: '14px' }}>
+                Notifikasi Sistem
               </div>
               <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
                 {notifs.length === 0 ? (
-                  <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontSize: '13px' }}>
-                    Belum ada notifikasi
+                  <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '13.5px' }}>
+                    Belum ada notifikasi baru
                   </div>
                 ) : (
                   notifs.map(n => (
@@ -196,20 +206,20 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
                       href={getNotifLink(n) || '#'}
                       style={{
                         display: 'flex',
-                        padding: '12px 14px',
-                        borderBottom: '1px solid var(--garis)',
+                        padding: '14px 16px',
+                        borderBottom: '1px solid #f1f5f9',
                         textDecoration: 'none',
                         color: 'inherit',
-                        background: n.dibaca ? 'var(--kertas)' : 'var(--krem)',
+                        background: n.dibaca ? '#ffffff' : '#f8fafc',
                         cursor: 'pointer',
                         transition: 'background 0.2s'
                       }}
                     >
-                      <div style={{ fontSize: '18px', marginRight: '12px' }}>{getTipeIcon(n.tipe)}</div>
+                      <div style={{ fontSize: '18px', marginRight: '14px' }}>{getTipeIcon(n.tipe)}</div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '13px', fontWeight: n.dibaca ? 'normal' : 'bold', color: 'var(--teks)' }}>{n.judul}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--teks-redup)', marginTop: '2px' }}>{n.pesan}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--teks-redup)', marginTop: '4px' }}>{formatTime(n.createdAt)}</div>
+                        <div style={{ fontSize: '13.5px', fontWeight: n.dibaca ? 600 : 800, color: '#0f172a' }}>{n.judul}</div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px', lineHeight: 1.4 }}>{n.pesan}</div>
+                        <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '5px', fontWeight: 600 }}>{formatTime(n.createdAt)}</div>
                       </div>
                     </a>
                   ))
@@ -221,13 +231,26 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
 
         {/* User Info Badge */}
         <div className="hide-mobile">
-          <div className="user-badge">
-            <div className="user-avatar">
-              <User size={16} />
+          <div 
+            className="user-badge"
+            style={isSuperAdmin ? {
+              background: '#f1f5f9',
+              border: '1px solid #e2e8f0',
+              borderRadius: '99px',
+              padding: '6px 16px',
+              color: '#0f172a',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              boxShadow: 'none'
+            } : {}}
+          >
+            <div className="user-avatar" style={isSuperAdmin ? { background: '#18181b', color: '#ffffff', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}}>
+              <User size={15} strokeWidth={2.5} />
             </div>
             <div className="user-info">
-              <span className="nama-user">{nama}</span>
-              <span className="peran">{role === 'ADM' ? 'ADM' : (ROLE_LABEL[role] ?? role)}</span>
+              <span className="nama-user" style={isSuperAdmin ? { color: '#0f172a', fontWeight: 800, fontSize: '13.5px' } : {}}>{nama}</span>
+              <span className="peran" style={isSuperAdmin ? { color: '#64748b', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' } : {}}>{role === 'ADM' ? 'ADM' : (ROLE_LABEL[role] ?? role)}</span>
             </div>
           </div>
         </div>
@@ -237,6 +260,21 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
           onClick={() => signOut({ callbackUrl: '/login' })}
           className="btn-keluar"
           aria-label="Keluar dari sistem"
+          style={isSuperAdmin ? {
+            background: '#18181b',
+            color: '#ffffff',
+            borderRadius: '12px',
+            border: 'none',
+            padding: '8px 16px',
+            fontWeight: 700,
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s'
+          } : {}}
         >
           <LogOut size={16} />
           <span className="hide-mobile">Keluar</span>
@@ -245,3 +283,4 @@ export default function DashboardHeader({ onMenuClick }: { onMenuClick: () => vo
     </header>
   )
 }
+

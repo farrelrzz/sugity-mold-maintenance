@@ -68,10 +68,169 @@ export default function DashboardSidebar({ isOpen, onClose, isCollapsed, onToggl
     }
   }
 
+  if (role === 'SUPER_ADMIN' || role === 'SUPERADMIN') {
+    return (
+      <aside 
+        className={`app-sidebar ${isOpen ? 'buka' : ''} ${isCollapsed ? 'collapsed' : ''} superadmin-idraft-sidebar`}
+        style={{
+          background: '#ffffff',
+          color: '#0f172a',
+          borderRight: '1px solid #e2e8f0',
+          boxShadow: '4px 0 35px rgba(0,0,0,0.03)',
+          padding: '20px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'
+        }}
+      >
+        <style jsx global>{`
+          .superadmin-idraft-sidebar .sa-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            border-radius: 16px;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 14.5px;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            margin-bottom: 4px;
+          }
+          .superadmin-idraft-sidebar .sa-menu-link:hover {
+            color: #0f172a;
+            background: #f8fafc;
+            transform: translateX(3px);
+          }
+          .superadmin-idraft-sidebar .sa-menu-link.active {
+            background: #18181b !important;
+            color: #ffffff !important;
+            font-weight: 700;
+            box-shadow: 0 6px 18px -4px rgba(0,0,0,0.25);
+            transform: translateX(0);
+          }
+          .superadmin-idraft-sidebar.collapsed .sa-menu-link {
+            padding: 12px 0;
+            justify-content: center;
+            transform: none !important;
+          }
+          .superadmin-idraft-sidebar.collapsed .sa-menu-link span.text {
+            display: none;
+          }
+          .superadmin-idraft-sidebar.collapsed .sa-section-title {
+            display: none;
+          }
+          .superadmin-idraft-sidebar .sa-section-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #94a3b8;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin: 20px 8px 8px 14px;
+          }
+        `}</style>
+
+        {/* Top Section: Branding & Main Navigation */}
+        <div style={{ overflowY: 'auto', overflowX: 'hidden' }}>
+          {/* Logo Brand Bar */}
+          <div style={{ display: 'flex', justifyContent: isCollapsed ? 'center' : 'space-between', alignItems: 'center', padding: '4px 6px 24px 6px', borderBottom: '1px solid #f1f5f9', marginBottom: '16px' }}>
+            {!isCollapsed && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '14px', background: '#18181b', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontWeight: 900, fontSize: '20px', boxShadow: '0 6px 14px -2px rgba(0,0,0,0.2)' }}>
+                  ⚡
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <b style={{ fontSize: '19px', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px', lineHeight: 1.1 }}>sugity</b>
+                  <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Superadmin</span>
+                </div>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={handleHamburgerClick}
+              title="Toggle Sidebar"
+              style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                color: '#0f172a',
+                width: '36px',
+                height: '36px',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                flexShrink: 0
+              }}
+            >
+              <Menu size={18} strokeWidth={2.2} />
+            </button>
+          </div>
+
+          {/* Main Navigation Group */}
+          <nav>
+            <Link href="/dashboard" className={`sa-menu-link ${isAktif('/dashboard') ? 'active' : ''}`} onClick={onClose}>
+              <LayoutDashboard size={20} strokeWidth={2.2} />
+              <span className="text">Dashboard</span>
+            </Link>
+            <Link href="/jadwal" className={`sa-menu-link ${isAktif('/jadwal') ? 'active' : ''}`} onClick={onClose}>
+              <Calendar size={20} strokeWidth={2.2} />
+              <span className="text">Calendar & Maint</span>
+            </Link>
+            <Link href="/riwayat" className={`sa-menu-link ${isAktif('/riwayat') ? 'active' : ''}`} onClick={onClose}>
+              <FileText size={20} strokeWidth={2.2} />
+              <span className="text">Reports Archive</span>
+            </Link>
+            <Link href="/approval" className={`sa-menu-link ${isAktif('/approval') ? 'active' : ''}`} onClick={onClose}>
+              <CheckSquare size={20} strokeWidth={2.2} />
+              <span className="text">Statistics & Appv</span>
+            </Link>
+            <Link href="/mold-book" className={`sa-menu-link ${isAktif('/mold-book') ? 'active' : ''}`} onClick={onClose}>
+              <BookOpen size={20} strokeWidth={2.2} />
+              <span className="text">Mold Documents</span>
+            </Link>
+
+            {/* INTEGRATIONS & SECURITY MODULES */}
+            <div className="sa-section-title">SYSTEM MODULES</div>
+            <Link href="/audit-log" className={`sa-menu-link ${isAktif('/audit-log') ? 'active' : ''}`} onClick={onClose}>
+              <ShieldCheck size={20} strokeWidth={2.2} />
+              <span className="text">Audit Log</span>
+            </Link>
+            <Link href="/kalender-safety" className={`sa-menu-link ${isAktif('/kalender-safety') ? 'active' : ''}`} onClick={onClose}>
+              <ShieldAlert size={20} strokeWidth={2.2} />
+              <span className="text">Safety Calendar</span>
+            </Link>
+            <Link href="/laporan/baru" className="sa-menu-link" style={{ color: '#0f172a', fontWeight: 700 }} onClick={onClose}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', border: '1.5px dashed #64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800 }}>+</span>
+              <span className="text">Add new report</span>
+            </Link>
+
+            {/* TEAMS & USERS */}
+            <div className="sa-section-title">TEAMS & ACCOUNTS</div>
+            <Link href="/kelola-akun" className={`sa-menu-link ${isAktif('/kelola-akun') ? 'active' : ''}`} onClick={onClose}>
+              <Users size={20} strokeWidth={2.2} />
+              <span className="text">Manajemen User</span>
+            </Link>
+          </nav>
+        </div>
+
+        {/* Bottom Section: Settings */}
+        <div style={{ paddingTop: '16px', borderTop: '1px solid #f1f5f9', marginTop: '16px' }}>
+          <Link href="/pengaturan-sistem" className={`sa-menu-link ${isAktif('/pengaturan-sistem') ? 'active' : ''}`} onClick={onClose}>
+            <Settings size={20} strokeWidth={2.2} />
+            <span className="text">System Settings</span>
+          </Link>
+        </div>
+      </aside>
+    );
+  }
+
   return (
     <aside className={`app-sidebar ${isOpen ? 'buka' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
-
       <div className="sidebar-header">
+
         <div style={{ display: 'flex', justifyContent: 'center', width: '100%', alignItems: 'center' }}>
           <img 
             src="/logo-sugity.jpg" 
