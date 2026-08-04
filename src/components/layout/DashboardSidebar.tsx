@@ -72,10 +72,11 @@ export default function DashboardSidebar({ isOpen, onClose, isCollapsed, onToggl
         {/* Top Branding Section */}
         <div className={`flex items-center gap-3 w-full pb-4 border-b border-slate-100 dark:border-slate-800/80 ${isCollapsed ? 'justify-center' : 'px-1'}`}>
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-md transition-transform duration-300 group-hover:scale-105 flex items-center justify-center bg-white shrink-0">
+            <div style={{ width: '48px', height: '48px', minWidth: '48px', minHeight: '48px' }} className="rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-md transition-transform duration-300 group-hover:scale-105 flex items-center justify-center bg-white shrink-0">
               <img 
                 src="/logo-sugity.jpg" 
                 alt="Sugity Logo" 
+                style={{ width: '38px', height: '38px', objectFit: 'contain' }}
                 className="w-10 h-10 object-contain"
               />
             </div>
@@ -151,8 +152,8 @@ export default function DashboardSidebar({ isOpen, onClose, isCollapsed, onToggl
       <aside className={`fixed top-0 bottom-0 left-0 z-[55] w-[280px] bg-white dark:bg-slate-900 shadow-2xl border-r border-slate-200/80 dark:border-slate-800 p-6 flex flex-col justify-between lg:hidden transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div>
           <div className="flex items-center gap-3 pb-6 border-b border-slate-100 dark:border-slate-800">
-            <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-md shrink-0 bg-white flex items-center justify-center">
-              <img src="/logo-sugity.jpg" alt="Sugity Logo" className="w-9 h-9 object-contain" />
+            <div style={{ width: '44px', height: '44px', minWidth: '44px', minHeight: '44px' }} className="rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-md shrink-0 bg-white flex items-center justify-center">
+              <img src="/logo-sugity.jpg" alt="Sugity Logo" style={{ width: '36px', height: '36px', objectFit: 'contain' }} className="w-9 h-9 object-contain" />
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">Sugity Mold</span>
