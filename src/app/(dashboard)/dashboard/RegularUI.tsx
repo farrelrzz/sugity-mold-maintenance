@@ -516,42 +516,40 @@ export default function RegularUI({
 
         </div>
 
-        {/* RIGHT BLOCK: 2 SIDE-BY-SIDE DONUT CARDS (EXACTLY LIKE PHOTO) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '16px' }}>
+        {/* RIGHT BLOCK: VERTICALLY STACKED COMPACT & AESTHETIC ANALYTICS CARDS */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* Donut Card 1: Approval Status */}
-          <div className="kartu kartu-glow-hijau" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <span className="tv-card-header" style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', display: 'block' }}>Status Approval</span>
-              <h3 className="tv-donut-num" style={{ fontSize: '30px', fontWeight: 800, margin: '6px 0 2px 0', color: '#0f172a', letterSpacing: '-1px' }}>
-                {data.approvalRatios.total} <span style={{ fontSize: '14px', fontWeight: 600, color: '#64748b' }}>Laporan</span>
-              </h3>
-              <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '14px' }}>Periode: {data.approvalRatios.period}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '16px' }}>
-              
-              {/* Legend Dots on Left / Top */}
-              <div className="tv-legend" style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
-                  <span>PIC/Member ({data.approvalRatios.pic})</span>
+          {/* Card 1: Status Approval (Compact Horizontal Layout) */}
+          <div 
+            className="kartu kartu-glow-hijau" 
+            style={{ 
+              margin: 0, 
+              padding: '20px 24px', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'space-between',
+              flex: 1,
+              borderRadius: '16px',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
+            }}
+          >
+            {/* Top Row: Title, Big Number & Donut Chart */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+                  <span className="tv-card-header" style={{ fontSize: '13px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Status Approval</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
-                  <span>TL ({data.approvalRatios.tl})</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
-                  <span>GL ({data.approvalRatios.gl})</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#f43f5e', flexShrink: 0 }} />
-                  <span>ADM ({data.approvalRatios.adm})</span>
-                </div>
+                <h3 className="tv-donut-num" style={{ fontSize: '30px', fontWeight: 800, margin: '0 0 4px 0', color: '#0f172a', letterSpacing: '-0.5px' }}>
+                  {data.approvalRatios.total} <span style={{ fontSize: '15px', fontWeight: 600, color: '#64748b' }}>Laporan</span>
+                </h3>
+                <span style={{ fontSize: '11.5px', color: '#94a3b8', fontWeight: 500 }}>Periode: {data.approvalRatios.period}</span>
               </div>
 
-              {/* Donut Ring on Right */}
-              <div className="tv-donut-box" style={{ width: 105, height: 105, position: 'relative', flexShrink: 0 }}>
+              {/* Donut Chart with percentage overlay */}
+              <div className="tv-donut-box" style={{ width: 85, height: 85, position: 'relative', flexShrink: 0 }}>
                 <Doughnut
                   data={{
                     labels: ['PIC/Member', 'TL', 'GL', 'ADM'],
@@ -568,44 +566,86 @@ export default function RegularUI({
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '72%',
+                    cutout: '74%',
                     plugins: { legend: { display: false }, tooltip: { enabled: data.approvalRatios.total > 0 } }
                   }}
                 />
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', pointerEvents: 'none' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a' }}>
+                    {data.approvalRatios.total > 0 ? `${Math.round((data.approvalRatios.adm / data.approvalRatios.total) * 100)}%` : '0%'}
+                  </span>
+                  <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '-2px' }}>ADM</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Row: 4-Column Modern Legend Pills */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(85px, 1fr))', gap: '8px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #f1f5f9' }}>
+              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '10px', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>PIC/Mem</span>
+                </div>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{data.approvalRatios.pic}</span>
               </div>
 
+              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '10px', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>TL</span>
+                </div>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{data.approvalRatios.tl}</span>
+              </div>
+
+              <div style={{ background: '#f8fafc', padding: '8px 10px', borderRadius: '10px', border: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>GL</span>
+                </div>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{data.approvalRatios.gl}</span>
+              </div>
+
+              <div style={{ background: '#fff1f2', padding: '8px 10px', borderRadius: '10px', border: '1px solid #fecdd3', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#f43f5e', flexShrink: 0 }} />
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#e11d48' }}>ADM</span>
+                </div>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#e11d48' }}>{data.approvalRatios.adm}</span>
+              </div>
             </div>
           </div>
 
-          {/* Donut Card 2: Planning Target Shift */}
-          <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <span className="tv-card-header" style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', display: 'block' }}>Aktual vs Target</span>
-              <h3 className="tv-donut-num" style={{ fontSize: '30px', fontWeight: 800, margin: '6px 0 2px 0', color: '#0f172a', letterSpacing: '-1px' }}>
-                {data.planningWeekly.totalAktual} <span style={{ fontSize: '18px', fontWeight: 700, color: '#94a3b8' }}>/ {data.planningWeekly.totalTarget}</span>
-              </h3>
-              <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '14px' }}>Kumulatif bulan ini</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '16px' }}>
-              
-              {/* Legend Dots on Left / Top */}
-              <div className="tv-legend" style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
-                  <span>Shift A ({totalAktualA})</span>
+          {/* Card 2: Aktual vs Target (Compact Horizontal Layout) */}
+          <div 
+            className="kartu kartu-glow-biru" 
+            style={{ 
+              margin: 0, 
+              padding: '20px 24px', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'space-between',
+              flex: 1,
+              borderRadius: '16px',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.02)'
+            }}
+          >
+            {/* Top Row: Title, Big Number & Donut Chart */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6' }} />
+                  <span className="tv-card-header" style={{ fontSize: '13px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Aktual vs Target</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
-                  <span>Shift B ({totalAktualB})</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
-                  <span>Nonshift ({totalAktualNon})</span>
-                </div>
+                <h3 className="tv-donut-num" style={{ fontSize: '30px', fontWeight: 800, margin: '0 0 4px 0', color: '#0f172a', letterSpacing: '-0.5px' }}>
+                  {data.planningWeekly.totalAktual} <span style={{ fontSize: '18px', fontWeight: 700, color: '#94a3b8' }}>/ {data.planningWeekly.totalTarget}</span>
+                </h3>
+                <span style={{ fontSize: '11.5px', color: '#94a3b8', fontWeight: 500 }}>Kumulatif pencapaian bulan ini</span>
               </div>
 
-              {/* Donut Ring on Right */}
-              <div className="tv-donut-box" style={{ width: 105, height: 105, position: 'relative', flexShrink: 0 }}>
+              {/* Donut Chart with percentage overlay */}
+              <div className="tv-donut-box" style={{ width: 85, height: 85, position: 'relative', flexShrink: 0 }}>
                 <Doughnut
                   data={{
                     labels: ['Shift A', 'Shift B', 'Nonshift'],
@@ -622,12 +662,50 @@ export default function RegularUI({
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '72%',
+                    cutout: '74%',
                     plugins: { legend: { display: false }, tooltip: { enabled: (totalAktualA + totalAktualB + totalAktualNon) > 0 } }
                   }}
                 />
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', pointerEvents: 'none' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#0f172a' }}>
+                    {data.planningWeekly.totalTarget > 0 ? `${Math.round((data.planningWeekly.totalAktual / data.planningWeekly.totalTarget) * 100)}%` : '0%'}
+                  </span>
+                  <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: 600, marginTop: '-2px' }}>Achv</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Row: 3-Shift Modern Legend Pills */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '10px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #f1f5f9' }}>
+              <div style={{ background: '#eff6ff', padding: '8px 12px', borderRadius: '10px', border: '1px solid #dbeafe', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
+                  <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#1e40af' }}>Shift A</span>
+                </div>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#1e3a8a' }}>
+                  {totalAktualA} <span style={{ fontSize: '11px', fontWeight: 500, color: '#60a5fa' }}>Unit</span>
+                </span>
               </div>
 
+              <div style={{ background: '#fffbeb', padding: '8px 12px', borderRadius: '10px', border: '1px solid #fef3c7', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
+                  <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#92400e' }}>Shift B</span>
+                </div>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#78350f' }}>
+                  {totalAktualB} <span style={{ fontSize: '11px', fontWeight: 500, color: '#fbbf24' }}>Unit</span>
+                </span>
+              </div>
+
+              <div style={{ background: '#f0fdf4', padding: '8px 12px', borderRadius: '10px', border: '1px solid #dcfce7', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
+                  <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#166534' }}>Nonshift</span>
+                </div>
+                <span style={{ fontSize: '15px', fontWeight: 800, color: '#14532d' }}>
+                  {totalAktualNon} <span style={{ fontSize: '11px', fontWeight: 500, color: '#4ade80' }}>Unit</span>
+                </span>
+              </div>
             </div>
           </div>
 
