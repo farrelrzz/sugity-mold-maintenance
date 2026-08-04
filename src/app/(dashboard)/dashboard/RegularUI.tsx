@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Bar, Line, Chart as ChartComponent } from 'react-chartjs-2'
+import { Bar, Doughnut, Line, Chart as ChartComponent } from 'react-chartjs-2'
 import { 
   Calendar, 
   Download, 
@@ -377,8 +377,11 @@ export default function RegularUI({
         )}
       </div>
 
-      {/* ==================== SECTION 1: KEY METRICS GRID ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '16px', marginBottom: '20px' }}>
+      {/* ==================== ROW 2: ASYMMETRIC METRICS & DONUT GRID (LIKE PHOTO) ==================== */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))', gap: '20px' }}>
+        
+        {/* LEFT BLOCK: 2x3 or 3x2 METRIC CARDS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '16px' }}>
           
           {/* Card 1: Total Kegiatan */}
           <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -457,11 +460,7 @@ export default function RegularUI({
               </div>
             </div>
           </div>
-      </div>
 
-      {/* ==================== SECTION 2: MINIMALIST & AESTHETIC KPI GRID (ROW 2 - 4 COLUMNS) ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '16px', marginBottom: '24px' }}>
-          
           {/* Card 5: Efisiensi Kerja */}
           <div className="kartu kartu-glow-ungu" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -474,7 +473,7 @@ export default function RegularUI({
               <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
                 {completionRate}%
               </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
                 <span style={{ display: 'flex', alignItems: 'center', background: '#f3e8ff', color: '#7e22ce', padding: '2px 6px', borderRadius: '12px', fontWeight: 700 }}>
                   <Sparkles size={12} style={{ marginRight: '3px' }} /> Optimal
                 </span>
@@ -495,13 +494,13 @@ export default function RegularUI({
               <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
                 {activeQueueCount} <span style={{ fontSize: '18px', fontWeight: 700, color: '#94a3b8' }}>Unit</span>
               </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
                 {activeQueueCount === 0 ? (
                   <>
                     <span style={{ display: 'flex', alignItems: 'center', background: '#dcfce7', color: '#15803d', padding: '2px 6px', borderRadius: '12px', fontWeight: 700 }}>
                       ✓ All Clear
                     </span>
-                    <span>Tidak ada antrean</span>
+                    <span>Tidak ada antrean tertunda</span>
                   </>
                 ) : (
                   <>
@@ -515,351 +514,407 @@ export default function RegularUI({
             </div>
           </div>
 
-          {/* Card 7: Status Approval (Compact Minimalist) */}
+        </div>
+
+        {/* RIGHT BLOCK: 2 SIDE-BY-SIDE DONUT CARDS (EXACTLY LIKE PHOTO) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '16px' }}>
+          
+          {/* Donut Card 1: Approval Status */}
           <div className="kartu kartu-glow-hijau" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Status Approval</span>
-              <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
-                <ShieldCheck size={17} style={{ color: '#10b981' }} />
-              </div>
-            </div>
-            <div style={{ marginTop: '16px' }}>
-              <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
-                {data.approvalRatios.total} <span style={{ fontSize: '18px', fontWeight: 700, color: '#94a3b8' }}>Laporan</span>
-              </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '11.5px', color: '#64748b', fontWeight: 600, flexWrap: 'wrap' }}>
-                <span style={{ display: 'flex', alignItems: 'center', background: '#ecfdf5', color: '#047857', padding: '2px 6px', borderRadius: '12px', fontWeight: 700 }}>
-                  ● Aktif
-                </span>
-                <span>PIC: <b>{data.approvalRatios.pic}</b> • TL: <b>{data.approvalRatios.tl}</b> • GL: <b>{data.approvalRatios.gl}</b> • ADM: <b>{data.approvalRatios.adm}</b></span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 8: Aktual vs Target (Compact Minimalist) */}
-          <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span className="tv-card-header" style={{ fontSize: '13px', color: '#64748b', fontWeight: 700 }}>Aktual vs Target</span>
-              <div style={{ width: 34, height: 34, borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8fafc' }}>
-                <TrendingUp size={17} style={{ color: '#3b82f6' }} />
-              </div>
-            </div>
-            <div style={{ marginTop: '16px' }}>
-              <h2 className="tv-stat-num" style={{ margin: 0, fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
-                {data.planningWeekly.totalAktual} <span style={{ fontSize: '18px', fontWeight: 700, color: '#94a3b8' }}>/ {data.planningWeekly.totalTarget}</span>
-              </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px', fontSize: '11.5px', color: '#64748b', fontWeight: 600, flexWrap: 'wrap' }}>
-                <span style={{ display: 'flex', alignItems: 'center', background: '#eff6ff', color: '#1d4ed8', padding: '2px 6px', borderRadius: '12px', fontWeight: 700 }}>
-                  {data.planningWeekly.totalTarget > 0 ? `${Math.round((data.planningWeekly.totalAktual / data.planningWeekly.totalTarget) * 100)}%` : '0%'}
-                </span>
-                <span>Sh. A: <b>{totalAktualA}</b> • Sh. B: <b>{totalAktualB}</b> • Non: <b>{totalAktualNon}</b></span>
-              </div>
-            </div>
-          </div>
-      </div>
-
-      {/* ==================== MINIMALIST ROW 3A: CHARTS SIDE-BY-SIDE (GUARANTEED 2 COLUMNS ON DESKTOP/LAPTOP) ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', width: '100%', gap: '18px', marginBottom: '20px' }}>
-        
-        {/* Chart 1: Tren Performa Pemeliharaan YTD */}
-        <div className="kartu" style={{ margin: 0, padding: '18px 20px', display: 'flex', flexDirection: 'column', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
             <div>
-              <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>Tren Biaya & Kegiatan YTD</h3>
-              <span className="tv-chart-sub" style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 500 }}>Akumulasi cost vs frekuensi maintenance bulanan</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 10px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
-              <span>2026</span>
-              <Layers size={13} style={{ color: '#3b82f6' }} />
-            </div>
-          </div>
-          <div style={{ height: '200px', width: '100%' }}>
-            <ChartComponent type="bar" data={ytdChartData as any} options={ytdOptions as any} />
-          </div>
-        </div>
-
-        {/* Chart 2: Grafik Overhaul Mold Harian */}
-        <div className="kartu" style={{ margin: 0, padding: '18px 20px', display: 'flex', flexDirection: 'column', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-            <div>
-              <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>Grafik Overhaul Mold Harian</h3>
-              <span className="tv-chart-sub" style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 500 }}>
-                Penyelesaian OH Mold full approve ({bulan})
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                window.location.href = `/api/dashboard/export-daily-oh?bulan=${bulan}`;
-              }}
-              style={{
-                background: '#f0fdf4',
-                border: '1px solid #86efac',
-                color: '#15803d',
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontSize: '11.5px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                boxShadow: '0 2px 6px rgba(16, 185, 129, 0.1)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#dcfce7'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#f0fdf4'}
-            >
-              📊 Export OH
-            </button>
-          </div>
-          <div style={{ height: '200px', width: '100%' }}>
-            <Line
-              data={{
-                labels: data.dailyOh.map((d: any) => new Date(d.date).getDate().toString()),
-                datasets: [
-                  {
-                    label: 'Total OH Selesai',
-                    data: data.dailyOh.map((d: any) => d.count),
-                    borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.10)',
-                    borderWidth: 2.5,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#8b5cf6',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointRadius: 3.5,
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { 
-                  y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: '#f1f5f9' } },
-                  x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
-                },
-              }}
-            />
-          </div>
-        </div>
-
-      </div>
-
-      {/* ==================== MINIMALIST ROW 3B: ZERO ACCIDENT & TOP OT (SIDE-BY-SIDE 2 COLUMNS, NOT STACKED 2 ROWS) ==================== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', width: '100%', gap: '18px', marginBottom: '20px' }}>
-        
-        {/* Widget 1: Zero Accident Compact Badge */}
-        <Link 
-          href="/kalender-safety" 
-          style={{ textDecoration: 'none', display: 'flex', width: '100%' }}
-          title="Klik untuk membuka Kalender Safety"
-        >
-          <div 
-            className={`kartu ${data.cardStats?.yearlyAccidents > 0 ? 'kartu-glow-merah' : 'kartu-glow-hijau'}`} 
-            style={{ 
-              margin: 0, 
-              padding: '16px 20px', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              justifyContent: 'space-between',
-              width: '100%',
-              borderRadius: '16px',
-              transition: 'all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)',
-              cursor: 'pointer',
-              border: data.cardStats?.yearlyAccidents > 0 ? '1px solid #fca5a5' : '1px solid #6ee7b7',
-              background: data.cardStats?.yearlyAccidents > 0 ? 'linear-gradient(135deg, #fff5f5 0%, #ffffff 100%)' : 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.18)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.02)'; }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ 
-                  width: 38, height: 38, borderRadius: '10px', 
-                  background: data.cardStats?.yearlyAccidents > 0 ? '#fef2f2' : '#d1fae5', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <ShieldCheck size={22} style={{ color: data.cardStats?.yearlyAccidents > 0 ? '#ef4444' : '#059669' }} />
-                </div>
-                <div>
-                  <span style={{ fontSize: '13px', color: '#475569', fontWeight: 700, display: 'block', lineHeight: 1.2 }}>
-                    Accident Free Operation
-                  </span>
-                  <span style={{ fontSize: '11.5px', color: '#059669', fontWeight: 800 }}>Lihat Detail ↗</span>
-                </div>
-              </div>
-              <span style={{ 
-                fontSize: '11px', fontWeight: 800, 
-                background: data.cardStats?.yearlyAccidents > 0 ? '#fef2f2' : '#ecfdf5', 
-                color: data.cardStats?.yearlyAccidents > 0 ? '#dc2626' : '#047857', 
-                padding: '4px 10px', borderRadius: '20px', 
-                border: data.cardStats?.yearlyAccidents > 0 ? '1px solid #fca5a5' : '1px solid #a7f3d0'
-              }}>
-                {data.cardStats?.yearlyAccidents > 0 ? `🔴 ${data.cardStats.yearlyAccidents} INSIDEN` : '🟢 ZERO ACCIDENT'}
-              </span>
-            </div>
-            
-            <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px dashed rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <h3 className="tv-stat-num" style={{ 
-                margin: 0, fontSize: '24px', fontWeight: 900, 
-                color: data.cardStats?.yearlyAccidents > 0 ? '#dc2626' : '#065f46', 
-                letterSpacing: '-0.5px',
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '6px'
-              }}>
-                <span>{data.cardStats.accidentFreeDays}</span>
-                <span style={{ fontSize: '15px', fontWeight: 700, color: data.cardStats?.yearlyAccidents > 0 ? '#ef4444' : '#10b981' }}>Hari</span>
+              <span className="tv-card-header" style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', display: 'block' }}>Status Approval</span>
+              <h3 className="tv-donut-num" style={{ fontSize: '30px', fontWeight: 800, margin: '6px 0 2px 0', color: '#0f172a', letterSpacing: '-1px' }}>
+                {data.approvalRatios.total} <span style={{ fontSize: '14px', fontWeight: 600, color: '#64748b' }}>Laporan</span>
               </h3>
-              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Tanpa Kecelakaan Kerja</span>
+              <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '14px' }}>Periode: {data.approvalRatios.period}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '16px' }}>
+              
+              {/* Legend Dots on Left / Top */}
+              <div className="tv-legend" style={{ display: 'flex', flexDirection: 'column', gap: '5px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
+                  <span>PIC/Member ({data.approvalRatios.pic})</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
+                  <span>TL ({data.approvalRatios.tl})</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
+                  <span>GL ({data.approvalRatios.gl})</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#f43f5e', flexShrink: 0 }} />
+                  <span>ADM ({data.approvalRatios.adm})</span>
+                </div>
+              </div>
+
+              {/* Donut Ring on Right */}
+              <div className="tv-donut-box" style={{ width: 105, height: 105, position: 'relative', flexShrink: 0 }}>
+                <Doughnut
+                  data={{
+                    labels: ['PIC/Member', 'TL', 'GL', 'ADM'],
+                    datasets: [{
+                      data: data.approvalRatios.total > 0 
+                        ? [data.approvalRatios.pic, data.approvalRatios.tl, data.approvalRatios.gl, data.approvalRatios.adm] 
+                        : [1],
+                      backgroundColor: data.approvalRatios.total > 0 ? ['#10b981', '#3b82f6', '#f59e0b', '#f43f5e'] : ['#e2e8f0'],
+                      borderWidth: 2,
+                      borderColor: '#ffffff',
+                      hoverOffset: 4
+                    }]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: { legend: { display: false }, tooltip: { enabled: data.approvalRatios.total > 0 } }
+                  }}
+                />
+              </div>
+
             </div>
           </div>
-        </Link>
 
-        {/* Widget 2: Top Performer OT Compact Badge */}
-        <div className="kartu kartu-glow-oranye" style={{ 
-          margin: 0, 
-          padding: '16px 20px', 
-          display: 'flex', 
-          flexDirection: 'column', 
-          justifyContent: 'space-between', 
-          width: '100%', 
-          borderRadius: '16px', 
-          background: 'linear-gradient(135deg, #fffbeb 0%, #ffffff 100%)', 
-          border: '1px solid #fde68a',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.02)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: 38, height: 38, borderRadius: '10px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Award size={22} style={{ color: '#f59e0b' }} />
-              </div>
-              <div>
-                <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700, display: 'block', lineHeight: 1.2 }}>
-                  Kontribusi Overtime Teraktif
-                </span>
-                <span style={{ fontSize: '11.5px', color: '#b45309', fontWeight: 700 }}>
-                  🏆 {data.maintenanceSummary?.topPerformer ? `${data.maintenanceSummary.topPerformer.total.toFixed(1)} Jam` : 'Belum ada data'}
-                </span>
-              </div>
+          {/* Donut Card 2: Planning Target Shift */}
+          <div className="kartu kartu-glow-biru" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <span className="tv-card-header" style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a', display: 'block' }}>Aktual vs Target</span>
+              <h3 className="tv-donut-num" style={{ fontSize: '30px', fontWeight: 800, margin: '6px 0 2px 0', color: '#0f172a', letterSpacing: '-1px' }}>
+                {data.planningWeekly.totalAktual} <span style={{ fontSize: '18px', fontWeight: 700, color: '#94a3b8' }}>/ {data.planningWeekly.totalTarget}</span>
+              </h3>
+              <span style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '14px' }}>Kumulatif bulan ini</span>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 800, background: '#fef3c7', color: '#b45309', padding: '4px 10px', borderRadius: '20px', border: '1px solid #fde68a' }}>
-              TOP OT
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '16px' }}>
+              
+              {/* Legend Dots on Left / Top */}
+              <div className="tv-legend" style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#3b82f6', flexShrink: 0 }} />
+                  <span>Shift A ({totalAktualA})</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
+                  <span>Shift B ({totalAktualB})</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981', flexShrink: 0 }} />
+                  <span>Nonshift ({totalAktualNon})</span>
+                </div>
+              </div>
+
+              {/* Donut Ring on Right */}
+              <div className="tv-donut-box" style={{ width: 105, height: 105, position: 'relative', flexShrink: 0 }}>
+                <Doughnut
+                  data={{
+                    labels: ['Shift A', 'Shift B', 'Nonshift'],
+                    datasets: [{
+                      data: (totalAktualA + totalAktualB + totalAktualNon) > 0 
+                        ? [totalAktualA, totalAktualB, totalAktualNon] 
+                        : [1],
+                      backgroundColor: (totalAktualA + totalAktualB + totalAktualNon) > 0 ? ['#3b82f6', '#f59e0b', '#10b981'] : ['#e2e8f0'],
+                      borderWidth: 2,
+                      borderColor: '#ffffff',
+                      hoverOffset: 4
+                    }]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: { legend: { display: false }, tooltip: { enabled: (totalAktualA + totalAktualB + totalAktualNon) > 0 } }
+                  }}
+                />
+              </div>
+
+            </div>
           </div>
 
-          <div style={{ marginTop: '14px', paddingTop: '10px', borderTop: '1px dashed rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 className="tv-part-name" style={{ margin: 0, fontSize: '22px', fontWeight: 900, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', letterSpacing: '-0.3px' }}>
-              {data.maintenanceSummary?.topPerformer?.nama || '—'}
-            </h3>
-            <span style={{ fontSize: '12px', color: '#d97706', fontWeight: 700 }}>Bulan Ini</span>
-          </div>
         </div>
 
       </div>
 
-      {/* ==================== MINIMALIST ROW 3C: PEKERJAAN MAINTENANCE TERKINI (2-COLUMN GRID INSIDE CARD) ==================== */}
-      <div style={{ width: '100%', marginBottom: '24px' }}>
-        <div className="kartu" style={{ margin: 0, padding: '20px 22px', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }} />
-              <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>Pekerjaan Maintenance Terkini</h3>
+      {/* ==================== ROW 3: CHARTS ON LEFT, WIDGETS & RECENT FEED ON RIGHT (LIKE PHOTO) ==================== */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))', gap: '20px' }}>
+        
+        {/* LEFT COLUMN: TWO LARGE ANALYTICAL CHARTS STACKED */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Chart 1: Tren Performa Pemeliharaan YTD (Sales dynamics equivalent) */}
+          <div className="kartu" style={{ margin: 0, padding: '22px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Tren Biaya & Kegiatan YTD</h3>
+                <span className="tv-chart-sub" style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>Perbandingan akumulasi cost vs frekuensi pekerjaan bulanan</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: '#475569' }}>
+                <span>2026</span>
+                <Layers size={13} />
+              </div>
             </div>
-            <a href="/riwayat" style={{ fontSize: '12px', color: '#3b82f6', fontWeight: 800, textDecoration: 'none', background: '#eff6ff', padding: '5px 12px', borderRadius: '20px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              Lihat Semua <ArrowUpRight size={14} />
-            </a>
+            <div style={{ height: '280px', width: '100%' }}>
+              <ChartComponent type="bar" data={ytdChartData as any} options={ytdOptions as any} />
+            </div>
           </div>
 
-          {/* 2-Column Minimalist Card Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '12px', overflowY: 'auto', maxHeight: '300px', paddingRight: '4px', scrollbarWidth: 'thin' }}>
-            {data.recentLaporan.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '30px 14px', color: '#94a3b8', fontSize: '13.5px', fontWeight: 500, gridColumn: '1 / -1' }}>
-                Belum ada aktivitas maintenance terbaru terdaftar.
+          {/* Chart 2: Grafik Overhaul Mold Harian (Overall User Activity equivalent) */}
+          <div className="kartu" style={{ margin: 0, padding: '22px', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Grafik Overhaul Mold Harian</h3>
+                <span className="tv-chart-sub" style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
+                  Penyelesaian overhaul mold (full approve) per tanggal ({bulan})
+                </span>
               </div>
-            ) : (
-              data.recentLaporan.slice(0, 6).map((lap: any) => (
-                <div key={lap.id} className="tv-list-item" style={{
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = `/api/dashboard/export-daily-oh?bulan=${bulan}`;
+                }}
+                style={{
+                  background: '#f0fdf4',
+                  border: '1px solid #86efac',
+                  color: '#15803d',
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  borderRadius: '12px',
-                  background: '#f8fafc',
-                  border: '1px solid #f1f5f9',
-                  gap: '12px',
-                  transition: 'all 0.15s ease',
+                  gap: '6px'
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#ffffff';
-                  e.currentTarget.style.boxShadow = '0 3px 12px rgba(0,0,0,0.04)';
-                  e.currentTarget.style.borderColor = '#e2e8f0';
+              >
+                📊 Export OH
+              </button>
+            </div>
+            <div style={{ height: '260px', width: '100%' }}>
+              <Line
+                data={{
+                  labels: data.dailyOh.map((d: any) => new Date(d.date).getDate().toString()),
+                  datasets: [
+                    {
+                      label: 'Total OH Selesai',
+                      data: data.dailyOh.map((d: any) => d.count),
+                      borderColor: '#8b5cf6',
+                      backgroundColor: 'rgba(139, 92, 246, 0.12)',
+                      borderWidth: 3,
+                      fill: true,
+                      tension: 0.4,
+                      pointBackgroundColor: '#8b5cf6',
+                      pointBorderColor: '#ffffff',
+                      pointBorderWidth: 2,
+                      pointRadius: 4,
+                    },
+                  ],
                 }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f8fafc';
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.borderColor = '#f1f5f9';
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } },
+                  scales: { 
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                  },
                 }}
-                >
-                  {/* Avatar Icon + Mold & Part info */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
-                    <div style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: '10px',
-                      background: lap.jenis === 'OH_MOLD' ? '#fff7ed' : '#f0fdf4',
-                      color: lap.jenis === 'OH_MOLD' ? '#ea580c' : '#16a34a',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 900,
-                      fontSize: '12px',
-                      flexShrink: 0,
-                      border: `1px solid ${lap.jenis === 'OH_MOLD' ? '#ffedd5' : '#dcfce7'}`
-                    }}>
-                      {lap.jenis === 'OH_MOLD' ? 'OH' : lap.jenis === 'BM' ? 'BM' : lap.jenis === 'IM' ? 'IM' : 'M'}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '13.5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        Mold {lap.noMold} <span style={{ fontWeight: 500, color: '#64748b', fontSize: '12.5px' }}>— {lap.part || 'Part -'}</span>
-                      </div>
-                      <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span>📍 {lap.factory} ({lap.shift || '-'})</span>
-                        <span>•</span>
-                        <span>📅 {new Date(lap.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Info: Status & PIC */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, gap: '4px' }}>
-                    <span style={{
-                      fontSize: '10.5px',
-                      fontWeight: 800,
-                      padding: '2.5px 9px',
-                      borderRadius: '20px',
-                      background: lap.jenis === 'OH_MOLD' ? '#ea580c' : '#10b981',
-                      color: '#ffffff',
-                      letterSpacing: '0.3px',
-                      textTransform: 'uppercase'
-                    }}>
-                      {lap.jenis === 'OH_MOLD' ? 'OH MOLD' : lap.jenis === 'BM' ? 'B/M' : lap.jenis}
-                    </span>
-                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#475569' }}>
-                      👤 {lap.pic?.nama || 'Member'}
-                    </span>
-                  </div>
-
-                </div>
-              ))
-            )}
+              />
+            </div>
           </div>
 
         </div>
+
+        {/* RIGHT COLUMN: 2 MINI WIDGET CARDS + RECENT ACTIVITY LIST (LIKE PHOTO) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* TWO SIDE-BY-SIDE WIDGET CARDS */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '16px' }}>
+            
+            {/* Widget 1: Accident Free Days - Tersinkron ke Kalender Safety */}
+            <Link 
+              href="/kalender-safety" 
+              style={{ textDecoration: 'none', display: 'flex' }}
+              title="Klik untuk membuka Kalender Safety & Zero Accident"
+            >
+              <div 
+                className={`kartu ${data.cardStats?.yearlyAccidents > 0 ? 'kartu-glow-merah' : 'kartu-glow-hijau'}`} 
+                style={{ 
+                  margin: 0, 
+                  padding: '20px', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  transition: 'all 0.2s ease',
+                  cursor: 'pointer',
+                  border: data.cardStats?.yearlyAccidents > 0 ? '1px solid #fca5a5' : '1px solid #6ee7b7',
+                  background: data.cardStats?.yearlyAccidents > 0 ? 'linear-gradient(180deg, #fff5f5 0%, #ffffff 100%)' : 'linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(16, 185, 129, 0.2)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = ''; }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ 
+                    width: 40, height: 40, borderRadius: '12px', 
+                    background: data.cardStats?.yearlyAccidents > 0 ? '#fef2f2' : '#d1fae5', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                  }}>
+                    <ShieldCheck size={24} style={{ color: data.cardStats?.yearlyAccidents > 0 ? '#ef4444' : '#059669' }} />
+                  </div>
+                  <span style={{ 
+                    fontSize: '11px', fontWeight: 900, 
+                    background: data.cardStats?.yearlyAccidents > 0 ? '#fef2f2' : '#ecfdf5', 
+                    color: data.cardStats?.yearlyAccidents > 0 ? '#dc2626' : '#047857', 
+                    padding: '4px 10px', borderRadius: '16px', 
+                    border: data.cardStats?.yearlyAccidents > 0 ? '1px solid #fca5a5' : '1px solid #a7f3d0',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                  }}>
+                    {data.cardStats?.yearlyAccidents > 0 ? `🔴 ADA ${data.cardStats.yearlyAccidents} INSIDEN` : '🟢 ZERO ACCIDENT'}
+                  </span>
+                </div>
+                <div style={{ marginTop: '16px' }}>
+                  <h3 className="tv-stat-num" style={{ 
+                    margin: 0, fontSize: '26px', fontWeight: 900, 
+                    color: data.cardStats?.yearlyAccidents > 0 ? '#dc2626' : '#065f46', 
+                    letterSpacing: '-0.5px',
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '6px'
+                  }}>
+                    <span>{data.cardStats.accidentFreeDays}</span>
+                    <span style={{ fontSize: '17px', fontWeight: 700, color: data.cardStats?.yearlyAccidents > 0 ? '#ef4444' : '#10b981' }}>Hari</span>
+                  </h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                    <span style={{ fontSize: '12.5px', color: '#475569', fontWeight: 700 }}>
+                      Accident Free Operation
+                    </span>
+                    <span style={{ fontSize: '12px', color: '#059669', fontWeight: 800 }}>
+                      Lihat Detail ↗
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Widget 2: Top Performer OT */}
+            <div className="kartu kartu-glow-oranye" style={{ margin: 0, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ width: 38, height: 38, borderRadius: '12px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Award size={22} style={{ color: '#f59e0b' }} />
+                </div>
+                <span style={{ fontSize: '11px', fontWeight: 800, background: '#fef3c7', color: '#b45309', padding: '3px 8px', borderRadius: '16px', border: '1px solid #fde68a' }}>
+                  TOP OT
+                </span>
+              </div>
+              <div style={{ marginTop: '16px' }}>
+                <h3 className="tv-part-name" style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {data.maintenanceSummary?.topPerformer?.nama || '—'}
+                </h3>
+                <span className="tv-chart-sub" style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, marginTop: '4px', display: 'block' }}>
+                  🏆 {data.maintenanceSummary?.topPerformer ? `${data.maintenanceSummary.topPerformer.total.toFixed(1)} Jam Lembur` : 'Belum ada data'}
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* RECENT ACTIVITY FEED / LIST (Customer order equivalent in photo) */}
+          <div className="kartu" style={{ margin: 0, padding: '22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Pekerjaan Maintenance Terkini</h3>
+              <a href="/riwayat" style={{ fontSize: '12.5px', color: '#3b82f6', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                Lihat Semua <ArrowUpRight size={14} />
+              </a>
+            </div>
+
+            {/* Crisp Modern List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', overflowY: 'auto', maxHeight: '460px', paddingRight: '4px' }}>
+              {data.recentLaporan.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px 14px', color: '#94a3b8', fontSize: '13.5px', fontWeight: 500 }}>
+                  Belum ada aktivitas maintenance terbaru terdaftar.
+                </div>
+              ) : (
+                data.recentLaporan.slice(0, 6).map((lap: any) => (
+                  <div key={lap.id} className="tv-list-item" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    borderRadius: '12px',
+                    background: '#f8fafc',
+                    border: '1px solid #f1f5f9',
+                    gap: '12px',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#ffffff';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#f8fafc';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.borderColor = '#f1f5f9';
+                  }}
+                  >
+                    {/* Avatar Icon + Mold & Part info */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+                      <div style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '12px',
+                        background: lap.jenis === 'OH_MOLD' ? '#fff7ed' : '#f0fdf4',
+                        color: lap.jenis === 'OH_MOLD' ? '#ea580c' : '#16a34a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 800,
+                        fontSize: '13px',
+                        flexShrink: 0,
+                        border: `1px solid ${lap.jenis === 'OH_MOLD' ? '#ffedd5' : '#dcfce7'}`
+                      }}>
+                        {lap.jenis === 'OH_MOLD' ? 'OH' : lap.jenis === 'BM' ? 'BM' : lap.jenis === 'IM' ? 'IM' : 'M'}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          Mold {lap.noMold} <span style={{ fontWeight: 500, color: '#64748b', fontSize: '13px' }}>— {lap.part || 'Part -'}</span>
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>📍 {lap.factory} ({lap.shift || '-'})</span>
+                          <span>•</span>
+                          <span>📅 {new Date(lap.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Info: Status & PIC */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, gap: '4px' }}>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        padding: '3px 10px',
+                        borderRadius: '20px',
+                        background: lap.jenis === 'OH_MOLD' ? '#ea580c' : '#10b981',
+                        color: '#ffffff',
+                        letterSpacing: '0.3px',
+                        textTransform: 'uppercase'
+                      }}>
+                        {lap.jenis === 'OH_MOLD' ? 'OH MOLD' : lap.jenis === 'BM' ? 'B/M' : lap.jenis}
+                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>
+                        👤 {lap.pic?.nama || 'Member'}
+                      </span>
+                    </div>
+
+                  </div>
+                ))
+              )}
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
 
       {/* ==================== ROW 4: OVERTIME PIC & KELOLA TARGET MAINTENANCE ==================== */}

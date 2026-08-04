@@ -444,8 +444,6 @@ export async function GET(req: Request) {
       factory: moldDict[m.noMold]?.factory || '-'
     }))
 
-    const totalMolds = await prisma.moldBook.count()
-
     return NextResponse.json({
       cardStats: {
         totalCost,
@@ -453,7 +451,6 @@ export async function GET(req: Request) {
         maintenanceDone,
         accidentFreeDays,
         yearlyAccidents,
-        totalMolds,
       },
       maintenanceSummary: {
         totalPlan: totalPlanMaintenance,

@@ -80,7 +80,6 @@ interface StatsData {
 
 import { useSession } from 'next-auth/react'
 import RegularUI from './RegularUI'
-import SuperAdminUI from './SuperAdminUI'
 
 export default function DashboardPage() {
   const { data: session } = useSession()
@@ -199,10 +198,6 @@ export default function DashboardPage() {
     handleSaveTarget,
     exporting,
     handleExport
-  }
-
-  if (session?.user?.role === 'SUPER_ADMIN' || (session?.user as any)?.role === 'SUPERADMIN') {
-    return <SuperAdminUI {...props} session={session} />
   }
 
   return <RegularUI {...props} />
