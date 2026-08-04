@@ -1,6 +1,4 @@
 import { Bar, Doughnut, Line, Chart as ChartComponent } from 'react-chartjs-2'
-import Link from 'next/link'
-import { Calendar, Sparkles, ShieldCheck, Activity, Download, FileText, Layers } from 'lucide-react'
 
 export default function SuperAdminUI({
   data,
@@ -261,267 +259,31 @@ export default function SuperAdminUI({
           background: rgba(255,255,255,0.02);
         }
       `}</style>
-      
-      {/* ==================== QUIXOTIC HERO GREETING & COMMAND CENTER FILTERS ==================== */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2 border-b border-slate-800/80 pb-6 mb-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight flex items-center gap-2">
-            Command Center, <span className="text-emerald-400">Farrel</span> <span className="text-2xl sm:text-4xl inline-block animate-bounce">🛡️</span>
-          </h1>
-          <p className="text-xs sm:text-sm font-extrabold text-slate-400 mt-1">
-            Super Admin real-time control panel for Sugity Molding Plant operations & diagnostic telemetry
-          </p>
-        </div>
 
-        <div className="flex items-center gap-3 self-start md:self-auto flex-wrap">
-          <div className="bg-slate-900/90 border border-slate-700/80 rounded-full px-4 py-2 shadow-sm flex items-center gap-2 text-xs md:text-sm font-extrabold text-slate-200 transition-all hover:border-emerald-500">
-            <Calendar size={16} className="text-emerald-400 shrink-0" />
-            <span>Periode:</span>
-            <input
-              type="month"
-              value={bulan}
-              onChange={(e) => setBulan(e.target.value)}
-              className="border-none bg-transparent font-black text-white outline-none cursor-pointer text-xs md:text-sm"
-            />
-          </div>
-
-          <Link
-            href="/laporan/baru"
-            className="bg-gradient-to-r from-emerald-600 via-[#0d6840] to-emerald-700 text-white font-black px-5 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-lg shadow-emerald-950/40 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all text-xs sm:text-sm shrink-0 border border-emerald-400/30"
-          >
-            <Sparkles size={16} />
-            <span>+ Add New Laporan</span>
-          </Link>
+      {/* Header Area */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '10px' }}>
+        <h1 className="sa-title">COMMAND CENTER</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#94a3b8' }}>PERIODE ANALISIS:</span>
+          <input
+            type="month"
+            value={bulan}
+            onChange={(e) => setBulan(e.target.value)}
+            className="sa-input"
+          />
+          <button type="button" className="sa-btn-secondary" onClick={handleExport} disabled={exporting}>
+            {exporting ? '⏳ MENGUNDUH...' : '⬇️ EXPORT EXCEL'}
+          </button>
         </div>
       </div>
 
-      {/* ==================== QUIXOTIC COMMAND CENTER BENTO GRID ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-6">
-        {/* Left Column (Span 4) */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-gradient-to-br from-[#0a5c37] via-[#0d6840] to-[#053820] text-white p-6 rounded-[34px] shadow-2xl shadow-emerald-950/50 relative overflow-hidden border border-emerald-400/30 flex flex-col justify-between min-h-[235px] transition-all hover:scale-[1.01]">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none"></div>
-            
-            <div className="flex justify-between items-start z-10">
-              <div>
-                <span className="text-xs font-extrabold text-emerald-200 uppercase tracking-widest block">Command Budget Target</span>
-                <span className="text-[11px] text-emerald-300">Total akumulasi biaya maintenance M/P</span>
-              </div>
-              <span className="w-9 h-9 rounded-full bg-emerald-800/60 border border-emerald-400/30 flex items-center justify-center font-bold text-sm shadow-inner">↗</span>
-            </div>
-
-            <div className="my-4 z-10">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="font-black tracking-wider text-xs text-emerald-100 uppercase flex items-center gap-1.5">
-                  <ShieldCheck size={16} className="text-emerald-400" /> SUGITY SUPREME
-                </span>
-                <span className="text-[11px] font-mono bg-emerald-400 text-slate-950 font-black px-2.5 py-0.5 rounded-full shadow-sm">+24.50%</span>
-              </div>
-              <div className="text-3xl sm:text-4xl font-black tracking-tight text-white font-mono my-1 drop-shadow-md">
-                Rp {(Number(data.cardStats?.totalCost || 0) * 1000 || 89450000).toLocaleString('id-ID')}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-emerald-500/20 text-xs font-mono text-emerald-200 z-10">
-              <span className="tracking-widest font-bold">•••• SUPER_ADMIN</span>
-              <span className="font-bold text-white bg-emerald-900/70 px-2.5 py-0.5 rounded-lg border border-emerald-400/30">ACTIVE</span>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/90 rounded-[32px] p-6 shadow-xl border border-slate-800 flex items-center justify-between transition-all hover:border-slate-700">
-            <div>
-              <span className="text-xs font-extrabold text-slate-400 block mb-1">Overall Plant Efficiency</span>
-              <span className="text-2xl sm:text-3xl font-black text-white">
-                +{Math.round(((data.cardStats?.totalActions || 120) / ((data.cardStats?.totalActions || 120) + 2)) * 100) || 98}% EFF
-              </span>
-            </div>
-            <span className="bg-emerald-950/70 text-emerald-400 font-black px-4 py-2 rounded-full text-xs border border-emerald-700/50 shadow-inner">
-              +14.2% ↗
-            </span>
-          </div>
-        </div>
-
-        {/* Center Column (Span 4) */}
-        <div className="lg:col-span-4 flex flex-col h-full">
-          <div className="bg-slate-900/90 rounded-[34px] p-6 sm:p-7 shadow-xl border border-slate-800 flex flex-col justify-between h-full min-h-[350px] transition-all hover:border-slate-700">
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-emerald-950/80 text-emerald-400 flex items-center justify-center shrink-0 font-extrabold text-xs border border-emerald-700/50">
-                  <Activity size={17} />
-                </div>
-                <span className="font-black text-white text-base">YTD Performance Trend</span>
-              </div>
-
-              <div className="bg-slate-800 p-1 rounded-full inline-flex gap-1 text-[11px] font-extrabold border border-slate-700">
-                <span className="bg-emerald-600 text-white px-3 py-1 rounded-full shadow-sm">Monthly</span>
-                <span className="text-slate-400 px-3 py-1 hover:text-white cursor-pointer">Annually</span>
-              </div>
-            </div>
-
-            <div className="text-center my-1">
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-[11px] font-black px-3.5 py-1 rounded-full shadow-md inline-block">
-                +19.4% Operational Surge 🚀
-              </span>
-            </div>
-
-            <div className="flex-1 w-full h-[220px] mt-2 relative">
-              <Bar data={ytdChartData as any} options={ytdOptions as any} />
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column (Span 4) */}
-        <div className="lg:col-span-4 flex flex-col gap-6">
-          <div className="bg-slate-900/90 rounded-[34px] p-6 shadow-xl border border-slate-800 flex flex-col justify-between transition-all hover:border-slate-700">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-xs font-extrabold text-slate-400 block">System Activity Volume</span>
-                <span className="text-2xl sm:text-3xl font-black text-white mt-0.5 block">
-                  {data.cardStats?.totalActions || 184} <span className="text-emerald-400 text-base font-extrabold">Actions Logged</span>
-                </span>
-              </div>
-              <button onClick={handleExport} aria-label="Export" className="w-9 h-9 rounded-full bg-slate-800 text-slate-200 font-extrabold flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm">
-                ↗
-              </button>
-            </div>
-
-            <div className="my-3 h-20 bg-gradient-to-b from-emerald-950/40 to-transparent rounded-2xl p-1 flex items-end justify-between border-b-2 border-emerald-500/50 overflow-hidden relative">
-              <svg className="w-full h-16 text-emerald-400 opacity-90" viewBox="0 0 400 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M0 70 Q 50 20, 100 50 T 200 30 T 300 65 T 400 20 L 400 100 L 0 100 Z" fill="url(#greenGradSA)" />
-                <path d="M0 70 Q 50 20, 100 50 T 200 30 T 300 65 T 400 20" stroke="#10b981" strokeWidth="3.5" fill="none" />
-                <defs>
-                  <linearGradient id="greenGradSA" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.35"/>
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.0"/>
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <button onClick={handleExport} disabled={exporting} className="bg-[#0d6840] hover:bg-emerald-600 text-white py-2.5 px-4 rounded-full text-xs font-black shadow-md transition-all text-center flex items-center justify-center gap-1.5 active:scale-95 border border-emerald-500/30">
-                <Download size={14} />
-                <span>{exporting ? '⏳...' : 'Export Excel ↑'}</span>
-              </button>
-              <Link href="/jadwal" className="bg-slate-800 text-slate-200 py-2.5 px-4 rounded-full text-xs font-black text-center hover:bg-slate-700 transition-colors flex items-center justify-center gap-1.5 shadow-sm border border-slate-700">
-                <Calendar size={14} className="text-emerald-400" />
-                <span>Cek Jadwal ↓</span>
-              </Link>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/90 rounded-[32px] p-6 shadow-xl border border-slate-800 flex flex-col gap-3.5 transition-all hover:border-slate-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-xs font-extrabold text-slate-400 block">Plant Safety Index</span>
-                <span className="text-xl sm:text-2xl font-black text-white mt-0.5 block">
-                  {data.cardStats?.accidentFreeDays || '365'} Days Zero Accident
-                </span>
-              </div>
-              <span className="bg-emerald-950/80 text-emerald-400 font-black px-3.5 py-1.5 rounded-full text-xs border border-emerald-700/50 shadow-inner">
-                +100% SAFE
-              </span>
-            </div>
-
-            <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
-              <div>
-                <span className="text-xs font-black text-slate-200 block">Active Supervisors</span>
-                <span className="text-[10px] text-slate-400 font-bold">Sign-offs by TL / GL / CL</span>
-              </div>
-
-              <div className="flex items-center -space-x-2 overflow-hidden">
-                <div title="Team Leader" className="w-8 h-8 rounded-full border-2 border-slate-800 bg-amber-500 text-slate-950 text-[11px] font-black flex items-center justify-center shadow-sm">TL</div>
-                <div title="Group Leader" className="w-8 h-8 rounded-full border-2 border-slate-800 bg-blue-500 text-white text-[11px] font-black flex items-center justify-center shadow-sm">GL</div>
-                <div title="Chief Leader" className="w-8 h-8 rounded-full border-2 border-slate-800 bg-indigo-500 text-white text-[11px] font-black flex items-center justify-center shadow-sm">CL</div>
-                <Link href="/approval" className="w-8 h-8 rounded-full border-2 border-slate-800 bg-emerald-600 text-white text-[11px] font-black flex items-center justify-center shadow-md z-10 hover:scale-110 transition-transform">
-                  +3
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ==================== QUIXOTIC RECENT MAINTENANCE INSPECTION LOGS ==================== */}
-      <div className="bg-slate-900/90 rounded-[36px] p-6 md:p-8 shadow-2xl border border-slate-800 my-6 transition-all hover:border-slate-700">
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-          <div>
-            <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-              <span className="w-9 h-9 rounded-2xl bg-emerald-950 text-emerald-400 flex items-center justify-center text-sm shadow-inner shrink-0 border border-emerald-800/60">
-                <FileText size={19} />
-              </span>
-              Real-time Molding Floor Inspection Logs
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 font-bold mt-1">Live streaming feed from Shift A, Shift B & Non-Shift operations across molding presses</p>
-          </div>
-          <Link href="/riwayat" className="w-11 h-11 rounded-full bg-slate-800 hover:bg-emerald-600 hover:text-white text-slate-200 font-black flex items-center justify-center transition-all shadow-sm shrink-0 hover:scale-105 border border-slate-700">
-            ↗
-          </Link>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[650px]">
-            <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-extrabold text-xs uppercase tracking-wider">
-                <th className="py-3.5 px-3">Mold Problem & Task</th>
-                <th className="py-3.5 px-3">Date</th>
-                <th className="py-3.5 px-3">Time / Shift</th>
-                <th className="py-3.5 px-3">Status</th>
-                <th className="py-3.5 px-3 text-right">Action Expense</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/70 text-sm font-bold">
-              {(data.recentLaporan && data.recentLaporan.length > 0 ? data.recentLaporan.slice(0, 5) : [
-                { id: 1, judul: 'Mold Cleaning & Grease Check #8421', createdAt: new Date().toISOString(), shift: 'Shift A', status: 'Successful', biaya: '89,345.23 IDR' },
-                { id: 2, judul: 'Ejector Pin Replacement - Mold Bumper', createdAt: new Date(Date.now() - 86400000).toISOString(), shift: 'Shift B', status: 'Successful', biaya: '12,345.89 IDR' },
-                { id: 3, judul: 'Cooling Channel Descaling & Polish', createdAt: new Date(Date.now() - 172800000).toISOString(), shift: 'Non-Shift', status: 'Successful', biaya: '32,123.67 IDR' }
-              ]).map((item: any, idx: number) => {
-                const dateObj = new Date(item.createdAt || Date.now());
-                const icons = [
-                  { bg: 'bg-rose-950/80 text-rose-400 border border-rose-800', label: '🛠️' },
-                  { bg: 'bg-blue-950/80 text-blue-400 border border-blue-800', label: '⚙️' },
-                  { bg: 'bg-amber-950/80 text-amber-400 border border-amber-800', label: '✨' },
-                  { bg: 'bg-purple-950/80 text-purple-400 border border-purple-800', label: '🔧' },
-                  { bg: 'bg-emerald-950/80 text-emerald-400 border border-emerald-800', label: '🛡️' }
-                ];
-                const badge = icons[idx % icons.length];
-
-                return (
-                  <tr key={item.id || idx} className="hover:bg-slate-800/60 transition-colors group">
-                    <td className="py-4 px-3 flex items-center gap-3.5">
-                      <div className={`w-11 h-11 rounded-2xl ${badge.bg} font-black flex items-center justify-center text-lg shadow-sm shrink-0 transition-transform group-hover:scale-110`}>
-                        {badge.label}
-                      </div>
-                      <div className="min-w-0">
-                        <span className="block text-white font-extrabold text-sm sm:text-base truncate max-w-xs">{item.judul || item.problem || item.uraian || 'Maintenance Routine Check'}</span>
-                        <span className="text-[11px] text-emerald-400 font-extrabold">+18.67% Quality Assurance</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-3 text-slate-300 font-bold text-sm">
-                      {dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="py-4 px-3 text-slate-400 font-medium text-xs sm:text-sm">
-                      {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • <span className="font-bold text-slate-200">{item.shift || 'Shift A'}</span>
-                    </td>
-                    <td className="py-4 px-3">
-                      <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 text-emerald-300 text-xs font-extrabold border border-emerald-800">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-                        {item.status || 'Successful'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-3 text-right font-mono font-black text-white text-sm">
-                      {item.biaya || `${(Math.floor(Math.random() * 70) + 15)},345.23 IDR`}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      {/* ==================== REMARKER AREA ==================== */}
-      <div className="sa-card" style={{ marginBottom: '24px' }}>
+      {/* Maintenance Reminder (Optimized for Monitor / TV) */}
+      <div className="sa-card" style={{
+        marginBottom: '24px',
+        borderColor: data.todayMaintenance && data.todayMaintenance.length > 0 ? 'rgba(74, 222, 128, 0.4)' : 'rgba(255,255,255,0.08)',
+        boxShadow: data.todayMaintenance && data.todayMaintenance.length > 0 ? '0 0 40px rgba(74, 222, 128, 0.1)' : 'none',
+        padding: '24px'
+      }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <span style={{ fontSize: '32px', filter: 'drop-shadow(0 0 10px rgba(74, 222, 128, 0.6))' }}>

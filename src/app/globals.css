@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-@import "tailwindcss";
-
 /* ============================================================
    GLOBAL CSS — Sistem Maintenance PT Sugity Creatives
    Design system yang sama dengan Index_v21.html
    ============================================================ */
+
+/* Import font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* ============================================================
    CSS VARIABLES (Design Tokens)

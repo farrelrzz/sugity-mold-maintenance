@@ -17,11 +17,7 @@ import {
   ShieldAlert,
   Clock, 
   CheckSquare,
-  Menu,
-  ChevronRight,
-  ChevronLeft,
-  Grid,
-  Sparkles
+  Menu
 } from 'lucide-react'
 
 const NAV_TABS = [
@@ -64,129 +60,85 @@ export default function DashboardSidebar({ isOpen, onClose, isCollapsed, onToggl
     onClose()
   }, [pathname])
 
+  const handleHamburgerClick = () => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 800) {
+      onClose()
+    } else {
+      onToggleCollapse()
+    }
+  }
+
   return (
-    <>
-      {/* DESKTOP FLOATING VERTICAL PILL DOCK (Quixotic Style) */}
-      <aside className={`fixed left-4 top-5 bottom-5 z-50 hidden lg:flex flex-col justify-between transition-all duration-300 ease-out bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-[0_12px_40px_rgba(0,0,0,0.06)] py-5 my-auto select-none rounded-[40px] ${isCollapsed ? 'w-20 px-2' : 'w-64 px-5'}`}>
-        
-        {/* Top Branding Section */}
-        <div className={`flex items-center gap-3 w-full pb-4 border-b border-slate-100 dark:border-slate-800/80 ${isCollapsed ? 'justify-center' : 'px-1'}`}>
-          <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div style={{ width: '48px', height: '48px', minWidth: '48px', minHeight: '48px' }} className="rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-md transition-transform duration-300 group-hover:scale-105 flex items-center justify-center bg-white shrink-0">
-              <img 
-                src="/logo-sugity.jpg" 
-                alt="Sugity Logo" 
-                style={{ width: '38px', height: '38px', objectFit: 'contain' }}
-                className="w-10 h-10 object-contain"
-              />
-            </div>
-            {!isCollapsed && (
-              <div className="flex flex-col truncate">
-                <span className="font-extrabold text-slate-900 dark:text-white text-base tracking-tight leading-tight">Sugity Mold</span>
-                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-                  Online System
-                </span>
-              </div>
-            )}
-          </Link>
+    <aside className={`app-sidebar ${isOpen ? 'buka' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
+
+      <div className="sidebar-header">
+        <div style={{ display: 'flex', justifyContent: 'center', width: '100%', alignItems: 'center' }}>
+          <img 
+            src="/logo-sugity.jpg" 
+            alt="Sugity Logo" 
+            className="logo-sugity" 
+            style={{ 
+              filter: 'url(#remove-black)',
+              transition: 'all 0.3s ease',
+              mixBlendMode: 'screen' // fallback/enhancement
+            }} 
+          />
         </div>
 
-        {/* Center Navigation Icons Stack */}
-        <nav className="flex-1 my-4 flex flex-col gap-2 overflow-y-auto overflow-x-visible w-full py-1 no-scrollbar">
-          {visibleTabs.map((tab) => {
-            const active = isAktif(tab.href);
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className={`flex items-center gap-3.5 rounded-full transition-all duration-300 relative group font-bold ${
-                  active 
-                    ? isCollapsed 
-                      ? 'w-12 h-12 justify-center mx-auto bg-gradient-to-br from-emerald-600 via-[#0d6840] to-[#084228] text-white shadow-lg shadow-emerald-700/35 scale-105' 
-                      : 'px-4 py-3.5 bg-gradient-to-r from-emerald-600 via-[#0d6840] to-emerald-700 text-white shadow-md shadow-emerald-700/25 w-full'
-                    : isCollapsed
-                      ? 'w-12 h-12 justify-center mx-auto text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-white'
-                      : 'px-4 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 hover:text-emerald-700 dark:hover:text-emerald-400 w-full'
-                }`}
-              >
-                <tab.icon size={20} strokeWidth={active ? 2.5 : 2} className="shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                
-                {!isCollapsed && (
-                  <span className="text-sm tracking-wide truncate">{tab.label}</span>
-                )}
-
-                {/* Modern Hover Tooltip in Collapsed Mode */}
-                {isCollapsed && (
-                  <span className="absolute left-[62px] top-1/2 -translate-y-1/2 px-3.5 py-1.5 bg-slate-900 text-white text-xs font-extrabold rounded-xl shadow-2xl whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 group-hover:left-[54px] transition-all duration-200 z-[100] border border-slate-700 flex items-center gap-1.5">
-                    {tab.label}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Bottom Utility Area */}
-        <div className={`pt-4 border-t border-slate-100 dark:border-slate-800/80 flex ${isCollapsed ? 'flex-col items-center gap-3' : 'flex-row justify-between px-2'} w-full`}>
+        <div style={{ display: 'flex', justifyContent: isCollapsed ? 'center' : 'space-between', alignItems: 'center', width: '100%', gap: '8px', marginTop: isCollapsed ? '8px' : '4px' }}>
+          <div className="judul" style={{ flex: 1, minWidth: 0 }}>
+            <b style={{ display: 'block', fontSize: '16px', lineHeight: 1.2 }}>Maintenance Report</b>
+            <span style={{ fontSize: '10px', whiteSpace: 'nowrap', display: 'block', color: '#cfe6d8', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis' }}>Molding Maintenance Dept</span>
+          </div>
           <button
             type="button"
-            onClick={onToggleCollapse}
-            aria-label="Toggle Dock Width"
+            onClick={handleHamburgerClick}
+            aria-label="Toggle Sidebar"
             title={isCollapsed ? "Perbesar Sidebar" : "Perkecil Sidebar"}
-            className="w-11 h-11 rounded-full bg-slate-100/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-600 flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-105 active:scale-95 shrink-0"
+            className="sidebar-hamburger-btn"
+            style={{
+              background: 'rgba(255, 255, 255, 0.12)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: '#ffffff',
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+              flexShrink: 0,
+              margin: isCollapsed ? '0 auto' : '0'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
-            {isCollapsed ? <ChevronRight size={19} strokeWidth={2.5} /> : <ChevronLeft size={19} strokeWidth={2.5} />}
+            <Menu size={20} strokeWidth={2.2} />
           </button>
-
-          {!isCollapsed && (
-            <div className="flex flex-col text-right truncate">
-              <span className="text-[11px] font-bold text-slate-500">v2.4 Quixotic</span>
-              <span className="text-[10px] text-slate-400">Molding Div</span>
-            </div>
-          )}
         </div>
-      </aside>
+      </div>
 
-      {/* MOBILE SLIDE-IN DRAWER & BOTTOM DOCK */}
-      <aside className={`fixed top-0 bottom-0 left-0 z-[55] w-[280px] bg-white dark:bg-slate-900 shadow-2xl border-r border-slate-200/80 dark:border-slate-800 p-6 flex flex-col justify-between lg:hidden transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div>
-          <div className="flex items-center gap-3 pb-6 border-b border-slate-100 dark:border-slate-800">
-            <div style={{ width: '44px', height: '44px', minWidth: '44px', minHeight: '44px' }} className="rounded-full overflow-hidden border-2 border-emerald-500/30 shadow-md shrink-0 bg-white flex items-center justify-center">
-              <img src="/logo-sugity.jpg" alt="Sugity Logo" style={{ width: '36px', height: '36px', objectFit: 'contain' }} className="w-9 h-9 object-contain" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">Sugity Mold</span>
-              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Maintenance Dept</span>
-            </div>
-          </div>
-
-          <nav className="mt-6 flex flex-col gap-2 max-h-[65vh] overflow-y-auto">
-            {visibleTabs.map((tab) => {
-              const active = isAktif(tab.href);
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  onClick={onClose}
-                  className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all font-bold text-sm ${
-                    active 
-                      ? 'bg-gradient-to-r from-emerald-600 via-[#0d6840] to-emerald-700 text-white shadow-md shadow-emerald-700/20' 
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <tab.icon size={20} strokeWidth={2} className="shrink-0" />
-                  <span>{tab.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-xs font-semibold text-slate-400">
-          PT Sugity Creatives © 2026
-        </div>
-      </aside>
-    </>
+      <nav className="sidebar-nav">
+        {visibleTabs.map((tab) => (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            className={isAktif(tab.href) ? 'aktif' : ''}
+            onClick={onClose}
+          >
+            <span className="icon"><tab.icon size={20} strokeWidth={2} /></span>
+            <span className="text">{tab.label}</span>
+          </Link>
+        ))}
+      </nav>
+    </aside>
   )
 }
