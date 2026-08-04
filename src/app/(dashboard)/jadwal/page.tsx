@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { showToast } from '@/components/ui/Toast'
 import Pagination from '@/components/ui/Pagination'
+import { Trash2, PlayCircle, AlertTriangle, X, Calendar, User, Wrench } from 'lucide-react'
 
 interface MoldSpec {
   noMold: string;
@@ -18,6 +19,8 @@ export default function JadwalPage() {
   const { data: session } = useSession()
   const [jadwal, setJadwal] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteModalItem, setDeleteModalItem] = useState<any | null>(null)
+  const [deleting, setDeleting] = useState(false)
   
   const [search, setSearch] = useState('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -205,18 +208,22 @@ export default function JadwalPage() {
     }
   }
 
-  const handleDeleteJadwal = async (id: number, moldNo: string) => {
-    if (!confirm(`Hapus jadwal maintenance untuk mold ${moldNo}?`)) return
+  const executeDeleteJadwal = async () => {
+    if (!deleteModalItem) return
+    setDeleting(true)
     try {
-      const res = await fetch(`/api/jadwal/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/jadwal/${deleteModalItem.id}`, { method: 'DELETE' })
       if (!res.ok) {
         const d = await res.json()
         throw new Error(d.error || 'Gagal menghapus jadwal')
       }
-      showToast('🗑️ Jadwal berhasil dihapus', 'sukses')
+      showToast('🗑️ Jadwal berhasil dihapus ✓', 'sukses')
+      setDeleteModalItem(null)
       fetchJadwal()
     } catch (err: any) {
-      showToast(err.message, 'error')
+      showToast(err.message || 'Gagal menghapus jadwal', 'error')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -509,9 +516,6 @@ export default function JadwalPage() {
               </tr>
             ) : (
               jadwal.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((j) => {
-                const userRole = ((session?.user as any)?.role || '').toUpperCase()
-                const canDelete = ['GL', 'CL', 'ADM', 'SUPER_ADMIN', 'SUPERADMIN'].includes(userRole)
-
                 const isApprovedAdm = j.status === 'Sudah_Dikerjakan' || j.status === 'Sudah Dikerjakan' || j.status === 'Selesai'
                 const isProses = j.status === 'Proses_Approval' || j.status === 'Proses Approval'
                 const isSedang = j.status === 'Sedang_Dikerjakan' || j.status === 'Sedang Dikerjakan'
@@ -576,44 +580,62 @@ export default function JadwalPage() {
                             background: '#16a34a',
                             border: '1px solid #15803d',
                             color: '#ffffff',
-                            padding: '6px 14px',
+                            padding: '7px 14px',
                             borderRadius: '8px',
-                            fontSize: '13px',
+                            fontSize: '12.5px',
                             fontWeight: 700,
                             cursor: 'pointer',
                             transition: 'all 0.2s',
-                            boxShadow: '0 2px 5px rgba(22, 163, 74, 0.25)',
+                            boxShadow: '0 2px 6px rgba(22, 163, 74, 0.25)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
                             whiteSpace: 'nowrap'
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = '#15803d'; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = '#16a34a'; }}
-                          title="Kerjakan Laporan (Bisa diakses oleh semua member/PIC)"
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#15803d'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = '#16a34a'; e.currentTarget.style.transform = 'none'; }}
+                          title="Kerjakan Laporan Maintenance"
                         >
-                          🚀 Kerjakan
+                          <PlayCircle size={15} /> Kerjakan
                         </button>
-                        {canDelete && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteJadwal(j.id, j.noMold)}
-                            style={{
-                              background: '#fff',
-                              border: '1px solid #ef4444',
-                              color: '#ef4444',
-                              padding: '6px 10px',
-                              borderRadius: '8px',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              transition: 'all 0.2s',
-                              whiteSpace: 'nowrap'
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#ef4444'; }}
-                            title="Hapus jadwal Rencana (Hanya GL, CL, ADM)"
-                          >
-                            🗑️ Hapus
-                          </button>
-                        )}
+                        
+                        <button
+                          type="button"
+                          onClick={() => setDeleteModalItem(j)}
+                          style={{
+                            background: '#fff1f2',
+                            border: '1px solid #fecdd3',
+                            color: '#e11d48',
+                            padding: '7px 13px',
+                            borderRadius: '8px',
+                            fontSize: '12.5px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            boxShadow: '0 2px 4px rgba(225, 29, 72, 0.08)',
+                            whiteSpace: 'nowrap'
+                          }}
+                          onMouseEnter={(e) => { 
+                            e.currentTarget.style.background = '#e11d48'; 
+                            e.currentTarget.style.color = '#ffffff'; 
+                            e.currentTarget.style.borderColor = '#be123c';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                            e.currentTarget.style.boxShadow = '0 4px 10px rgba(225, 29, 72, 0.3)';
+                          }}
+                          onMouseLeave={(e) => { 
+                            e.currentTarget.style.background = '#fff1f2'; 
+                            e.currentTarget.style.color = '#e11d48'; 
+                            e.currentTarget.style.borderColor = '#fecdd3';
+                            e.currentTarget.style.transform = 'none';
+                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(225, 29, 72, 0.08)';
+                          }}
+                          title="Hapus jadwal maintenance ini"
+                        >
+                          <Trash2 size={15} /> Hapus
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -634,6 +656,140 @@ export default function JadwalPage() {
           itemLabel="jadwal maintenance"
           pageSizeOptions={[5, 8, 15, 30]}
         />
+      )}
+
+      {/* Modal Konfirmasi Hapus Jadwal (Estetik & Rapi) */}
+      {deleteModalItem && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '20px'
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget && !deleting) setDeleteModalItem(null); }}
+        >
+          <div 
+            style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              width: '100%',
+              maxWidth: '460px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Header Dialog */}
+            <div style={{ background: '#fff1f2', borderBottom: '1px solid #fecdd3', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: '14px', position: 'relative' }}>
+              <div style={{ width: 44, height: 44, borderRadius: '14px', background: '#ffe4e6', border: '1px solid #fecdd3', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#e11d48' }}>
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#991b1b', letterSpacing: '-0.3px' }}>
+                  Konfirmasi Hapus Jadwal
+                </h3>
+                <span style={{ fontSize: '12.5px', color: '#e11d48', fontWeight: 600 }}>
+                  Tindakan ini permanen dan tidak dapat dibatalkan
+                </span>
+              </div>
+              <button 
+                onClick={() => !deleting && setDeleteModalItem(null)}
+                disabled={deleting}
+                style={{ position: 'absolute', right: '20px', top: '22px', background: 'transparent', border: 'none', color: '#94a3b8', cursor: deleting ? 'not-allowed' : 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.2s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#ef4444'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content Details */}
+            <div style={{ padding: '22px 24px' }}>
+              <p style={{ margin: '0 0 16px 0', fontSize: '14px', color: '#475569', lineHeight: '1.6', fontWeight: 500 }}>
+                Apakah Anda yakin ingin menghapus schedule mingguan yang telah dibuat ini dari daftar antrean maintenance?
+              </p>
+
+              {/* Rincian Kartu Jadwal */}
+              <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '14px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed #e2e8f0', paddingBottom: '8px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nomor Mold</span>
+                  <span style={{ fontSize: '16px', fontWeight: 800, color: 'var(--oranye-tua)', background: '#fff', padding: '2px 10px', borderRadius: '6px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                    {deleteModalItem.noMold}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', color: '#334155', fontWeight: 600 }}>
+                  <Wrench size={16} style={{ color: '#3b82f6', flexShrink: 0 }} />
+                  <span>Jenis: <b>{deleteModalItem.jenis || 'OH MOLD'}</b></span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', color: '#334155', fontWeight: 600 }}>
+                  <Calendar size={16} style={{ color: '#10b981', flexShrink: 0 }} />
+                  <span>Tanggal: <b>{deleteModalItem.hari ? `${deleteModalItem.hari}, ` : ''}{deleteModalItem.tanggalRencana ? new Date(deleteModalItem.tanggalRencana).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</b></span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13.5px', color: '#334155', fontWeight: 600 }}>
+                  <User size={16} style={{ color: '#a855f7', flexShrink: 0 }} />
+                  <span>PIC: <b>{deleteModalItem.pic?.nama || '-'}</b></span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons Footer */}
+            <div style={{ background: '#f8fafc', borderTop: '1px solid #f1f5f9', padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setDeleteModalItem(null)}
+                disabled={deleting}
+                style={{
+                  background: '#e2e8f0',
+                  color: '#475569',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '10px',
+                  fontSize: '13.5px',
+                  fontWeight: 700,
+                  cursor: deleting ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => { if (!deleting) e.currentTarget.style.background = '#cbd5e1'; }}
+                onMouseLeave={(e) => { if (!deleting) e.currentTarget.style.background = '#e2e8f0'; }}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={executeDeleteJadwal}
+                disabled={deleting}
+                style={{
+                  background: deleting ? '#fda4af' : '#e11d48',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '10px 22px',
+                  borderRadius: '10px',
+                  fontSize: '13.5px',
+                  fontWeight: 800,
+                  cursor: deleting ? 'not-allowed' : 'pointer',
+                  boxShadow: deleting ? 'none' : '0 4px 12px rgba(225, 29, 72, 0.35)',
+                  transition: 'all 0.2s',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => { if (!deleting) { e.currentTarget.style.background = '#be123c'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
+                onMouseLeave={(e) => { if (!deleting) { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.transform = 'none'; } }}
+              >
+                {deleting ? '⌛ Menghapus...' : <><Trash2 size={16} /> Ya, Hapus Jadwal</>}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
