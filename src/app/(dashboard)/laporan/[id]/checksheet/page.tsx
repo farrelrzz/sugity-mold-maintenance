@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { showToast } from '@/components/ui/Toast'
 import { ArrowLeft, RefreshCcw, Printer, Save } from 'lucide-react'
+import { optimizeAndCompressImage } from '@/lib/imageOptimizer'
 
 interface ApprovalEntry {
   id: number
@@ -564,26 +565,28 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     }
   }
 
-  // Upload dynamic image (simulate base64 upload to files)
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Upload dynamic image with WebP high-definition ultra-compression
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
 
-    const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
+    const MAX_SIZE = 10 * 1024 * 1024 // Batas awal 10 MB sebelum dikompres
 
-    Array.from(files).forEach((file) => {
+    for (const file of Array.from(files)) {
       if (file.size > MAX_SIZE) {
-        showToast(`Foto Checksheet "${file.name}" ditolak! Ukuran maksimal foto adalah 5 MB (Ukuran saat ini: ${(file.size / (1024 * 1024)).toFixed(2)} MB).`, 'error')
-        return
+        showToast(`Foto Checksheet "${file.name}" terlalu besar! Maksimal 10 MB sebelum kompresi.`, 'error')
+        continue
       }
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setFoto((prev) => [...prev, reader.result as string])
-        }
+      try {
+        // Kompres foto kamera HP ke format WebP super ringan (~40-80 KB) dengan resolusi tajam
+        const compressedBase64 = await optimizeAndCompressImage(file, { maxDimension: 1024, quality: 0.8 })
+        setFoto((prev) => [...prev, compressedBase64])
+        showToast(`Foto "${file.name}" berhasil dioptimasi & dikompres ke resolusi tajam!`, 'success')
+      } catch (err) {
+        console.error('Gagal memproses foto:', err)
+        showToast(`Gagal mengoptimasi foto "${file.name}"`, 'error')
       }
-      reader.readAsDataURL(file)
-    })
+    }
   }
 
   const handleRemoveFoto = (idx: number) => {

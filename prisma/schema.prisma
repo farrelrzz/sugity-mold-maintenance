@@ -152,7 +152,7 @@ model ChecksheetSparepart {
 model ChecksheetFoto {
   id           Int      @id @default(autoincrement())
   checksheetId Int      @map("checksheet_id")
-  filePath     String   @map("file_path") @db.VarChar(255)
+  filePath     String   @map("file_path") @db.LongText
   uploadedAt   DateTime @default(now()) @map("uploaded_at")
 
   checksheet Checksheet @relation(fields: [checksheetId], references: [id], onDelete: Cascade)

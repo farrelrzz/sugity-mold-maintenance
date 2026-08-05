@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { compactJsonPayload, cleanTextPayload, autoPruneOldLogs } from '@/lib/optimizeStorage'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -76,6 +77,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       foto,
     } = body
 
+    const optimizedChecklist = compactJsonPayload(checklist) || {}
+
     let checksheet = await prisma.checksheet.findUnique({
       where: { laporanId: id },
     })
@@ -84,7 +87,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       checksheet = await prisma.checksheet.create({
         data: {
           laporanId: id,
-          checklist: checklist || {},
+          checklist: optimizedChecklist,
           jamMulai: jamMulai || null,
           jamSelesai: jamSelesai || null,
           jumlahOrang: Number(jumlahOrang) || 1,
@@ -95,7 +98,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       checksheet = await prisma.checksheet.update({
         where: { id: checksheet.id },
         data: {
-          checklist: checklist || {},
+          checklist: optimizedChecklist,
           jamMulai: jamMulai || null,
           jamSelesai: jamSelesai || null,
           jumlahOrang: Number(jumlahOrang) || 1,
@@ -103,13 +106,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       })
     }
 
-    // Sync info dan countermeasure kembali ke Laporan agar muncul di riwayat dan pencarian
+    // Sync info dan countermeasure kembali ke Laporan agar muncul di riwayat dan pencarian (dioptimasi spasi dan teks)
     const items = checklist?.items || {}
-    let extractedInfo = items['cm_0'] || undefined
-    let extractedCountermeasure = items['cm_2'] || undefined
+    let extractedInfo = cleanTextPayload(items['cm_0']) || undefined
+    let extractedCountermeasure = cleanTextPayload(items['cm_2']) || undefined
     
-    // Jika OH MOLD, mungkin tidak ada cm_0, kita ambil catatan jika perlu, tapi Laporan awalnya mungkin sudah ada info. 
-    // Kita update hanya jika ada nilainya.
     if (extractedInfo !== undefined || extractedCountermeasure !== undefined) {
       await prisma.laporan.update({
         where: { id },
@@ -149,6 +150,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         })),
       })
     }
+
+    // Trigger pembersihan log sampah di belakang layar (non-blocking) agar TiDB Cloud selalu awet & hemat
+    autoPruneOldLogs(prisma).catch(() => {})
 
     return NextResponse.json({ ok: true, checksheetId })
   } catch (error) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Factory, Shift, JenisLaporan } from '@prisma/client'
+import { compactJsonPayload, cleanTextPayload } from '@/lib/optimizeStorage'
 
 function toPrismaShift(s: string | null | undefined): Shift | null {
   if (!s) return null
@@ -128,7 +129,7 @@ export async function POST(req: Request) {
     const jumlahOrang = Math.max(1, picPendamping.length)
 
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Simpan Laporan
+      // 1. Simpan Laporan dengan optimasi penyimpanan TiDB Cloud
       const laporan = await tx.laporan.create({
         data: {
           noMold,
@@ -137,15 +138,15 @@ export async function POST(req: Request) {
           shift: toPrismaShift(shift),
           picId: Number(picId),
           tanggal: new Date(tanggal),
-          part,
-          komentar,
-          coreActual,
-          cavActual,
-          heaterActual,
-          shotCycle,
-          shotMonth,
-          info,
-          countermeasure,
+          part: cleanTextPayload(part),
+          komentar: cleanTextPayload(komentar),
+          coreActual: cleanTextPayload(coreActual),
+          cavActual: cleanTextPayload(cavActual),
+          heaterActual: compactJsonPayload(heaterActual),
+          shotCycle: cleanTextPayload(shotCycle),
+          shotMonth: cleanTextPayload(shotMonth),
+          info: cleanTextPayload(info),
+          countermeasure: cleanTextPayload(countermeasure),
         },
       })
 
