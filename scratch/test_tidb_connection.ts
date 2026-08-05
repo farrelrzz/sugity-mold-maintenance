@@ -5,8 +5,8 @@ async function main() {
   const conn = await mariadb.createConnection({
     host: 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
     port: 4000,
-    user: '2UVNBvRtUAd5zyR.root',
-    password: 'vFEouGzVawSvJ0hP',
+    user: '4RW9SWasKgizVvK.root',
+    password: 'wBYxqX7bFpXKNydF',
     ssl: { rejectUnauthorized: false },
     connectTimeout: 15000
   });

@@ -8,8 +8,8 @@ import { execSync } from 'child_process'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// ⚠️ GANTI TEKS 'MASUKKAN_PASSWORD_DISINI' DENGAN PASSWORD AKUN BARU TIDB ANDA!
-const NEW_TIDB_URL = process.env.NEW_DATABASE_URL || 'mysql://4RW9SWasKgizVvK.root:MASUKKAN_PASSWORD_DISINI@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sugity?sslaccept=strict&connect_timeout=30'
+// URL Resmi Akun Baru TiDB Cloud (4RW9SWasKgizVvK) dengan Database /sugity
+const NEW_TIDB_URL = process.env.NEW_DATABASE_URL || 'mysql://4RW9SWasKgizVvK.root:wBYxqX7bFpXKNydF@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sugity?sslaccept=strict&connect_timeout=30'
 
 function createPrisma(url: string) {
   const parsed = new URL(url)
@@ -30,10 +30,7 @@ const prisma = createPrisma(NEW_TIDB_URL)
 
 async function importAllData() {
   console.log('🔄 Memulai Impor Data ke Akun TiDB Cloud Baru (4RW9SWasKgizVvK)...')
-  if (NEW_TIDB_URL.includes('MASUKKAN_PASSWORD_DISINI')) {
-    console.error('❌ ERROR: Anda belum mengganti teks "MASUKKAN_PASSWORD_DISINI" dengan password asli akun baru Anda di baris 11 pada file ini!')
-    process.exit(1)
-  }
+
 
   console.log('🏗️ Langkah 1: Meringkas dan menyusun skema tabel database otomatis (Prisma DB Push) di cloud baru...')
   try {

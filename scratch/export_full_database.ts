@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 // URL Database TiDB Cloud Lama (Sumber Data Export)
-const OLD_TIDB_URL = process.env.DATABASE_URL || 'mysql://2UVNBvRtUAd5zyR.root:vFEouGzVawSvJ0hP@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sugity?sslaccept=strict&connect_timeout=30'
+const OLD_TIDB_URL = process.env.DATABASE_URL || 'mysql://4RW9SWasKgizVvK.root:wBYxqX7bFpXKNydF@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sugity?sslaccept=strict&connect_timeout=30'
 
 function createPrisma(url: string) {
   const parsed = new URL(url)
