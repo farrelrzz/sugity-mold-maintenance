@@ -3,12 +3,13 @@ import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
+import { execSync } from 'child_process'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// ⚠️ GANTI STRING DI BAWAH INI DENGAN KONEKSI DATABASE AKUN TIDB CLOUD BARU ANDA!
-const NEW_TIDB_URL = process.env.NEW_DATABASE_URL || 'mysql://USER_BARU.root:PASSWORD_BARU@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sugity?sslaccept=strict&connect_timeout=30'
+// ⚠️ GANTI TEKS 'MASUKKAN_PASSWORD_DISINI' DENGAN PASSWORD AKUN BARU TIDB ANDA!
+const NEW_TIDB_URL = process.env.NEW_DATABASE_URL || 'mysql://4RW9SWasKgizVvK.root:MASUKKAN_PASSWORD_DISINI@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/sugity?sslaccept=strict&connect_timeout=30'
 
 function createPrisma(url: string) {
   const parsed = new URL(url)
@@ -28,9 +29,21 @@ function createPrisma(url: string) {
 const prisma = createPrisma(NEW_TIDB_URL)
 
 async function importAllData() {
-  console.log('🔄 Memulai Impor Data ke Akun TiDB Cloud Baru...')
-  if (NEW_TIDB_URL.includes('USER_BARU')) {
-    console.error('❌ ERROR: Anda belum memasukkan URL Akun TiDB Cloud yang baru di variabel NEW_TIDB_URL pada file ini!')
+  console.log('🔄 Memulai Impor Data ke Akun TiDB Cloud Baru (4RW9SWasKgizVvK)...')
+  if (NEW_TIDB_URL.includes('MASUKKAN_PASSWORD_DISINI')) {
+    console.error('❌ ERROR: Anda belum mengganti teks "MASUKKAN_PASSWORD_DISINI" dengan password asli akun baru Anda di baris 11 pada file ini!')
+    process.exit(1)
+  }
+
+  console.log('🏗️ Langkah 1: Meringkas dan menyusun skema tabel database otomatis (Prisma DB Push) di cloud baru...')
+  try {
+    execSync('npx -y prisma db push --accept-data-loss', {
+      env: { ...process.env, DATABASE_URL: NEW_TIDB_URL },
+      stdio: 'inherit'
+    })
+    console.log('✅ Skema tabel berhasil dibuat sempurna di server TiDB Cloud yang baru!\n')
+  } catch (err) {
+    console.error('❌ Gagal membuat skema tabel di server baru. Pastikan Password dan URL sudah tepat!', err)
     process.exit(1)
   }
 
