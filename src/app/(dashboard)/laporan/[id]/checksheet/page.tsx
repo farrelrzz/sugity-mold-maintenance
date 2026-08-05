@@ -581,7 +581,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
         // Kompres foto kamera HP ke format WebP super ringan (~40-80 KB) dengan resolusi tajam
         const compressedBase64 = await optimizeAndCompressImage(file, { maxDimension: 1024, quality: 0.8 })
         setFoto((prev) => [...prev, compressedBase64])
-        showToast(`Foto "${file.name}" berhasil dioptimasi & dikompres ke resolusi tajam!`, 'success')
+        showToast(`Foto "${file.name}" berhasil dioptimasi & dikompres ke resolusi tajam!`, 'sukses')
       } catch (err) {
         console.error('Gagal memproses foto:', err)
         showToast(`Gagal mengoptimasi foto "${file.name}"`, 'error')
