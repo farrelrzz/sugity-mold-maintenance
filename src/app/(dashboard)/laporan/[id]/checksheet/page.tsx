@@ -565,6 +565,28 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     }
   }
 
+  const handleSignAll = async () => {
+    const saveOk = await handleSave(false)
+    if (!saveOk) return
+
+    if (!confirm('Apakah Anda yakin ingin menyetujui seluruh tahapan persetujuan (TL, GL, ADM) sekaligus secara otomatis?')) return
+
+    try {
+      const res = await fetch(`/api/laporan/${laporanId}/checksheet/sign-all`, {
+        method: 'POST',
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast(data.error || 'Gagal Approve All', 'error')
+      } else {
+        showToast(`Berhasil menyetujui ${data.signedCount} tahapan sekaligus! ✓`)
+        window.location.reload()
+      }
+    } catch {
+      showToast('Kesalahan jaringan', 'error')
+    }
+  }
+
   // Upload dynamic image with WebP high-definition ultra-compression
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -2722,8 +2744,24 @@ ${hasCoolingOrHeater ? `
         </fieldset>
 
         {/* SIGNATURE APPROVAL CARD */}
-        <div className="kartu">
-          <p className="label-besar">Approval Status & Tanda Tangan</p>
+        <div className="kartu" style={{ marginTop: '30px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '15px', marginBottom: '15px' }}>
+            <p className="label-besar" style={{ margin: 0 }}>Approval Status & Tanda Tangan</p>
+            
+            {/* APPROVE ALL BUTTON */}
+            {['TL', 'GL', 'ADM', 'SUPER_ADMIN'].includes(userRole || '') && (
+              <button 
+                onClick={handleSignAll}
+                className="group relative flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-sm rounded-lg shadow-md hover:shadow-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:-translate-y-0.5"
+                style={{ border: 'none', cursor: 'pointer' }}
+                title="Approve All Remaining (TL, GL, ADM)"
+              >
+                <span style={{ marginRight: '5px' }}>⚡</span>
+                <span className="tracking-wide">Approve All</span>
+              </button>
+            )}
+          </div>
+
           <div className="cs-ttd-wrap">
             {getTtdBox('PIC', 'Member (PIC)', picSign, undefined)}
             {getTtdBox('TL', 'Team Leader', tlSign, picSign)}
@@ -2731,7 +2769,6 @@ ${hasCoolingOrHeater ? `
             {getTtdBox('ADM', 'ADM', admSign, glSign)}
           </div>
         </div>
-
         {/* SUBMIT BUTTON AT BOTTOM */}
         {!isLocked && (
           <button className="tombol-utama" type="button" onClick={() => handleSave(true)}>
