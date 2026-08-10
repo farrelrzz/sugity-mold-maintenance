@@ -129,7 +129,7 @@ export default function ApprovalPage() {
     // Process all approvals
     for (const item of pendingItems) {
       try {
-        const res = await fetch(`/api/laporan/${item.laporanId}/checksheet/sign-all`, {
+        const res = await fetch(`/api/laporan/${item.laporanId}/checksheet/sign`, {
           method: 'POST'
         })
         if (res.ok) successCount++
@@ -382,20 +382,28 @@ export default function ApprovalPage() {
             {activeTab === 'MENUNGGU' && waitingCount > 0 && (
               <button
                 onClick={handleApproveAllPending}
-                className="group relative flex items-center justify-center gap-1.5 px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-sm rounded-lg shadow-md hover:shadow-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 overflow-hidden"
-                style={{ border: 'none', cursor: 'pointer' }}
-                title="Tandatangani semua dokumen yang menunggu sekaligus"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  background: 'linear-gradient(135deg, var(--hijau) 0%, var(--hijau-tua) 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '30px',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)',
+                  transition: 'all 0.2s',
+                  marginLeft: '10px'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                title={`Tandatangani ${waitingCount} dokumen sekaligus`}
               >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                <div className="relative z-10 flex items-center">
-                  <svg className="w-4 h-4 text-emerald-100 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <svg className="w-4 h-4 text-white drop-shadow-sm -ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="relative z-10 tracking-wide">Approve Semua ({waitingCount})</span>
+                <CheckCircle2 size={18} />
+                <span>Approve Semua ({waitingCount})</span>
               </button>
             )}
           </div>

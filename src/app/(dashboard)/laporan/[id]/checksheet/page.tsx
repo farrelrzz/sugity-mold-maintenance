@@ -565,27 +565,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     }
   }
 
-  const handleSignAll = async () => {
-    const saveOk = await handleSave(false)
-    if (!saveOk) return
 
-    if (!confirm('Apakah Anda yakin ingin menyetujui seluruh tahapan persetujuan (PIC, TL, GL, ADM) sekaligus secara otomatis?')) return
-
-    try {
-      const res = await fetch(`/api/laporan/${laporanId}/checksheet/sign-all`, {
-        method: 'POST',
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        showToast(data.error || 'Gagal Approve All', 'error')
-      } else {
-        showToast(`Berhasil menyetujui ${data.signedCount} tahapan sekaligus! ✓`)
-        window.location.reload()
-      }
-    } catch {
-      showToast('Kesalahan jaringan', 'error')
-    }
-  }
 
   // Upload dynamic image with WebP high-definition ultra-compression
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
