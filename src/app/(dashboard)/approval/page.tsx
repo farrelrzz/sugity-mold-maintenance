@@ -111,6 +111,47 @@ export default function ApprovalPage() {
     }
   }
 
+  const handleApproveAllPending = async () => {
+    const pendingItems = data.filter(d => d.status === 'MENUNGGU')
+    if (pendingItems.length === 0) {
+      showToast('Tidak ada dokumen yang menunggu persetujuan Anda', 'error')
+      return
+    }
+
+    if (!window.confirm(`⚡ Yakin ingin menyetujui SEMUA (${pendingItems.length}) dokumen sekaligus?\n\nTindakan ini akan menerapkan tanda tangan Anda pada semua laporan yang sedang menunggu giliran Anda.`)) {
+      return
+    }
+
+    setLoading(true)
+    let successCount = 0
+    let failCount = 0
+
+    // Process all approvals
+    for (const item of pendingItems) {
+      try {
+        const res = await fetch(`/api/laporan/${item.laporanId}/checksheet/sign-all`, {
+          method: 'POST'
+        })
+        if (res.ok) successCount++
+        else failCount++
+      } catch (e) {
+        failCount++
+      }
+    }
+
+    showToast(`Selesai! Berhasil menyetujui ${successCount} dokumen.${failCount > 0 ? ` Gagal: ${failCount}` : ''}`, successCount > 0 ? 'sukses' as any : 'error')
+    
+    // Refresh data
+    try {
+      const d = await fetch('/api/approval').then(res => res.json())
+      if (!d.error) setData(d)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const waitingCount = data.filter(d => d.status === 'MENUNGGU').length
   const approvedCount = data.filter(d => d.status === 'APPROVED').length
 
@@ -322,16 +363,42 @@ export default function ApprovalPage() {
           background: 'var(--krem)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
         }}>
           <div style={{ fontWeight: 800, fontSize: '16px', color: 'var(--teks)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             {activeTab === 'MENUNGGU' && <><span style={{ color: 'var(--merah)' }}>🔴</span> Dokumen Menunggu Verifikasi Tanda Tangan</>}
             {activeTab === 'APPROVED' && <><span style={{ color: 'var(--hijau)' }}>🟢</span> Riwayat Dokumen Yang Telah Disetujui</>}
             {activeTab === 'REVISI' && <><span style={{ color: 'var(--oranye)' }}>🔄</span> Antrean Permohonan Revisi Checksheet (Admin Only)</>}
           </div>
-          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--teks-redup)' }}>
-            Total: {activeTab === 'REVISI' ? revisiData.length : filteredData.length} Data
-          </span>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--teks-redup)' }}>
+              Total: {activeTab === 'REVISI' ? revisiData.length : filteredData.length} Data
+            </span>
+            
+            {/* MASS APPROVE BUTTON */}
+            {activeTab === 'MENUNGGU' && waitingCount > 0 && (
+              <button
+                onClick={handleApproveAllPending}
+                className="group relative flex items-center justify-center gap-1.5 px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-sm rounded-lg shadow-md hover:shadow-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 overflow-hidden"
+                style={{ border: 'none', cursor: 'pointer' }}
+                title="Tandatangani semua dokumen yang menunggu sekaligus"
+              >
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                <div className="relative z-10 flex items-center">
+                  <svg className="w-4 h-4 text-emerald-100 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <svg className="w-4 h-4 text-white drop-shadow-sm -ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="relative z-10 tracking-wide">Approve Semua ({waitingCount})</span>
+              </button>
+            )}
+          </div>
         </div>
 
         <div style={{ overflowX: 'auto', width: '100%' }}>
