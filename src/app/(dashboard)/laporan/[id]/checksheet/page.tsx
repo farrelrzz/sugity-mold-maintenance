@@ -2728,18 +2728,7 @@ ${hasCoolingOrHeater ? `
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '15px', marginBottom: '15px' }}>
             <p className="label-besar" style={{ margin: 0 }}>Approval Status & Tanda Tangan</p>
             
-            {/* APPROVE ALL BUTTON */}
-            {['PIC', 'TL', 'GL', 'ADM', 'SUPER_ADMIN'].includes(userRole || '') && (
-              <button 
-                onClick={handleSignAll}
-                className="group relative flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-sm rounded-lg shadow-md hover:shadow-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:-translate-y-0.5"
-                style={{ border: 'none', cursor: 'pointer' }}
-                title="Approve All Remaining (PIC, TL, GL, ADM)"
-              >
-                <span style={{ marginRight: '5px' }}>⚡</span>
-                <span className="tracking-wide">Approve All</span>
-              </button>
-            )}
+
           </div>
 
           <div className="cs-ttd-wrap">
