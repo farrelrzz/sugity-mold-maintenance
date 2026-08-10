@@ -11,9 +11,6 @@ export async function GET(req: Request) {
     }
 
     const role = session.user.role
-    if (role === 'PIC') {
-      return NextResponse.json({ error: 'Akses ditolak: PIC tidak berwenang mengakses data approval' }, { status: 403 })
-    }
 
     const checksheets = await prisma.checksheet.findMany({
       include: {

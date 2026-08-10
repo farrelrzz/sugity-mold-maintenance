@@ -59,7 +59,7 @@ export default function ApprovalPage() {
   const [activeTab, setActiveTab] = useState<'MENUNGGU' | 'APPROVED' | 'REVISI'>('MENUNGGU')
 
   useEffect(() => {
-    if (!session || session?.user?.role === 'PIC') {
+    if (!session) {
       setLoading(false)
       return
     }
@@ -132,20 +132,7 @@ export default function ApprovalPage() {
     )
   }
 
-  if (session?.user?.role === 'PIC') {
-    return (
-      <div className="kartu" style={{ padding: '50px 30px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--merah-bg)', maxWidth: '600px', margin: '40px auto' }}>
-        <AlertTriangle size={52} style={{ color: 'var(--merah)', margin: '0 auto 16px auto' }} />
-        <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--teks)', marginBottom: '10px' }}>Akses Terbatas</h2>
-        <p style={{ fontSize: '14.5px', color: 'var(--teks-redup)', lineHeight: 1.6, marginBottom: '24px' }}>
-          Hanya Leader (Team Leader, Group Leader, Chief Leader) dan Administrator (ADM) yang berwenang untuk mengakses dan memberikan tanda tangan di Pusat Approval.
-        </p>
-        <button className="tombol-utama" onClick={() => router.push('/dashboard')} style={{ padding: '12px 24px', borderRadius: '10px', fontWeight: 'bold' }}>
-          Kembali ke Dashboard
-        </button>
-      </div>
-    )
-  }
+  // Removed PIC blocking block
 
   const getJenisBadgeColor = (jenis: string) => {
     const j = jenis?.toUpperCase() || ''

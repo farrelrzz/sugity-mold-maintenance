@@ -32,7 +32,7 @@ const NAV_TABS = [
   { href: '/pengaturan-sistem', label: 'Pengaturan Sistem', icon: Settings, roles: ['SUPER_ADMIN'] },
   { href: '/audit-log', label: 'Audit Log', icon: ShieldCheck, roles: ['SUPER_ADMIN'] },
   { href: '/overtime', label: 'Overtime', icon: Clock, roles: ['PIC', 'TL', 'GL', 'CL', 'ADM'] },
-  { href: '/approval', label: 'Approval', icon: CheckSquare, roles: ['TL', 'GL', 'CL', 'ADM'] },
+  { href: '/approval', label: 'Approval', icon: CheckSquare, roles: ['PIC', 'TL', 'GL', 'CL', 'ADM'] },
 ]
 
 interface SidebarProps {
