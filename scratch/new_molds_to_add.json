@@ -1,0 +1,72 @@
+[
+  {
+    "noMold": "W51",
+    "model": "D74A",
+    "part": "BOARD, RR DOOR TRIM, RH/LH",
+    "factory": "F2",
+    "lokasiMold": "F2A"
+  },
+  {
+    "noMold": "W56",
+    "model": "D03B",
+    "part": "PANEL, QUARTER TRIM, RR LH",
+    "factory": "F2",
+    "lokasiMold": "F2A"
+  },
+  {
+    "noMold": "W57",
+    "model": "D03B",
+    "part": "PANEL, QUARTER TRIM, RR LH - HV",
+    "factory": "F2",
+    "lokasiMold": "F2A"
+  },
+  {
+    "noMold": "Q61",
+    "model": "D03B",
+    "part": "COMPARTMENT, GLOVE/DOOR, INNER LHD",
+    "factory": "F3",
+    "lokasiMold": "F3A"
+  },
+  {
+    "noMold": "Q58",
+    "model": "D03B",
+    "part": "COVER RR SPOILER",
+    "factory": "F3",
+    "lokasiMold": "F3A"
+  },
+  {
+    "noMold": "AA01",
+    "model": "D37D",
+    "part": "GRILLE RAD AERO",
+    "factory": "F3",
+    "lokasiMold": "F3A"
+  },
+  {
+    "noMold": "W50",
+    "model": "D74A",
+    "part": "BOARD QTR TRIM RR RH/LH, COVER,QTR TRIM RH",
+    "factory": "F2",
+    "lokasiMold": "F2B"
+  },
+  {
+    "noMold": "W55",
+    "model": "D03B",
+    "part": "PANEL, QUARTER TRIM, RR RH",
+    "factory": "F2",
+    "lokasiMold": "F2B"
+  },
+  {
+    "noMold": "Q60",
+    "model": "D03B",
+    "part": "COMPARTMENT, GLOVE/DOOR, INNER RHD",
+    "factory": "F3",
+    "lokasiMold": "F3B"
+  },
+  {
+    "noMold": "Y32",
+    "model": "D52B",
+    "part": "GRILLE RADIATOR UPR (PAINT)",
+    "factory": "F3",
+    "lokasiMold": "F3B"
+  }
+]

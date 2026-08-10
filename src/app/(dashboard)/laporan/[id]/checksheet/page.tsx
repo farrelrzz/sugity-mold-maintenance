@@ -569,7 +569,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     const saveOk = await handleSave(false)
     if (!saveOk) return
 
-    if (!confirm('Apakah Anda yakin ingin menyetujui seluruh tahapan persetujuan (TL, GL, ADM) sekaligus secara otomatis?')) return
+    if (!confirm('Apakah Anda yakin ingin menyetujui seluruh tahapan persetujuan (PIC, TL, GL, ADM) sekaligus secara otomatis?')) return
 
     try {
       const res = await fetch(`/api/laporan/${laporanId}/checksheet/sign-all`, {
@@ -2749,12 +2749,12 @@ ${hasCoolingOrHeater ? `
             <p className="label-besar" style={{ margin: 0 }}>Approval Status & Tanda Tangan</p>
             
             {/* APPROVE ALL BUTTON */}
-            {['TL', 'GL', 'ADM', 'SUPER_ADMIN'].includes(userRole || '') && (
+            {['PIC', 'TL', 'GL', 'ADM', 'SUPER_ADMIN'].includes(userRole || '') && (
               <button 
                 onClick={handleSignAll}
                 className="group relative flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-sm rounded-lg shadow-md hover:shadow-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-300 transform hover:-translate-y-0.5"
                 style={{ border: 'none', cursor: 'pointer' }}
-                title="Approve All Remaining (TL, GL, ADM)"
+                title="Approve All Remaining (PIC, TL, GL, ADM)"
               >
                 <span style={{ marginRight: '5px' }}>⚡</span>
                 <span className="tracking-wide">Approve All</span>

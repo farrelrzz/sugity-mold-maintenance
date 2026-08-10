@@ -17,9 +17,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
 
     const userRole = session.user.role
-    const allowedRoles = ['TL', 'GL', 'ADM', 'SUPER_ADMIN']
+    const allowedRoles = ['PIC', 'TL', 'GL', 'ADM', 'SUPER_ADMIN']
     
-    // Pastikan PIC tidak bisa asal Approve All untuk TL, GL, ADM
+    // Pastikan user memiliki akses
     if (!allowedRoles.includes(userRole)) {
       return NextResponse.json({ error: 'Role Anda tidak memiliki akses untuk Approve All.' }, { status: 403 })
     }
@@ -33,18 +33,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Checksheet belum dibuat.' }, { status: 404 })
     }
 
-    // Temukan semua approval untuk TL, GL, ADM yang belum di TTD
+    // Temukan semua approval untuk PIC, TL, GL, ADM yang belum di TTD
     const approvals = await prisma.checksheetApproval.findMany({
       where: { 
         checksheetId: checksheet.id,
-        role: { in: ['TL', 'GL', 'ADM'] }
+        role: { in: ['PIC', 'TL', 'GL', 'ADM'] }
       },
     })
 
     const unsignedApprovals = approvals.filter(a => !a.signedAt)
 
     if (unsignedApprovals.length === 0) {
-      return NextResponse.json({ error: 'Semua approval (TL, GL, ADM) sudah ditandatangani.' }, { status: 400 })
+      return NextResponse.json({ error: 'Semua approval (PIC, TL, GL, ADM) sudah ditandatangani.' }, { status: 400 })
     }
 
     const userId = Number(session.user.id)
