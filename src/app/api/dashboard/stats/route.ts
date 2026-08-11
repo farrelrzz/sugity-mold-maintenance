@@ -228,21 +228,21 @@ export async function GET(req: Request) {
       }
     }
 
-    // 3. Approval Ratios untuk MINGGU BERJALAN
-    const totalWeekly = laporanMingguIni.length
-    let weeklyPic = 0
-    let weeklyTl = 0
-    let weeklyGl = 0
-    let weeklyAdm = 0
+    // 3. Approval Ratios untuk BULAN BERJALAN
+    const totalBulanIni = laporanBulanIni.length
+    let bulanPic = 0
+    let bulanTl = 0
+    let bulanGl = 0
+    let bulanAdm = 0
 
-    laporanMingguIni.forEach((lap) => {
+    laporanBulanIni.forEach((lap) => {
       const cs = lap.checksheet
       if (cs) {
         const approvals = cs.approvals || []
-        if (approvals.some((a) => a.role === 'PIC' && a.signedAt !== null)) weeklyPic++
-        if (approvals.some((a) => a.role === 'TL' && a.signedAt !== null)) weeklyTl++
-        if (approvals.some((a) => a.role === 'GL' && a.signedAt !== null)) weeklyGl++
-        if (approvals.some((a) => a.role === 'ADM' && a.signedAt !== null)) weeklyAdm++
+        if (approvals.some((a) => a.role === 'PIC' && a.signedAt !== null)) bulanPic++
+        if (approvals.some((a) => a.role === 'TL' && a.signedAt !== null)) bulanTl++
+        if (approvals.some((a) => a.role === 'GL' && a.signedAt !== null)) bulanGl++
+        if (approvals.some((a) => a.role === 'ADM' && a.signedAt !== null)) bulanAdm++
       }
     })
 
@@ -460,13 +460,13 @@ export async function GET(req: Request) {
       },
       dailyOh,
       approvalRatios: {
-        total: totalWeekly,
-        pic: weeklyPic,
-        tl: weeklyTl,
-        gl: weeklyGl,
+        total: totalBulanIni,
+        pic: bulanPic,
+        tl: bulanTl,
+        gl: bulanGl,
         cl: 0,
-        adm: weeklyAdm,
-        period: `${formatDateLocal(startOfWeek)} s/d ${formatDateLocal(endOfWeek)}`,
+        adm: bulanAdm,
+        period: `Bulan Berjalan (${bulanParam})`,
       },
       planningWeekly: {
         weeks,
