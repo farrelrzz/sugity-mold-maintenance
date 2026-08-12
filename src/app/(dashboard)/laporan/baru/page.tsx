@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { showToast } from '@/components/ui/Toast'
+import { confirmDialog } from '@/components/ui/ConfirmModal'
 
 interface UserOption {
   id: number
@@ -233,7 +234,13 @@ export default function LaporanBaruPage() {
   }
 
   const handleDeleteOption = async (id: number) => {
-    if (!confirm('Hapus opsi ini permanen?')) return
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Opsi Permanen?',
+      message: 'Apakah Anda yakin ingin menghapus opsi ini dari database secara permanen? Opsi ini tidak akan muncul lagi di pilihan dropdown.',
+      type: 'danger',
+      confirmText: 'Ya, Hapus Opsi'
+    })
+    if (!isConfirmed) return
     try {
       const res = await fetch(`/api/report-options/${id}`, {
         method: 'DELETE'
@@ -554,7 +561,13 @@ export default function LaporanBaruPage() {
   }
 
   const handleRemovePicOption = async (picId: number, picNama: string) => {
-    if (!confirm(`Hapus PIC ${picNama} dari database?`)) return
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus PIC dari Database?',
+      message: `Apakah Anda yakin ingin menghapus PIC "${picNama}" dari database? Tindakan ini tidak dapat dibatalkan.`,
+      type: 'danger',
+      confirmText: 'Ya, Hapus PIC'
+    })
+    if (!isConfirmed) return
     try {
       const res = await fetch(`/api/users/${picId}`, { method: 'DELETE' })
       if (res.ok) {
@@ -612,7 +625,13 @@ export default function LaporanBaruPage() {
 
   // Hapus Jadwal Mingguan
   const handleHapusJadwal = async (id: number) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus rencana jadwal ini?')) return
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Rencana Jadwal?',
+      message: 'Apakah Anda yakin ingin menghapus rencana jadwal ini? Tindakan ini tidak dapat dibatalkan.',
+      type: 'danger',
+      confirmText: 'Ya, Hapus Jadwal'
+    })
+    if (!isConfirmed) return
 
     try {
       const res = await fetch(`/api/jadwal/${id}`, { method: 'DELETE' })
@@ -754,7 +773,13 @@ export default function LaporanBaruPage() {
       return
     }
 
-    if (!confirm(`Hapus mold ${selectedHapusMold.noMold} dari database?`)) return
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Mold?',
+      message: `Apakah Anda yakin ingin menghapus mold "${selectedHapusMold.noMold}" dari database secara permanen? Semua data yang terkait dengan mold ini juga akan ikut terhapus.`,
+      type: 'danger',
+      confirmText: 'Ya, Hapus Mold'
+    })
+    if (!isConfirmed) return
 
     try {
       const res = await fetch(`/api/mold-book/${encodeURIComponent(selectedHapusMold.noMold)}`, {

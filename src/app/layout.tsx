@@ -4,6 +4,7 @@ import { SessionProvider } from '@/components/providers/SessionProvider'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import ScrollObserver from '@/components/ui/ScrollObserver'
 import CreditsModal from '@/components/ui/CreditsModal'
+import { ConfirmModalProvider } from '@/components/ui/ConfirmModal'
 
 export const metadata: Metadata = {
   title: 'Sistem Maintenance - PT Sugity Creatives',
@@ -41,6 +42,7 @@ export default function RootLayout({
           <ThemeProvider attribute="data-theme" defaultTheme="light" forcedTheme="light" enableSystem={false}>
             <ScrollObserver />
             <CreditsModal />
+            <ConfirmModalProvider />
             {children}
           </ThemeProvider>
         </SessionProvider>
