@@ -7,9 +7,8 @@ import bcrypt from 'bcryptjs'
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions)
-    const userRole = (session?.user as any)?.role
-    if (!session || !['SUPER_ADMIN', 'SUPERADMIN', 'ADM'].includes(userRole)) {
-      return NextResponse.json({ error: 'Unauthorized. Hanya Super Admin & Admin yang diizinkan.' }, { status: 403 })
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
     }
 
     const { id } = await params
@@ -17,6 +16,22 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     if (isNaN(userId)) {
       return NextResponse.json({ error: 'ID tidak valid' }, { status: 400 })
     }
+
+    const userToDelete = await prisma.user.findUnique({ where: { id: userId } })
+    if (!userToDelete) {
+      return NextResponse.json({ error: 'User tidak ditemukan' }, { status: 404 })
+    }
+
+    const userRole = (session?.user as any)?.role
+    if (!['SUPER_ADMIN', 'SUPERADMIN', 'ADM'].includes(userRole)) {
+      if (userRole === 'PIC' && userToDelete.role === 'PIC') {
+        // PIC diizinkan menghapus PIC (terutama untuk hapus PIC temporary)
+      } else {
+        return NextResponse.json({ error: 'Unauthorized. Hanya Super Admin & Admin yang diizinkan.' }, { status: 403 })
+      }
+    }
+
+
 
     const deletedUser = await prisma.user.delete({
       where: { id: userId }
