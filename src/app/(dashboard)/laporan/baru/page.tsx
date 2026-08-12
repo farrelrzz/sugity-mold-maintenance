@@ -207,9 +207,11 @@ export default function LaporanBaruPage() {
         body: JSON.stringify({ category, value })
       })
       if (res.ok) {
-        showToast('Opsi permanen berhasil disimpan & dipilih! ✓')
+        const newOption = await res.json()
+        showToast('Opsi permanen berhasil disimpan & dipilih! ✓', 'sukses')
         if (category === 'PROBLEM') {
           const val = newProblem.trim()
+          setProblemOptions(prev => [...prev, newOption])
           setInfo(prev => {
             const parts = prev ? prev.split(',').map(s => s.trim()).filter(Boolean) : []
             return !parts.some(p => p.toLowerCase() === val.toLowerCase()) ? [...parts, val].join(', ') : prev
@@ -218,13 +220,13 @@ export default function LaporanBaruPage() {
         }
         if (category === 'COUNTERMEASURE') {
           const val = newCm.trim()
+          setCmOptions(prev => [...prev, newOption])
           setCountermeasure(prev => {
             const parts = prev ? prev.split(',').map(s => s.trim()).filter(Boolean) : []
             return !parts.some(p => p.toLowerCase() === val.toLowerCase()) ? [...parts, val].join(', ') : prev
           })
           setNewCm('')
         }
-        fetchOptions()
       } else {
         showToast('Gagal menambahkan opsi', 'error')
       }
@@ -241,18 +243,24 @@ export default function LaporanBaruPage() {
       confirmText: 'Ya, Hapus Opsi'
     })
     if (!isConfirmed) return
+
+    // Update state secara instan (Optimistic Update)
+    setProblemOptions(prev => prev.filter(p => p.id !== id))
+    setCmOptions(prev => prev.filter(c => c.id !== id))
+
     try {
       const res = await fetch(`/api/report-options/${id}`, {
         method: 'DELETE'
       })
       if (res.ok) {
-        showToast('Opsi berhasil dihapus ✓')
-        fetchOptions()
+        showToast('Opsi berhasil dihapus ✓', 'sukses')
       } else {
         showToast('Gagal menghapus opsi', 'error')
+        fetchOptions() // Revert jika gagal
       }
     } catch (e) {
       showToast('Terjadi kesalahan jaringan', 'error')
+      fetchOptions() // Revert jika gagal
     }
   }
 
