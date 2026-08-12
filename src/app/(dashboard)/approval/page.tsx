@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { showToast } from '@/components/ui/Toast'
+import { confirmDialog } from '@/components/ui/ConfirmModal'
 import { 
   FileCheck, 
   AlertCircle, 
@@ -92,7 +93,13 @@ export default function ApprovalPage() {
   }, [session])
 
   const handleRevisiAction = async (id: number, action: 'DISETUJUI' | 'DITOLAK') => {
-    if (!window.confirm(`Yakin ingin ${action.toLowerCase()} permintaan revisi ini?`)) return
+    const isConfirmed = await confirmDialog({
+      title: action === 'DISETUJUI' ? 'Setujui Revisi?' : 'Tolak Revisi?',
+      message: `Yakin ingin ${action.toLowerCase()} permintaan revisi ini?`,
+      type: action === 'DISETUJUI' ? 'info' : 'warning',
+      confirmText: action === 'DISETUJUI' ? 'Ya, Setujui' : 'Ya, Tolak'
+    })
+    if (!isConfirmed) return
     try {
       const res = await fetch(`/api/revisi/${id}`, {
         method: 'PATCH',
@@ -118,9 +125,13 @@ export default function ApprovalPage() {
       return
     }
 
-    if (!window.confirm(`⚡ Yakin ingin menyetujui SEMUA (${pendingItems.length}) dokumen sekaligus?\n\nTindakan ini akan menerapkan tanda tangan Anda pada semua laporan yang sedang menunggu giliran Anda.`)) {
-      return
-    }
+    const isConfirmed = await confirmDialog({
+      title: 'Setujui Semua Dokumen?',
+      message: `⚡ Yakin ingin menyetujui SEMUA (${pendingItems.length}) dokumen sekaligus?\n\nTindakan ini akan menerapkan tanda tangan Anda pada semua laporan yang sedang menunggu giliran Anda.`,
+      type: 'info',
+      confirmText: 'Ya, Setujui Semua'
+    })
+    if (!isConfirmed) return
 
     setLoading(true)
     let successCount = 0

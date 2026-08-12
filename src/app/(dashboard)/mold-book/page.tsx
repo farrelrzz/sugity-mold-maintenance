@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { showToast } from '@/components/ui/Toast'
+import { confirmDialog } from '@/components/ui/ConfirmModal'
 import Pagination from '@/components/ui/Pagination'
 
 interface Outhouse {
@@ -317,7 +318,13 @@ export default function MoldBookPage() {
   }
 
   const handleDelete = async (noMold: string) => {
-    if (!confirm(`Hapus mold "${noMold}" secara permanen?`)) return
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Mold?',
+      message: `Hapus mold "${noMold}" secara permanen? Semua data yang terkait dengan mold ini juga akan ikut terhapus.`,
+      type: 'danger',
+      confirmText: 'Ya, Hapus'
+    })
+    if (!isConfirmed) return
     try {
       const res = await fetch(`/api/mold-book/${encodeURIComponent(noMold)}`, { method: 'DELETE' })
       if (res.ok) {

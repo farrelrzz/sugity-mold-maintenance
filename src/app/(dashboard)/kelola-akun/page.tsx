@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { showToast } from '@/components/ui/Toast'
+import { confirmDialog } from '@/components/ui/ConfirmModal'
 import Pagination from '@/components/ui/Pagination'
 
 export default function KelolaAkunPage() {
@@ -164,7 +165,13 @@ export default function KelolaAkunPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Yakin ingin menghapus akun ini?')) return
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Akun?',
+      message: 'Apakah Anda yakin ingin menghapus akun ini secara permanen? Semua akses dari pengguna ini akan dicabut.',
+      type: 'danger',
+      confirmText: 'Ya, Hapus'
+    })
+    if (!isConfirmed) return
     try {
       const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
       if (res.ok) {

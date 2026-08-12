@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import Pagination from '@/components/ui/Pagination'
+import { confirmDialog } from '@/components/ui/ConfirmModal'
 
 const MONTH_NAMES = [
   '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -183,9 +184,13 @@ export default function KalenderSafetyPage() {
 
   const handleBulkFillMonth = async (m: number) => {
     if (!isAuthorized) return
-    if (!window.confirm(`Yakin ingin mengisi OTOMATIS seluruh hari di bulan ${MONTH_NAMES[m]} ${selectedYear} yang belum tercatat menjadi NO ACCIDENT (Zero Accident)?`)) {
-      return
-    }
+    const isConfirmed = await confirmDialog({
+      title: 'Isi Otomatis?',
+      message: `Yakin ingin mengisi OTOMATIS seluruh hari di bulan ${MONTH_NAMES[m]} ${selectedYear} yang belum tercatat menjadi NO ACCIDENT (Zero Accident)?`,
+      type: 'warning',
+      confirmText: 'Ya, Isi Otomatis'
+    })
+    if (!isConfirmed) return
 
     try {
       const res = await fetch('/api/safety-calendar', {

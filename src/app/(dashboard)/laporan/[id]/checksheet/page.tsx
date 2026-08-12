@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { showToast } from '@/components/ui/Toast'
+import { confirmDialog } from '@/components/ui/ConfirmModal'
 import { ArrowLeft, RefreshCcw, Printer, Save } from 'lucide-react'
 import { optimizeAndCompressImage } from '@/lib/imageOptimizer'
 
@@ -495,7 +496,13 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
   }
 
   const handleDeleteKatalog = async (id: number) => {
-    if (!confirm('Hapus item ini dari katalog?')) return
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Item Katalog?',
+      message: 'Hapus item ini dari katalog sparepart secara permanen?',
+      type: 'danger',
+      confirmText: 'Ya, Hapus'
+    })
+    if (!isConfirmed) return
     try {
       const res = await fetch(`/api/sparepart/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Gagal menghapus katalog')

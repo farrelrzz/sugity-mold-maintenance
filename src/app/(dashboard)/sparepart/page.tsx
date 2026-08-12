@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { confirmDialog } from '@/components/ui/ConfirmModal'
 
 export default function SparepartPage() {
   const { data: session } = useSession()
@@ -71,7 +72,13 @@ export default function SparepartPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Yakin ingin menghapus sparepart ini?')) return
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Sparepart?',
+      message: 'Apakah Anda yakin ingin menghapus sparepart ini dari katalog?',
+      type: 'danger',
+      confirmText: 'Ya, Hapus'
+    })
+    if (!isConfirmed) return
     try {
       const res = await fetch(`/api/sparepart/${id}`, { method: 'DELETE' })
       if (res.ok) {

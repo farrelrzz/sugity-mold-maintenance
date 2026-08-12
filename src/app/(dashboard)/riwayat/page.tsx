@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { showToast } from '@/components/ui/Toast'
+import { confirmDialog } from '@/components/ui/ConfirmModal'
 import Pagination from '@/components/ui/Pagination'
 
 interface ApprovalEntry {
@@ -112,9 +113,13 @@ export default function RiwayatPage() {
   }
 
   const handleDeleteLaporan = async (id: number) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus laporan ini? Seluruh data checksheet & approval terkait juga akan terhapus permanen.')) {
-      return
-    }
+    const isConfirmed = await confirmDialog({
+      title: 'Hapus Laporan?',
+      message: 'Apakah Anda yakin ingin menghapus laporan ini? Seluruh data checksheet & approval terkait juga akan terhapus permanen.',
+      type: 'danger',
+      confirmText: 'Ya, Hapus'
+    })
+    if (!isConfirmed) return
 
     try {
       const res = await fetch(`/api/laporan/${id}`, {

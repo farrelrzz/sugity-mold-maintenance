@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { showToast } from '@/components/ui/Toast'
+import { confirmDialog } from '@/components/ui/ConfirmModal'
 import { Database, FileSpreadsheet, Calendar, ShieldAlert, CheckSquare } from 'lucide-react'
 
 const MONTHS = [
@@ -71,9 +72,13 @@ export default function PengaturanSistemPage() {
   const toggleMaintenance = async () => {
     const newValue = !maintenanceMode
     if (newValue) {
-      if (!confirm('AWAS! Mengaktifkan Maintenance Mode akan memblokir semua user (kecuali Super Admin) dari mengakses sistem. Lanjutkan?')) {
-        return
-      }
+      const isConfirmed = await confirmDialog({
+        title: 'Aktifkan Maintenance Mode?',
+        message: 'AWAS! Mengaktifkan Maintenance Mode akan memblokir semua user (kecuali Super Admin) dari mengakses sistem. Lanjutkan?',
+        type: 'danger',
+        confirmText: 'Ya, Aktifkan'
+      })
+      if (!isConfirmed) return
     }
 
     setSaving(true)
