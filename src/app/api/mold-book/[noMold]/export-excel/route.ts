@@ -82,7 +82,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ noMold: 
       include: {
         pic: { select: { nama: true } },
         checksheet: {
-          include: { spareparts: true, foto: true }
+          include: { spareparts: true }
         }
       },
       orderBy: { tanggal: 'asc' }
@@ -91,107 +91,167 @@ export async function GET(req: Request, { params }: { params: Promise<{ noMold: 
     const workbook = new ExcelJS.Workbook()
     workbook.creator = 'Sugity Mold Maintenance'
 
-    const bulanNames = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ]
+    const sheet = workbook.addWorksheet('Riwayat Tahunan')
 
+    // Set Column Widths
+    sheet.getColumn('A').width = 5   // DD
+    sheet.getColumn('B').width = 5   // MM
+    sheet.getColumn('C').width = 5   // YY
+    sheet.getColumn('D').width = 50  // O/H & BM, PM CARD (Description)
+    sheet.getColumn('E').width = 20  // M/P COST
+    sheet.getColumn('F').width = 20  // S/P COST
+    sheet.getColumn('G').width = 20  // TOTAL COST
+    sheet.getColumn('H').width = 30  // COMMENT
+
+    // TITLE ROW
+    sheet.mergeCells('A1:D1')
+    sheet.getCell('A1').value = `HISTORY O/H & BM , PM CARD         YEAR : ${targetYear}`
+    sheet.getCell('A1').font = { bold: true, size: 14 }
+    sheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'left' }
+
+    // MOLD INFO
+    sheet.getCell('A2').value = 'MACHINE/MOLD NO :'
+    sheet.getCell('C2').value = mold.noMold
+    sheet.mergeCells('A2:B2')
+    sheet.mergeCells('C2:D2')
+    sheet.mergeCells('E2:H2')
+    sheet.getCell('E2').value = 'PIC :'
+
+    sheet.getCell('A3').value = 'MACHINE/MOLD NAME :'
+    sheet.getCell('C3').value = mold.part || '-'
+    sheet.mergeCells('A3:B3')
+    sheet.mergeCells('C3:D3')
+    sheet.mergeCells('E3:H3')
+    sheet.getCell('E3').value = 'PROD PLAN :'
+
+    sheet.getCell('A4').value = 'CUST :'
+    sheet.getCell('B4').value = mold.customer || '-'
+    sheet.getCell('C4').value = 'MODEL :'
+    sheet.getCell('D4').value = mold.model || '-'
+    sheet.mergeCells('E4:H4')
+    sheet.getCell('E4').value = 'O/H PLAN :'
+
+    sheet.getCell('A5').value = 'SVP :'
+    sheet.getCell('B5').value = '-'
+    sheet.getCell('C5').value = 'MAKER :'
+    sheet.getCell('D5').value = mold.maker || '-'
+    sheet.mergeCells('E5:H5')
+    sheet.getCell('E5').value = 'O/H CYCLE :'
+
+    // Apply borders to the info section
+    for (let r = 2; r <= 5; r++) {
+      for (let c = 1; c <= 8; c++) {
+        const cell = sheet.getCell(r, c)
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        }
+        cell.font = { size: 10, bold: true }
+      }
+    }
+
+    // TABLE HEADERS
+    sheet.mergeCells('A6:C6')
+    sheet.getCell('A6').value = 'FILLING DATE'
+    sheet.getCell('A7').value = 'DD'
+    sheet.getCell('B7').value = 'MM'
+    sheet.getCell('C7').value = 'YY'
+
+    sheet.mergeCells('D6:D7')
+    sheet.getCell('D6').value = 'O/H & BM , PM CARD'
+
+    sheet.mergeCells('E6:G6')
+    sheet.getCell('E6').value = 'TOTAL COST'
+    sheet.getCell('E7').value = 'M/P COST Rp(89,595/H)'
+    sheet.getCell('F7').value = 'OUT HOUSE COST (Rp)'
+    sheet.getCell('G7').value = '(Rp)'
+
+    sheet.mergeCells('H6:H7')
+    sheet.getCell('H6').value = 'COMMENT'
+
+    // Style table headers
+    for (let r = 6; r <= 7; r++) {
+      for (let c = 1; c <= 8; c++) {
+        const cell = sheet.getCell(r, c)
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        }
+        cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true }
+        cell.font = { size: 10, bold: true }
+      }
+    }
+
+    // FILL DATA
+    let startRow = 8
     let totalMpYear = 0
     let totalSpYear = 0
-    const countsPerMonth = Array(12).fill(0)
-    const costPerMonth = Array(12).fill(0)
 
-    // Buat 12 Sheet Bulanan
-    bulanNames.forEach((namaBulan, idx) => {
-      const sheet = workbook.addWorksheet(`${idx + 1} - ${namaBulan}`)
-      sheet.columns = [
-        { header: 'Tanggal', key: 'tgl', width: 12 },
-        { header: 'No Mold', key: 'mold', width: 15 },
-        { header: 'Model', key: 'model', width: 15 },
-        { header: 'Part Name', key: 'part', width: 20 },
-        { header: 'Customer', key: 'customer', width: 15 },
-        { header: 'Factory', key: 'factory', width: 15 },
-        { header: 'PIC', key: 'pic', width: 20 },
-        { header: 'Jenis Perawatan', key: 'jenis', width: 15 },
-        { header: 'Detail Problem', key: 'problem', width: 30 },
-        { header: 'Countermeasure', key: 'cm', width: 30 },
-        { header: 'M/P Cost (Rp)', key: 'mpcost', width: 15 },
-        { header: 'S/P Cost (Rp)', key: 'spcost', width: 15 },
-        { header: 'Total Cost (Rp)', key: 'totalcost', width: 15 },
-        { header: 'Link Foto', key: 'foto', width: 25 },
-      ]
-      
-      // Styling header
-      sheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }
-      sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF194A37' } }
+    laporanList.forEach(lap => {
+      const cost = hitungHistoryCosts(lap)
+      totalMpYear += cost.mpCost
+      totalSpYear += cost.spCost
 
-      // Filter laporan per bulan
-      const lapBulanIni = laporanList.filter(l => l.tanggal.getMonth() === idx)
-      
-      lapBulanIni.forEach(lap => {
-        const cost = hitungHistoryCosts(lap)
-        totalMpYear += cost.mpCost
-        totalSpYear += cost.spCost
-        countsPerMonth[idx]++
-        costPerMonth[idx] += cost.totalCost
+      const d = new Date(lap.tanggal)
+      const dd = String(d.getDate()).padStart(2, '0')
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const yy = String(d.getFullYear()).slice(-2)
 
-        // Foto URL (join if multiple)
-        let fotoUrls = ''
-        if (lap.checksheet?.foto && lap.checksheet.foto.length > 0) {
-          fotoUrls = lap.checksheet.foto.map((f: any) => f.filePath).join(', ')
+      let desc = `[${lap.jenis}]`
+      if (lap.info) desc += `\nProblem: ${lap.info}`
+      if (lap.countermeasure) desc += `\nCM: ${lap.countermeasure}`
+
+      const row = sheet.addRow([
+        dd,
+        mm,
+        yy,
+        desc,
+        cost.mpCost,
+        cost.spCost,
+        cost.totalCost,
+        lap.komentar || ''
+      ])
+
+      row.getCell(5).numFmt = '#,##0'
+      row.getCell(6).numFmt = '#,##0'
+      row.getCell(7).numFmt = '#,##0'
+
+      for (let c = 1; c <= 8; c++) {
+        row.getCell(c).border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
         }
-
-        const row = sheet.addRow({
-          tgl: lap.tanggal.toISOString().slice(0, 10),
-          mold: mold.noMold,
-          model: mold.model || '-',
-          part: lap.part || '-',
-          customer: mold.customer || '-',
-          factory: lap.factory || '-',
-          pic: lap.pic?.nama || '-',
-          jenis: lap.jenis,
-          problem: lap.info || '-',
-          cm: lap.countermeasure || '-',
-          mpcost: cost.mpCost,
-          spcost: cost.spCost,
-          totalcost: cost.totalCost,
-          foto: fotoUrls || '-',
-        })
-        
-        row.getCell('mpcost').numFmt = '#,##0'
-        row.getCell('spcost').numFmt = '#,##0'
-        row.getCell('totalcost').numFmt = '#,##0'
-        row.alignment = { vertical: 'top', wrapText: true }
-      })
+        row.getCell(c).alignment = { vertical: 'top', wrapText: true }
+        row.getCell(c).font = { size: 10 }
+      }
+      
+      // Center align dates
+      row.getCell(1).alignment = { vertical: 'top', horizontal: 'center' }
+      row.getCell(2).alignment = { vertical: 'top', horizontal: 'center' }
+      row.getCell(3).alignment = { vertical: 'top', horizontal: 'center' }
     })
 
-    // Buat Sheet Ringkasan (Sheet 13)
-    const summarySheet = workbook.addWorksheet('13 - Ringkasan Tahunan')
-    summarySheet.columns = [
-      { header: 'Keterangan', key: 'keterangan', width: 25 },
-      { header: 'Nilai', key: 'nilai', width: 40 }
-    ]
-
-    summarySheet.addRow({ keterangan: 'Tahun Rekap', nilai: targetYear })
-    summarySheet.addRow({ keterangan: 'Nomor Mold', nilai: mold.noMold })
-    summarySheet.addRow({ keterangan: 'Model / Part Name', nilai: `${mold.model || '-'} / ${mold.part || '-'}` })
-    summarySheet.addRow({ keterangan: 'Customer / Factory', nilai: `${mold.customer || '-'} / ${mold.factory || '-'}` })
-    summarySheet.addRow({})
-    summarySheet.addRow({ keterangan: 'Total Frekuensi Perbaikan', nilai: laporanList.length })
-    summarySheet.addRow({ keterangan: 'Total M/P Cost Setahun', nilai: totalMpYear }).getCell('nilai').numFmt = '"Rp "#,##0'
-    summarySheet.addRow({ keterangan: 'Total S/P Cost Setahun', nilai: totalSpYear }).getCell('nilai').numFmt = '"Rp "#,##0'
-    summarySheet.addRow({ keterangan: 'Total Keseluruhan Cost', nilai: totalMpYear + totalSpYear }).getCell('nilai').numFmt = '"Rp "#,##0'
-    summarySheet.addRow({})
-
-    summarySheet.addRow({ keterangan: 'Bulan', nilai: 'Total Frekuensi & Cost' }).font = { bold: true }
-    bulanNames.forEach((namaBulan, idx) => {
-      summarySheet.addRow({
-        keterangan: namaBulan,
-        nilai: `${countsPerMonth[idx]} perbaikan (Rp ${costPerMonth[idx].toLocaleString('id-ID')})`
-      })
-    })
-
-    summarySheet.getColumn('keterangan').font = { bold: true }
+    // Add empty rows if less than 20 rows to make it look like a form
+    const minRows = 20
+    if (laporanList.length < minRows) {
+      for (let i = 0; i < minRows - laporanList.length; i++) {
+        const row = sheet.addRow(['', '', '', '', '', '', '', ''])
+        for (let c = 1; c <= 8; c++) {
+          row.getCell(c).border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          }
+        }
+      }
+    }
 
     const buffer = await workbook.xlsx.writeBuffer()
 
