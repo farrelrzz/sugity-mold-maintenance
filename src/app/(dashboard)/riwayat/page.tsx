@@ -223,7 +223,7 @@ export default function RiwayatPage() {
               style={{ padding: '9px 14px', fontSize: '13px' }}
               onClick={() => setFilterBelumCS(!filterBelumCS)}
             >
-              ⚠️ Belum Isi Checksheet
+              ⚠️ Belum CS / TTD PIC
             </button>
           </div>
 

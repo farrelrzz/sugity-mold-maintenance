@@ -30,40 +30,51 @@ export async function GET(req: Request) {
     const searchParam = searchParams.get('search')
     const belumCSParam = searchParams.get('belumCS') === 'true'
 
-    const whereClause: any = {}
+    const whereClause: any = { AND: [] }
 
     if (tanggalParam) {
       const d = new Date(tanggalParam)
       const startOfDay = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0))
       const endOfDay = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999))
-      whereClause.tanggal = {
-        gte: startOfDay,
-        lte: endOfDay,
-      }
+      whereClause.AND.push({
+        tanggal: {
+          gte: startOfDay,
+          lte: endOfDay,
+        }
+      })
     }
 
     if (factoryParam && factoryParam !== 'all') {
-      whereClause.factory = factoryParam as Factory
+      whereClause.AND.push({ factory: factoryParam as Factory })
     }
 
     if (belumCSParam) {
-      whereClause.checksheet = {
-        is: null,
-      }
+      whereClause.AND.push({
+        OR: [
+          { checksheet: { is: null } },
+          { checksheet: { approvals: { none: { role: 'PIC', signedAt: { not: null } } } } }
+        ]
+      })
     }
 
     if (searchParam) {
-      whereClause.OR = [
-        { noMold: { contains: searchParam } },
-        { part: { contains: searchParam } },
-        { info: { contains: searchParam } },
-        { countermeasure: { contains: searchParam } },
-        {
-          pic: {
-            nama: { contains: searchParam },
+      whereClause.AND.push({
+        OR: [
+          { noMold: { contains: searchParam } },
+          { part: { contains: searchParam } },
+          { info: { contains: searchParam } },
+          { countermeasure: { contains: searchParam } },
+          {
+            pic: {
+              nama: { contains: searchParam },
+            },
           },
-        },
-      ]
+        ]
+      })
+    }
+
+    if (whereClause.AND.length === 0) {
+      delete whereClause.AND
     }
 
     const laporanList = await prisma.laporan.findMany({
