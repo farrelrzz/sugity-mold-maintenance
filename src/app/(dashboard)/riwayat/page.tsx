@@ -122,7 +122,7 @@ export default function RiwayatPage() {
     if (!isConfirmed) return
 
     // Optimistic Update
-    setLaporan(prev => prev.filter(l => l.id !== id))
+    setLaporanList(prev => prev.filter(l => l.id !== id))
 
     try {
       const res = await fetch(`/api/laporan/${id}`, {
