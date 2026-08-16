@@ -329,7 +329,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
           if (data.checksheet) {
             const masterJamMulai = data.checksheet.jamMulai || ''
             const masterJamSelesai = data.checksheet.jamSelesai || ''
-            const loadedChecklist = data.checksheet.checklist?.items || {}
+            const loadedChecklist: Record<string, any> = data.checksheet.checklist?.items || {}
             
             // Auto pre-fill untuk MP cost (b1-b5) jika belum ada jam
             ['b1', 'b2', 'b3', 'b4', 'b5'].forEach(key => {
