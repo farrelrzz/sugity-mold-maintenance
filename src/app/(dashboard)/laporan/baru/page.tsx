@@ -61,7 +61,7 @@ export default function LaporanBaruPage() {
 
   // Form states
   const [tanggal, setTanggal] = useState('')
-  const [shift, setShift] = useState('Nonshift')
+  const [shift, setShift] = useState('')
   const [jenis, setJenis] = useState('OH MOLD')
   const [jenisLainnya, setJenisLainnya] = useState('')
 
@@ -89,7 +89,7 @@ export default function LaporanBaruPage() {
   const [picOptions, setPicOptions] = useState<UserOption[]>([]) // all PICs
   const [selectedPics, setSelectedPics] = useState<{ nama: string; shift: string }[]>([])
   const [picTambahan, setPicTambahan] = useState('')
-  const [picTambahanShift, setPicTambahanShift] = useState('Nonshift')
+  const [picTambahanShift, setPicTambahanShift] = useState('')
   const [jamMulai, setJamMulai] = useState('')
   const [jamSelesai, setJamSelesai] = useState('')
   const [loading, setLoading] = useState(false)
@@ -200,6 +200,28 @@ export default function LaporanBaruPage() {
 
   const handleAddOption = async (category: string, value: string) => {
     if (!value.trim()) return
+    
+    // ⚡ Optimistic Update: Tambahkan seketika dengan temporary ID
+    const tempId = Date.now()
+    const tempOption = { id: tempId, category, value }
+    const val = value.trim()
+
+    if (category === 'PROBLEM') {
+      setProblemOptions(prev => [...prev, tempOption])
+      setInfo(prev => {
+        const parts = prev ? prev.split(',').map(s => s.trim()).filter(Boolean) : []
+        return !parts.some(p => p.toLowerCase() === val.toLowerCase()) ? [...parts, val].join(', ') : prev
+      })
+      setNewProblem('')
+    } else if (category === 'COUNTERMEASURE') {
+      setCmOptions(prev => [...prev, tempOption])
+      setCountermeasure(prev => {
+        const parts = prev ? prev.split(',').map(s => s.trim()).filter(Boolean) : []
+        return !parts.some(p => p.toLowerCase() === val.toLowerCase()) ? [...parts, val].join(', ') : prev
+      })
+      setNewCm('')
+    }
+
     try {
       const res = await fetch('/api/report-options', {
         method: 'POST',
@@ -208,30 +230,20 @@ export default function LaporanBaruPage() {
       })
       if (res.ok) {
         const newOption = await res.json()
-        showToast('Opsi permanen berhasil disimpan & dipilih! ✓', 'sukses')
+        // Replace temporary ID with real database ID quietly
         if (category === 'PROBLEM') {
-          const val = newProblem.trim()
-          setProblemOptions(prev => [...prev, newOption])
-          setInfo(prev => {
-            const parts = prev ? prev.split(',').map(s => s.trim()).filter(Boolean) : []
-            return !parts.some(p => p.toLowerCase() === val.toLowerCase()) ? [...parts, val].join(', ') : prev
-          })
-          setNewProblem('')
+          setProblemOptions(prev => prev.map(p => p.id === tempId ? newOption : p))
+        } else {
+          setCmOptions(prev => prev.map(c => c.id === tempId ? newOption : c))
         }
-        if (category === 'COUNTERMEASURE') {
-          const val = newCm.trim()
-          setCmOptions(prev => [...prev, newOption])
-          setCountermeasure(prev => {
-            const parts = prev ? prev.split(',').map(s => s.trim()).filter(Boolean) : []
-            return !parts.some(p => p.toLowerCase() === val.toLowerCase()) ? [...parts, val].join(', ') : prev
-          })
-          setNewCm('')
-        }
+        showToast('Opsi permanen berhasil disimpan & dipilih! ✓', 'sukses')
       } else {
         showToast('Gagal menambahkan opsi', 'error')
+        fetchOptions() // Revert state on fail
       }
     } catch (e) {
       showToast('Terjadi kesalahan jaringan', 'error')
+      fetchOptions() // Revert state on fail
     }
   }
 
@@ -677,10 +689,32 @@ export default function LaporanBaruPage() {
     document.getElementById('kartu-tanggal-shift')?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const handleNext = () => {
+    if (!selectedMold) {
+      showToast('Pilih mold terlebih dahulu!', 'info')
+      return
+    }
+    if (!tanggal) {
+      showToast('Tanggal belum dipilih!', 'info')
+      return
+    }
+    if (!shift) {
+      showToast('Shift belum dipilih!', 'error')
+      document.getElementById('kartu-tanggal-shift')?.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+    document.getElementById('kartu-jam')?.scrollIntoView({ behavior: 'smooth' })
+    setStep(2)
+  }
+
   // Simpan Laporan Akhir
   const handleSave = async () => {
     if (!tanggal || !selectedMold || !jenis) {
       showToast('Mohon lengkapi Tanggal, Jenis Pekerjaan, dan Nomor Mold!', 'error')
+      return
+    }
+    if (!shift) {
+      showToast('Shift belum dipilih!', 'error')
       return
     }
 
@@ -789,25 +823,27 @@ export default function LaporanBaruPage() {
     })
     if (!isConfirmed) return
 
+    // Optimistic: Tutup modal seketika
+    const noMoldToDelete = selectedHapusMold.noMold
+    setShowHapusMold(false)
+    setSelectedHapusMold(null)
+    if (selectedMold?.noMold === noMoldToDelete) {
+      setSelectedMold(null)
+      setMoldSearch('')
+    }
+
     try {
-      const res = await fetch(`/api/mold-book/${encodeURIComponent(selectedHapusMold.noMold)}`, {
+      const res = await fetch(`/api/mold-book/${encodeURIComponent(noMoldToDelete)}`, {
         method: 'DELETE',
       })
       if (!res.ok) {
         const data = await res.json()
-        setHapusError(data.error || 'Gagal menghapus mold.')
+        showToast(data.error || 'Gagal menghapus mold.', 'error')
       } else {
-        showToast('Mold berhasil dihapus dari database! ✓')
-        if (selectedMold?.noMold === selectedHapusMold.noMold) {
-          setSelectedMold(null)
-          setMoldSearch('')
-        }
-        setSelectedHapusMold(null)
-        setHapusSearch('')
-        setShowHapusMold(false)
+        showToast('Mold berhasil dihapus dari database! ✓', 'sukses')
       }
     } catch {
-      setHapusError('Kesalahan jaringan.')
+      showToast('Terjadi kesalahan jaringan saat menghapus mold.', 'error')
     }
   }
 
@@ -850,6 +886,7 @@ export default function LaporanBaruPage() {
                 onChange={(e) => setShift(e.target.value)}
                 style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
               >
+                <option value="" disabled hidden>No Select</option>
                 <option value="Nonshift">Nonshift</option>
                 <option value="Shift A">Shift A</option>
                 <option value="Shift B">Shift B</option>

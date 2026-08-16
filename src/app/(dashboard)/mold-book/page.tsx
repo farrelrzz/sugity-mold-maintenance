@@ -325,17 +325,23 @@ export default function MoldBookPage() {
       confirmText: 'Ya, Hapus'
     })
     if (!isConfirmed) return
+
+    // Optimistic Update: Langsung hapus dari UI agar terasa instan
+    setMolds(prev => prev.filter(m => m.noMold !== noMold))
+    setEditingMold(null)
+    setShowAddModal(false)
+
     try {
       const res = await fetch(`/api/mold-book/${encodeURIComponent(noMold)}`, { method: 'DELETE' })
       if (res.ok) {
-        showToast('Mold dihapus!')
-        setEditingMold(null)
-        fetchMolds()
+        showToast('Mold dihapus! ✓', 'success')
       } else {
         showToast('Gagal menghapus', 'error')
+        fetchMolds() // Revert data jika gagal
       }
     } catch {
       showToast('Error jaringan', 'error')
+      fetchMolds() // Revert data jika gagal
     }
   }
 

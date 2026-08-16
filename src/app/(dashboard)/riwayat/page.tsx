@@ -121,6 +121,9 @@ export default function RiwayatPage() {
     })
     if (!isConfirmed) return
 
+    // Optimistic Update
+    setLaporan(prev => prev.filter(l => l.id !== id))
+
     try {
       const res = await fetch(`/api/laporan/${id}`, {
         method: 'DELETE',
@@ -128,12 +131,13 @@ export default function RiwayatPage() {
       if (!res.ok) {
         const err = await res.json()
         showToast(err.error || 'Gagal menghapus laporan', 'error')
+        fetchLaporan() // Revert
       } else {
-        showToast('Laporan berhasil dihapus ✓')
-        fetchLaporan()
+        showToast('Laporan berhasil dihapus ✓', 'sukses')
       }
     } catch {
       showToast('Kesalahan jaringan saat menghapus', 'error')
+      fetchLaporan() // Revert
     }
   }
 

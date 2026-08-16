@@ -34,7 +34,8 @@ function LoginForm() {
     usernameRef.current?.focus()
     document.documentElement.removeAttribute('data-role')
     document.body.removeAttribute('data-role')
-  }, [])
+    router.prefetch(callbackUrl) // Prefetch untuk transisi instan
+  }, [router, callbackUrl])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,11 +52,11 @@ function LoginForm() {
       redirect: false,
     })
 
-    setLoading(false)
-
     if (result?.error) {
+      setLoading(false)
       setError('Username atau password salah. Pastikan tidak ada spasi berlebih atau salah mengetik huruf besar/kecil.')
     } else {
+      // Tetap loading=true saat router sedang transisi agar UI tidak berkedip
       router.replace(callbackUrl)
     }
   }

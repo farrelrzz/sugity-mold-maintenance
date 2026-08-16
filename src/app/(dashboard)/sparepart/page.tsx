@@ -79,17 +79,22 @@ export default function SparepartPage() {
       confirmText: 'Ya, Hapus'
     })
     if (!isConfirmed) return
+
+    // Optimistic Update
+    setSpareparts(prev => prev.filter(sp => sp.id !== id))
+
     try {
       const res = await fetch(`/api/sparepart/${id}`, { method: 'DELETE' })
       if (res.ok) {
         showToast('Sparepart dihapus', 'sukses')
-        fetchSpareparts()
       } else {
         const data = await res.json()
         showToast(data.error || 'Gagal menghapus', 'error')
+        fetchSpareparts() // Revert
       }
     } catch (err) {
       showToast('Gagal terhubung', 'error')
+      fetchSpareparts() // Revert
     }
   }
 

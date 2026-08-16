@@ -172,17 +172,22 @@ export default function KelolaAkunPage() {
       confirmText: 'Ya, Hapus'
     })
     if (!isConfirmed) return
+
+    // Optimistic Update
+    setUsers(prev => prev.filter(u => u.id !== id))
+
     try {
       const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
       if (res.ok) {
         showToast('Akun berhasil dihapus', 'sukses')
-        fetchUsers()
       } else {
         const data = await res.json()
         showToast(data.error || 'Gagal menghapus akun', 'error')
+        fetchUsers() // Revert state
       }
     } catch (err) {
       showToast('Terjadi kesalahan jaringan', 'error')
+      fetchUsers() // Revert state
     }
   }
 

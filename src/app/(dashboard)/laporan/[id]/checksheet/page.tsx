@@ -327,9 +327,23 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
 
           setLaporan(data)
           if (data.checksheet) {
-            setChecklist(data.checksheet.checklist?.items || {})
-            setJamMulai(data.checksheet.jamMulai || '')
-            setJamSelesai(data.checksheet.jamSelesai || '')
+            const masterJamMulai = data.checksheet.jamMulai || ''
+            const masterJamSelesai = data.checksheet.jamSelesai || ''
+            const loadedChecklist = data.checksheet.checklist?.items || {}
+            
+            // Auto pre-fill untuk MP cost (b1-b5) jika belum ada jam
+            ['b1', 'b2', 'b3', 'b4', 'b5'].forEach(key => {
+              if (!loadedChecklist[key]) {
+                loadedChecklist[key] = { jamMulai: masterJamMulai, jamSelesai: masterJamSelesai, orang: 1 }
+              } else {
+                if (!loadedChecklist[key].jamMulai) loadedChecklist[key].jamMulai = masterJamMulai
+                if (!loadedChecklist[key].jamSelesai) loadedChecklist[key].jamSelesai = masterJamSelesai
+              }
+            })
+
+            setChecklist(loadedChecklist)
+            setJamMulai(masterJamMulai)
+            setJamSelesai(masterJamSelesai)
             setJumlahOrang(data.checksheet.jumlahOrang || 1)
             setCatatan(data.checksheet.checklist?.catatan || '')
             setSpareparts(
@@ -503,13 +517,17 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
       confirmText: 'Ya, Hapus'
     })
     if (!isConfirmed) return
+
+    // Optimistic Update
+    setKatalog(prev => prev.filter(k => k.id !== id))
+
     try {
       const res = await fetch(`/api/sparepart/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Gagal menghapus katalog')
       showToast('Katalog dihapus', 'sukses')
-      fetchKatalog()
     } catch (err: any) {
       showToast(err.message, 'error')
+      fetchKatalog() // Revert
     }
   }
 
