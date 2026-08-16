@@ -334,7 +334,7 @@ export default function MoldBookPage() {
     try {
       const res = await fetch(`/api/mold-book/${encodeURIComponent(noMold)}`, { method: 'DELETE' })
       if (res.ok) {
-        showToast('Mold dihapus! ✓', 'success')
+        showToast('Mold dihapus! ✓', 'sukses')
       } else {
         showToast('Gagal menghapus', 'error')
         fetchMolds() // Revert data jika gagal

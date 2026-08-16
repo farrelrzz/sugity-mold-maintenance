@@ -704,7 +704,6 @@ export default function LaporanBaruPage() {
       return
     }
     document.getElementById('kartu-jam')?.scrollIntoView({ behavior: 'smooth' })
-    setStep(2)
   }
 
   // Simpan Laporan Akhir
