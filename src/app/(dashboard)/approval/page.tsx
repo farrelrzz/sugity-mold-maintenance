@@ -134,24 +134,22 @@ export default function ApprovalPage() {
     if (!isConfirmed) return
 
     setLoading(true)
-    let successCount = 0
-    let failCount = 0
-
-    // Process all approvals
-    for (const item of pendingItems) {
-      try {
-        const res = await fetch(`/api/laporan/${item.laporanId}/checksheet/sign`, {
-          method: 'POST'
-        })
-        if (res.ok) successCount++
-        else failCount++
-      } catch (e) {
-        failCount++
+    try {
+      const res = await fetch('/api/approval/sign-bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ laporanIds: pendingItems.map(item => item.laporanId) })
+      })
+      const data = await res.json()
+      
+      if (res.ok) {
+        showToast(`Selesai! Berhasil menyetujui ${data.signedCount} dokumen sekaligus. ⚡`, 'sukses' as any)
+      } else {
+        showToast(data.error || 'Gagal memproses persetujuan massal', 'error')
       }
+    } catch (e) {
+      showToast('Terjadi kesalahan koneksi', 'error')
     }
-
-    showToast(`Selesai! Berhasil menyetujui ${successCount} dokumen.${failCount > 0 ? ` Gagal: ${failCount}` : ''}`, successCount > 0 ? 'sukses' as any : 'error')
-    
     // Refresh data
     try {
       const d = await fetch('/api/approval').then(res => res.json())
