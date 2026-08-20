@@ -87,33 +87,25 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!user || !isValid) {
-          // Log failed attempt without blocking login flow
-          try {
-            await prisma.auditLog.create({
-              data: {
-                userId: user ? user.id : null,
-                aktivitas: !user
-                  ? `Percobaan login gagal (Username tidak ditemukan: ${cleanUsername})`
-                  : `Percobaan login gagal (Password salah untuk: ${cleanUsername})`
-              }
-            })
-          } catch (e) {
-            console.error('AuditLog insert failed:', e)
-          }
+          // Log failed attempt without blocking login flow (Fire and forget)
+          prisma.auditLog.create({
+            data: {
+              userId: user ? user.id : null,
+              aktivitas: !user
+                ? `Percobaan login gagal (Username tidak ditemukan: ${cleanUsername})`
+                : `Percobaan login gagal (Password salah untuk: ${cleanUsername})`
+            }
+          }).catch(e => console.error('AuditLog insert failed:', e))
           return null
         }
 
-        // Log successful login without blocking login flow
-        try {
-          await prisma.auditLog.create({
-            data: {
-              userId: user.id,
-              aktivitas: `Login sebagai ${user.nama} (${user.role})`
-            }
-          })
-        } catch (e) {
-          console.error('AuditLog insert failed:', e)
-        }
+        // Log successful login without blocking login flow (Fire and forget)
+        prisma.auditLog.create({
+          data: {
+            userId: user.id,
+            aktivitas: `Login sebagai ${user.nama} (${user.role})`
+          }
+        }).catch(e => console.error('AuditLog insert failed:', e))
 
         return {
           id: String(user.id),

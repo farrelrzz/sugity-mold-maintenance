@@ -14,6 +14,7 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
 
   // Lupa Password modal (Admin Approval & Self-Service Flow)
@@ -56,7 +57,8 @@ function LoginForm() {
       setLoading(false)
       setError('Username atau password salah. Pastikan tidak ada spasi berlebih atau salah mengetik huruf besar/kecil.')
     } else {
-      // Tetap loading=true saat router sedang transisi agar UI tidak berkedip
+      // Instant success feedback
+      setSuccess(true)
       router.replace(callbackUrl)
     }
   }
@@ -195,9 +197,13 @@ function LoginForm() {
             <button
               type="submit"
               className="btn-login"
-              disabled={loading}
+              disabled={loading || success}
+              style={{
+                backgroundColor: success ? '#10b981' : undefined,
+                color: success ? '#fff' : undefined,
+              }}
             >
-              {loading ? 'Memproses...' : 'Masuk'}
+              {success ? 'Login Berhasil! Mengalihkan...' : loading ? 'Memproses...' : 'Masuk'}
             </button>
           </form>
 
