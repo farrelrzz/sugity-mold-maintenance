@@ -20,6 +20,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Tidak ada laporan yang dipilih' }, { status: 400 })
     }
 
+    const parsedLaporanIds = laporanIds.map(id => Number(id)).filter(id => !isNaN(id))
+    if (parsedLaporanIds.length === 0) {
+      return NextResponse.json({ error: 'ID laporan tidak valid' }, { status: 400 })
+    }
+
     const userRole = session.user.role as UserRole
     if (!ROLES_ORDER.includes(userRole)) {
       return NextResponse.json({ error: 'Role Anda tidak diizinkan.' }, { status: 403 })
@@ -31,7 +36,7 @@ export async function POST(req: Request) {
 
     // Fetch all relevant checksheets and their approvals
     const checksheets = await prisma.checksheet.findMany({
-      where: { laporanId: { in: laporanIds } },
+      where: { laporanId: { in: parsedLaporanIds } },
       include: {
         approvals: true,
         laporan: true
