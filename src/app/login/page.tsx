@@ -57,9 +57,9 @@ function LoginForm() {
       setLoading(false)
       setError('Username atau password salah. Pastikan tidak ada spasi berlebih atau salah mengetik huruf besar/kecil.')
     } else {
-      // Instant success feedback
+      // Use native browser navigation for instant visual transition
       setSuccess(true)
-      router.replace(callbackUrl)
+      window.location.href = callbackUrl
     }
   }
 
