@@ -736,6 +736,53 @@ ${_isOverhaul ? `
   const totalMpCost = isOverhaul ? getOverhaulTotalMpCost() : Math.round(getDurasiJam() * 89595 * jumlahOrang)
   const totalCostCombined = totalMpCost + totalSparepart
 
+  const getAllBMChuckItems = () => {
+    const custom = Array.isArray(checklist.bm_chuck_custom) ? checklist.bm_chuck_custom : []
+    const std = BM_CHUCK_ITEMS.map((item, i) => ({
+      no: i + 1,
+      label: item.label,
+      standard: item.standard,
+      judge: checklist[`bm_chuck|${i}`]?.judge || '',
+      isCustom: false,
+      customIndex: -1,
+    }))
+    const cust = custom.map((item: any, i: number) => ({
+      no: BM_CHUCK_ITEMS.length + i + 1,
+      label: item.label || '',
+      standard: item.standard || '',
+      judge: item.judge || '',
+      isCustom: true,
+      customIndex: i,
+    }))
+    return [...std, ...cust]
+  }
+
+  const handleAddCustomChuckItem = () => {
+    const currentCustom = Array.isArray(checklist.bm_chuck_custom) ? [...checklist.bm_chuck_custom] : []
+    setChecklist({
+      ...checklist,
+      bm_chuck_custom: [...currentCustom, { label: '', standard: '', judge: '' }]
+    })
+  }
+
+  const handleUpdateCustomChuckItem = (index: number, field: string, value: string) => {
+    const currentCustom = Array.isArray(checklist.bm_chuck_custom) ? [...checklist.bm_chuck_custom] : []
+    currentCustom[index] = { ...currentCustom[index], [field]: value }
+    setChecklist({
+      ...checklist,
+      bm_chuck_custom: currentCustom
+    })
+  }
+
+  const handleRemoveCustomChuckItem = (index: number) => {
+    const currentCustom = Array.isArray(checklist.bm_chuck_custom) ? [...checklist.bm_chuck_custom] : []
+    currentCustom.splice(index, 1)
+    setChecklist({
+      ...checklist,
+      bm_chuck_custom: currentCustom
+    })
+  }
+
   const approvals = laporan.checksheet?.approvals || []
   const picSign = approvals.find((a) => a.role === 'PIC')
   const tlSign = approvals.find((a) => a.role === 'TL')
@@ -1088,8 +1135,7 @@ ${_isOverhaul ? `
 
                       <div className="cs-info-row"><b>STD:</b>&nbsp;{sec.std}</div>
                       <div className="cs-info-row"><b>Metode Check:</b>&nbsp;{sec.metodeCheck}</div>
-
-                      {renderChecklistTable(sec.items.map((label) => ({ label, metode: '-', standar: '-' })), sec.kode)}
+{renderChecklistTable(sec.items.map((label) => ({ label, metode: '-', standar: '-' })), sec.kode)}
                       {renderCostBoxEditor(sec.costLabel)}
                     </div>
                   )
@@ -1099,139 +1145,211 @@ ${_isOverhaul ? `
               /* =======================================
                  BM CHUCK CHECKSHEET EDITOR
                  ======================================= */
-              <div style={{ marginTop: '16px' }}>
-                {/* 1. Info Spesifikasi Mold */}
-                <div style={{ background: '#f5f3ff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
-                  <div style={{ fontWeight: 800, fontSize: '14px', color: '#6d28d9', marginBottom: '12px' }}>⚙️ CHECK SHEET PEMERIKSAAN CHUCK</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '12px' }}>
-                    {[
-                      { label: 'MOLD NO', val: laporan.noMold },
-                      { label: 'MOLD NAME', val: laporan.moldData?.part || laporan.part || '-' },
-                      { label: 'MODEL', val: laporan.moldData?.model || '-' },
-                      { label: 'CUSTOMER', val: laporan.moldData?.customer || '-' },
-                      { label: 'TON', val: laporan.moldData?.tonase || '-' },
-                    ].map(({ label, val }) => (
-                      <div key={label} style={{ background: '#fff', borderRadius: '6px', padding: '8px 10px', border: '1px solid #ddd6fe' }}>
-                        <div style={{ fontSize: '10px', color: '#7c3aed', fontWeight: 700, marginBottom: '2px' }}>{label}</div>
-                        <div style={{ fontWeight: 600, color: '#1e1b4b', wordBreak: 'break-word' }}>{val}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              (() => {
+                const allItems = getAllBMChuckItems()
+                const hasNG = allItems.some((item) => item.judge === 'X')
+                const hasAny = allItems.some((item) => !!item.judge)
 
-                {/* 2. Diagram Chuck & NOTE Legend (DI ATAS FORM PENGISIAN) */}
-                <div style={{ background: '#fff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
-                  <div style={{ fontWeight: 700, fontSize: '13px', color: '#4c1d95', marginBottom: '10px' }}>🖼️ Diagram Chuck & Legend Status</div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {/* Diagram Image */}
-                    <div style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
-                      <img
-                        src="/images/chuck-diagram.png"
-                        alt="Chuck Diagram"
-                        style={{ width: '100%', maxWidth: '600px', height: 'auto', display: 'inline-block', borderRadius: '6px' }}
-                      />
-                    </div>
-
-                    {/* Legend Status NOTE */}
-                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '11px', color: '#475569', marginBottom: '6px' }}>NOTE / KETERANGAN SIMBOL:</div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px' }}>
-                        <span style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>O : OK</span>
-                        <span style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>X : NG</span>
-                        <span style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>G : Ganti</span>
-                        <span style={{ background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>R : Repair</span>
-                        <span style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>T/A : Tdk Pakai</span>
+                return (
+                  <div style={{ marginTop: '16px' }}>
+                    {/* 1. Info Spesifikasi Mold */}
+                    <div style={{ background: '#f5f3ff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+                      <div style={{ fontWeight: 800, fontSize: '14px', color: '#6d28d9', marginBottom: '12px' }}>⚙️ CHECK SHEET PEMERIKSAAN CHUCK</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '12px' }}>
+                        {[
+                          { label: 'MOLD NO', val: laporan.noMold },
+                          { label: 'MOLD NAME', val: laporan.moldData?.part || laporan.part || '-' },
+                          { label: 'MODEL', val: laporan.moldData?.model || '-' },
+                          { label: 'CUSTOMER', val: laporan.moldData?.customer || '-' },
+                          { label: 'TON', val: laporan.moldData?.tonase || '-' },
+                        ].map(({ label, val }) => (
+                          <div key={label} style={{ background: '#fff', borderRadius: '6px', padding: '8px 10px', border: '1px solid #ddd6fe' }}>
+                            <div style={{ fontSize: '10px', color: '#7c3aed', fontWeight: 700, marginBottom: '2px' }}>{label}</div>
+                            <div style={{ fontWeight: 600, color: '#1e1b4b', wordBreak: 'break-word' }}>{val}</div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* 3. Form Pengisian: 10 komponen + status */}
-                <div style={{ background: '#fff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
-                  <div style={{ fontWeight: 700, fontSize: '13px', color: '#4c1d95', marginBottom: '10px' }}>📋 Status Pemeriksaan Komponen (1 - 10)</div>
-                  
-                  <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                    <table style={{ width: '100%', minWidth: '320px', borderCollapse: 'collapse', fontSize: '13px' }}>
-                      <thead>
-                        <tr style={{ background: '#ede9fe' }}>
-                          <th style={{ border: '1px solid #c4b5fd', padding: '8px 6px', textAlign: 'center', width: '36px', color: '#4c1d95' }}>NO</th>
-                          <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'left', color: '#4c1d95' }}>ITEM</th>
-                          <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'left', color: '#4c1d95' }}>STANDAR</th>
-                          <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'center', width: '110px', color: '#4c1d95' }}>STATUS</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {BM_CHUCK_ITEMS.map((item, i) => {
-                          const key = `bm_chuck|${i}`
-                          const val = checklist[key]?.judge || ''
-                          const bgColor =
-                            val === 'O' ? '#dcfce7' :
-                            val === 'X' ? '#fee2e2' :
-                            val === 'G' ? '#fef3c7' :
-                            val === 'R' ? '#e0f2fe' :
-                            val === 'T/A' ? '#f1f5f9' : '#fff'
-                          return (
-                            <tr key={i} style={{ background: i % 2 === 0 ? '#faf5ff' : '#fff' }}>
-                              <td style={{ border: '1px solid #e2e8f0', padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#6d28d9' }}>{i + 1}</td>
-                              <td style={{ border: '1px solid #e2e8f0', padding: '8px', fontWeight: 600 }}>{item.label}</td>
-                              <td style={{ border: '1px solid #e2e8f0', padding: '8px', color: '#64748b', fontSize: '12px' }}>{item.standard}</td>
-                              <td style={{ border: '1px solid #e2e8f0', padding: '4px', textAlign: 'center', background: bgColor }}>
-                                <select
-                                  value={val}
-                                  onChange={(e) => handleChecklistChange(key, 'judge', e.target.value)}
-                                  style={{
-                                    width: '100%', minHeight: '38px', padding: '6px 4px', border: '1px solid #c4b5fd',
-                                    borderRadius: '6px', fontWeight: 700, fontSize: '13px',
-                                    background: 'transparent', cursor: 'pointer', textAlign: 'center',
-                                    color: val === 'O' ? '#15803d' : val === 'X' ? '#b91c1c' : val === 'G' ? '#b45309' : val === 'R' ? '#0369a1' : '#334155'
-                                  }}
-                                >
-                                  <option value="">— Pilih —</option>
-                                  <option value="O">O (OK)</option>
-                                  <option value="X">X (NG)</option>
-                                  <option value="G">G (Ganti)</option>
-                                  <option value="R">R (Repair)</option>
-                                  <option value="T/A">T/A (Tdk Pakai)</option>
-                                </select>
-                              </td>
+                    {/* 2. Diagram Chuck & NOTE Legend (DI ATAS FORM PENGISIAN) */}
+                    <div style={{ background: '#fff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: '#4c1d95', marginBottom: '10px' }}>🖼️ Diagram Chuck & Legend Status</div>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {/* Diagram Image */}
+                        <div style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                          <img
+                            src="/images/chuck-diagram.png"
+                            alt="Chuck Diagram"
+                            style={{ width: '100%', maxWidth: '600px', height: 'auto', display: 'inline-block', borderRadius: '6px' }}
+                          />
+                        </div>
+
+                        {/* Legend Status NOTE */}
+                        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px' }}>
+                          <div style={{ fontWeight: 700, fontSize: '11px', color: '#475569', marginBottom: '6px' }}>NOTE / KETERANGAN SIMBOL:</div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px' }}>
+                            <span style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>O : OK</span>
+                            <span style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>X : NG</span>
+                            <span style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>G : Ganti</span>
+                            <span style={{ background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>R : Repair</span>
+                            <span style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>T/A : Tdk Pakai</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. Form Pengisian: Komponen + Status + Dynamic Custom Items */}
+                    <div style={{ background: '#fff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ fontWeight: 700, fontSize: '13px', color: '#4c1d95' }}>📋 Status Pemeriksaan Komponen (Total: {allItems.length} Item)</div>
+                        <button
+                          type="button"
+                          onClick={handleAddCustomChuckItem}
+                          style={{
+                            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', color: '#fff', border: 'none',
+                            padding: '6px 12px', borderRadius: '6px', fontWeight: 700, fontSize: '12px', cursor: 'pointer',
+                            boxShadow: '0 2px 6px rgba(109,40,217,0.25)', display: 'flex', alignItems: 'center', gap: '4px'
+                          }}
+                        >
+                          ➕ Tambah Komponen Custom (Item {allItems.length + 1})
+                        </button>
+                      </div>
+                      
+                      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                        <table style={{ width: '100%', minWidth: '340px', borderCollapse: 'collapse', fontSize: '13px' }}>
+                          <thead>
+                            <tr style={{ background: '#ede9fe' }}>
+                              <th style={{ border: '1px solid #c4b5fd', padding: '8px 6px', textAlign: 'center', width: '36px', color: '#4c1d95' }}>NO</th>
+                              <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'left', color: '#4c1d95' }}>ITEM</th>
+                              <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'left', color: '#4c1d95' }}>STANDAR</th>
+                              <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'center', width: '110px', color: '#4c1d95' }}>STATUS</th>
+                              <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'center', width: '50px', color: '#4c1d95' }}>AKSI</th>
                             </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                          </thead>
+                          <tbody>
+                            {allItems.map((item) => {
+                              const val = item.judge
+                              const bgColor =
+                                val === 'O' ? '#dcfce7' :
+                                val === 'X' ? '#fee2e2' :
+                                val === 'G' ? '#fef3c7' :
+                                val === 'R' ? '#e0f2fe' :
+                                val === 'T/A' ? '#f1f5f9' : '#fff'
+                              return (
+                                <tr key={item.no} style={{ background: item.no % 2 === 0 ? '#faf5ff' : '#fff' }}>
+                                  <td style={{ border: '1px solid #e2e8f0', padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#6d28d9' }}>{item.no}</td>
+                                  <td style={{ border: '1px solid #e2e8f0', padding: '6px 8px', fontWeight: 600 }}>
+                                    {item.isCustom ? (
+                                      <input
+                                        type="text"
+                                        placeholder={`Nama Komponen ${item.no}...`}
+                                        value={item.label}
+                                        onChange={(e) => handleUpdateCustomChuckItem(item.customIndex, 'label', e.target.value)}
+                                        style={{ width: '100%', padding: '6px 8px', borderRadius: '4px', border: '1px solid #a78bfa', fontSize: '13px', fontWeight: 600 }}
+                                      />
+                                    ) : (
+                                      item.label
+                                    )}
+                                  </td>
+                                  <td style={{ border: '1px solid #e2e8f0', padding: '6px 8px', color: '#64748b', fontSize: '12px' }}>
+                                    {item.isCustom ? (
+                                      <input
+                                        type="text"
+                                        placeholder="Standar..."
+                                        value={item.standard}
+                                        onChange={(e) => handleUpdateCustomChuckItem(item.customIndex, 'standard', e.target.value)}
+                                        style={{ width: '100%', padding: '6px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                                      />
+                                    ) : (
+                                      item.standard
+                                    )}
+                                  </td>
+                                  <td style={{ border: '1px solid #e2e8f0', padding: '4px', textAlign: 'center', background: bgColor }}>
+                                    <select
+                                      value={val}
+                                      onChange={(e) => {
+                                        if (item.isCustom) {
+                                          handleUpdateCustomChuckItem(item.customIndex, 'judge', e.target.value)
+                                        } else {
+                                          handleChecklistChange(`bm_chuck|${item.no - 1}`, 'judge', e.target.value)
+                                        }
+                                      }}
+                                      style={{
+                                        width: '100%', minHeight: '38px', padding: '6px 4px', border: '1px solid #c4b5fd',
+                                        borderRadius: '6px', fontWeight: 700, fontSize: '13px',
+                                        background: 'transparent', cursor: 'pointer', textAlign: 'center',
+                                        color: val === 'O' ? '#15803d' : val === 'X' ? '#b91c1c' : val === 'G' ? '#b45309' : val === 'R' ? '#0369a1' : '#334155'
+                                      }}
+                                    >
+                                      <option value="">— Pilih —</option>
+                                      <option value="O">O (OK)</option>
+                                      <option value="X">X (NG)</option>
+                                      <option value="G">G (Ganti)</option>
+                                      <option value="R">R (Repair)</option>
+                                      <option value="T/A">T/A (Tdk Pakai)</option>
+                                    </select>
+                                  </td>
+                                  <td style={{ border: '1px solid #e2e8f0', padding: '4px', textAlign: 'center' }}>
+                                    {item.isCustom ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveCustomChuckItem(item.customIndex)}
+                                        style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: '4px', padding: '4px 8px', cursor: 'pointer', fontSize: '12px' }}
+                                        title="Hapus komponen ini"
+                                      >
+                                        🗑️
+                                      </button>
+                                    ) : (
+                                      <span style={{ color: '#cbd5e1', fontSize: '11px' }}>-</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
 
-                  {/* JUDGE + REMARK */}
-                  <div style={{ marginTop: '14px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: '1', minWidth: '140px' }}>
-                      <label style={{ fontSize: '11px', fontWeight: 700, color: '#6d28d9', display: 'block', marginBottom: '4px' }}>JUDGE KESELURUHAN</label>
-                      <div style={{
-                        padding: '10px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '15px', textAlign: 'center',
-                        background: BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => v === 'X') ? '#fee2e2'
-                          : BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => !!v) ? '#dcfce7' : '#f1f5f9',
-                        color: BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => v === 'X') ? '#b91c1c'
-                          : BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => !!v) ? '#15803d' : '#94a3b8',
-                        border: '1px solid #e2e8f0'
-                      }}>
-                        {BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => v === 'X') ? '❌ NG'
-                          : BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => !!v) ? '✅ OK' : '—'}
+                      <button
+                        type="button"
+                        onClick={handleAddCustomChuckItem}
+                        style={{
+                          marginTop: '12px', width: '100%', padding: '10px', background: '#f5f3ff', border: '1px dashed #7c3aed',
+                          borderRadius: '6px', color: '#6d28d9', fontWeight: 700, fontSize: '13px', cursor: 'pointer'
+                        }}
+                      >
+                        ➕ Tambah Komponen Chuck Baru (Item {allItems.length + 1})
+                      </button>
+
+                      {/* JUDGE + REMARK */}
+                      <div style={{ marginTop: '14px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ flex: '1', minWidth: '140px' }}>
+                          <label style={{ fontSize: '11px', fontWeight: 700, color: '#6d28d9', display: 'block', marginBottom: '4px' }}>JUDGE KESELURUHAN</label>
+                          <div style={{
+                            padding: '10px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '15px', textAlign: 'center',
+                            background: !hasAny ? '#f1f5f9' : (hasNG ? '#fee2e2' : '#dcfce7'),
+                            color: !hasAny ? '#94a3b8' : (hasNG ? '#b91c1c' : '#15803d'),
+                            border: '1px solid #e2e8f0'
+                          }}>
+                            {!hasAny ? '—' : (hasNG ? '❌ NG' : '✅ OK')}
+                          </div>
+                        </div>
+                        <div style={{ flex: '2', minWidth: '200px' }}>
+                          <label style={{ fontSize: '11px', fontWeight: 700, color: '#6d28d9', display: 'block', marginBottom: '4px' }}>REMARK / CATATAN</label>
+                          <input
+                            type="text"
+                            placeholder="Ketik catatan / keterangan..."
+                            value={catatan || ''}
+                            onChange={(e) => setCatatan(e.target.value)}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd6fe', borderRadius: '8px', fontSize: '13px', boxSizing: 'border-box' as any }}
+                          />
+                        </div>
                       </div>
                     </div>
-                    <div style={{ flex: '2', minWidth: '200px' }}>
-                      <label style={{ fontSize: '11px', fontWeight: 700, color: '#6d28d9', display: 'block', marginBottom: '4px' }}>REMARK / CATATAN</label>
-                      <input
-                        type="text"
-                        placeholder="Ketik catatan / keterangan..."
-                        value={catatan || ''}
-                        onChange={(e) => setCatatan(e.target.value)}
-                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd6fe', borderRadius: '8px', fontSize: '13px', boxSizing: 'border-box' as any }}
-                      />
-                    </div>
                   </div>
-                </div>
-              </div>
-
+                )
+              })()
 
             ) : (
               <>
