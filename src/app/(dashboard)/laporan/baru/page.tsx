@@ -889,6 +889,8 @@ export default function LaporanBaruPage() {
                 <option value="Nonshift">Nonshift</option>
                 <option value="Shift A">Shift A</option>
                 <option value="Shift B">Shift B</option>
+                <option value="DayShift">DayShift (07:15 - 20:40)</option>
+                <option value="NightShift">NightShift (21:00 - 06:55)</option>
               </select>
             </div>
           </div>

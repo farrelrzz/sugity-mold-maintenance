@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { showToast } from '@/components/ui/Toast'
 import { confirmDialog } from '@/components/ui/ConfirmModal'
 import Pagination from '@/components/ui/Pagination'
+import SummarizeModal from '@/components/laporan/SummarizeModal'
 
 interface ApprovalEntry {
   role: string
@@ -46,6 +47,7 @@ export default function RiwayatPage() {
 
   const [laporanList, setLaporanList] = useState<LaporanEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [isSummarizeOpen, setIsSummarizeOpen] = useState(false)
 
   // Filters
   const [filterTanggal, setFilterTanggal] = useState('')
@@ -229,6 +231,14 @@ export default function RiwayatPage() {
             >
               ⚠️ Belum CS / TTD PIC
             </button>
+            <button
+              type="button"
+              className="pilih-btn"
+              style={{ padding: '9px 14px', fontSize: '13px', background: 'linear-gradient(135deg, #6d28d9 0%, #4c1d95 100%)', color: '#fff', border: 'none', fontWeight: 700, boxShadow: '0 2px 6px rgba(109,40,217,0.25)' }}
+              onClick={() => setIsSummarizeOpen(true)}
+            >
+              📋 Copy Summarize Maintenance
+            </button>
           </div>
 
           <button
@@ -340,6 +350,12 @@ export default function RiwayatPage() {
           />
         )}
       </section>
+
+      <SummarizeModal
+        isOpen={isSummarizeOpen}
+        onClose={() => setIsSummarizeOpen(false)}
+        initialDate={filterTanggal}
+      />
     </>
   )
 }

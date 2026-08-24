@@ -407,7 +407,11 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
 
   const handleChecklistChange = (key: string, type: 'judge' | 'komentar', val: string) => {
     const entry = checklist[key] || { judge: '', komentar: '' }
-    const nextEntry = { ...entry, [type]: val }
+    let nextVal = val
+    if (type === 'judge' && entry.judge === val) {
+      nextVal = ''
+    }
+    const nextEntry = { ...entry, [type]: nextVal }
     setChecklist({ ...checklist, [key]: nextEntry })
   }
 
@@ -2112,7 +2116,15 @@ ${hasCoolingOrHeater ? `
                   <td style={{ color: 'var(--teks-redup)', padding: '8px 10px', border: '1px solid #999', whiteSpace: 'nowrap' }}>{item.standar || '-'}</td>
                   <td style={{ padding: '8px 10px', border: '1px solid #999' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                      <label
+                        style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', cursor: 'pointer' }}
+                        onClick={(e) => {
+                          if (val === 'OK') {
+                            e.preventDefault()
+                            handleChecklistChange(key, 'judge', '')
+                          }
+                        }}
+                      >
                         <input
                           type="radio"
                           name={`judge_${secKode}_${idx}`}
@@ -2121,7 +2133,15 @@ ${hasCoolingOrHeater ? `
                           onChange={() => handleChecklistChange(key, 'judge', 'OK')}
                         /> OK
                       </label>
-                      <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                      <label
+                        style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', cursor: 'pointer' }}
+                        onClick={(e) => {
+                          if (val === 'NG') {
+                            e.preventDefault()
+                            handleChecklistChange(key, 'judge', '')
+                          }
+                        }}
+                      >
                         <input
                           type="radio"
                           name={`judge_${secKode}_${idx}`}

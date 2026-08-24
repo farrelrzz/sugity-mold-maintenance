@@ -371,7 +371,11 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
 
   const handleChecklistChange = (key: string, type: 'judge' | 'komentar', val: string) => {
     const entry = checklist[key] || { judge: '', komentar: '' }
-    const nextEntry = { ...entry, [type]: val }
+    let nextVal = val
+    if (type === 'judge' && entry.judge === val) {
+      nextVal = ''
+    }
+    const nextEntry = { ...entry, [type]: nextVal }
     setChecklist({ ...checklist, [key]: nextEntry })
   }
 
@@ -1218,7 +1222,15 @@ ${_isOverhaul ? `
                   <td style={{ fontSize: '11.5px', color: 'var(--teks-redup)' }}>{item.standar || '-'}</td>
                   <td>
                     <div className="cs-okng" style={{ flexDirection: 'column', gap: '2px', alignItems: 'flex-start' }}>
-                      <label style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <label
+                        style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                        onClick={(e) => {
+                          if (val === 'OK') {
+                            e.preventDefault()
+                            handleChecklistChange(key, 'judge', '')
+                          }
+                        }}
+                      >
                         <input
                           type="radio"
                           name={`judge_${secKode}_${idx}`}
@@ -1227,7 +1239,15 @@ ${_isOverhaul ? `
                           onChange={() => handleChecklistChange(key, 'judge', 'OK')}
                         /> OK
                       </label>
-                      <label style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <label
+                        style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}
+                        onClick={(e) => {
+                          if (val === 'NG') {
+                            e.preventDefault()
+                            handleChecklistChange(key, 'judge', '')
+                          }
+                        }}
+                      >
                         <input
                           type="radio"
                           name={`judge_${secKode}_${idx}`}
