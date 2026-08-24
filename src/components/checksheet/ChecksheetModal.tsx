@@ -1100,10 +1100,10 @@ ${_isOverhaul ? `
                  BM CHUCK CHECKSHEET EDITOR
                  ======================================= */
               <div style={{ marginTop: '16px' }}>
-                {/* Info Spesifikasi Mold */}
-                <div style={{ background: '#f5f3ff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px' }}>
+                {/* 1. Info Spesifikasi Mold */}
+                <div style={{ background: '#f5f3ff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
                   <div style={{ fontWeight: 800, fontSize: '14px', color: '#6d28d9', marginBottom: '12px' }}>⚙️ CHECK SHEET PEMERIKSAAN CHUCK</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', fontSize: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', fontSize: '12px' }}>
                     {[
                       { label: 'MOLD NO', val: laporan.noMold },
                       { label: 'MOLD NAME', val: laporan.moldData?.part || laporan.part || '-' },
@@ -1113,23 +1113,52 @@ ${_isOverhaul ? `
                     ].map(({ label, val }) => (
                       <div key={label} style={{ background: '#fff', borderRadius: '6px', padding: '8px 10px', border: '1px solid #ddd6fe' }}>
                         <div style={{ fontSize: '10px', color: '#7c3aed', fontWeight: 700, marginBottom: '2px' }}>{label}</div>
-                        <div style={{ fontWeight: 600, color: '#1e1b4b' }}>{val}</div>
+                        <div style={{ fontWeight: 600, color: '#1e1b4b', wordBreak: 'break-word' }}>{val}</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                  {/* Kiri: tabel 10 komponen */}
-                  <div style={{ flex: '1', minWidth: '300px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '13px', color: '#4c1d95', marginBottom: '8px' }}>📋 Status Pemeriksaan Komponen</div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                {/* 2. Diagram Chuck & NOTE Legend (DI ATAS FORM PENGISIAN) */}
+                <div style={{ background: '#fff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+                  <div style={{ fontWeight: 700, fontSize: '13px', color: '#4c1d95', marginBottom: '10px' }}>🖼️ Diagram Chuck & Legend Status</div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Diagram Image */}
+                    <div style={{ background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
+                      <img
+                        src="/images/chuck-diagram.png"
+                        alt="Chuck Diagram"
+                        style={{ width: '100%', maxWidth: '600px', height: 'auto', display: 'inline-block', borderRadius: '6px' }}
+                      />
+                    </div>
+
+                    {/* Legend Status NOTE */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 12px' }}>
+                      <div style={{ fontWeight: 700, fontSize: '11px', color: '#475569', marginBottom: '6px' }}>NOTE / KETERANGAN SIMBOL:</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '12px' }}>
+                        <span style={{ background: '#dcfce7', color: '#15803d', border: '1px solid #bbf7d0', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>O : OK</span>
+                        <span style={{ background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>X : NG</span>
+                        <span style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>G : Ganti</span>
+                        <span style={{ background: '#e0f2fe', color: '#0369a1', border: '1px solid #bae6fd', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>R : Repair</span>
+                        <span style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1', padding: '4px 10px', borderRadius: '6px', fontWeight: 700 }}>T/A : Tdk Pakai</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Form Pengisian: 10 komponen + status */}
+                <div style={{ background: '#fff', border: '2px solid #ddd6fe', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px', boxShadow: '0 2px 4px rgba(0,0,0,0.03)' }}>
+                  <div style={{ fontWeight: 700, fontSize: '13px', color: '#4c1d95', marginBottom: '10px' }}>📋 Status Pemeriksaan Komponen (1 - 10)</div>
+                  
+                  <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <table style={{ width: '100%', minWidth: '320px', borderCollapse: 'collapse', fontSize: '13px' }}>
                       <thead>
                         <tr style={{ background: '#ede9fe' }}>
                           <th style={{ border: '1px solid #c4b5fd', padding: '8px 6px', textAlign: 'center', width: '36px', color: '#4c1d95' }}>NO</th>
                           <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'left', color: '#4c1d95' }}>ITEM</th>
                           <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'left', color: '#4c1d95' }}>STANDAR</th>
-                          <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'center', width: '90px', color: '#4c1d95' }}>STATUS</th>
+                          <th style={{ border: '1px solid #c4b5fd', padding: '8px', textAlign: 'center', width: '110px', color: '#4c1d95' }}>STATUS</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1147,18 +1176,18 @@ ${_isOverhaul ? `
                               <td style={{ border: '1px solid #e2e8f0', padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: '#6d28d9' }}>{i + 1}</td>
                               <td style={{ border: '1px solid #e2e8f0', padding: '8px', fontWeight: 600 }}>{item.label}</td>
                               <td style={{ border: '1px solid #e2e8f0', padding: '8px', color: '#64748b', fontSize: '12px' }}>{item.standard}</td>
-                              <td style={{ border: '1px solid #e2e8f0', padding: '6px', textAlign: 'center', background: bgColor }}>
+                              <td style={{ border: '1px solid #e2e8f0', padding: '4px', textAlign: 'center', background: bgColor }}>
                                 <select
                                   value={val}
                                   onChange={(e) => handleChecklistChange(key, 'judge', e.target.value)}
                                   style={{
-                                    width: '100%', padding: '6px 4px', border: '1px solid #c4b5fd',
+                                    width: '100%', minHeight: '38px', padding: '6px 4px', border: '1px solid #c4b5fd',
                                     borderRadius: '6px', fontWeight: 700, fontSize: '13px',
                                     background: 'transparent', cursor: 'pointer', textAlign: 'center',
                                     color: val === 'O' ? '#15803d' : val === 'X' ? '#b91c1c' : val === 'G' ? '#b45309' : val === 'R' ? '#0369a1' : '#334155'
                                   }}
                                 >
-                                  <option value="">—</option>
+                                  <option value="">— Pilih —</option>
                                   <option value="O">O (OK)</option>
                                   <option value="X">X (NG)</option>
                                   <option value="G">G (Ganti)</option>
@@ -1171,57 +1200,38 @@ ${_isOverhaul ? `
                         })}
                       </tbody>
                     </table>
-                    {/* JUDGE + REMARK */}
-                    <div style={{ marginTop: '12px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <div style={{ flex: '1', minWidth: '160px' }}>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: '#6d28d9', display: 'block', marginBottom: '4px' }}>JUDGE</label>
-                        <div style={{
-                          padding: '10px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '16px', textAlign: 'center',
-                          background: BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => v === 'X') ? '#fee2e2'
-                            : BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => !!v) ? '#dcfce7' : '#f1f5f9',
-                          color: BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => v === 'X') ? '#b91c1c'
-                            : BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => !!v) ? '#15803d' : '#94a3b8',
-                          border: '1px solid #e2e8f0'
-                        }}>
-                          {BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => v === 'X') ? '❌ NG'
-                            : BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => !!v) ? '✅ OK' : '—'}
-                        </div>
-                      </div>
-                      <div style={{ flex: '2', minWidth: '220px' }}>
-                        <label style={{ fontSize: '11px', fontWeight: 700, color: '#6d28d9', display: 'block', marginBottom: '4px' }}>REMARK</label>
-                        <input
-                          type="text"
-                          placeholder="Catatan / keterangan..."
-                          value={catatan || ''}
-                          onChange={(e) => setCatatan(e.target.value)}
-                          style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd6fe', borderRadius: '8px', fontSize: '13px', boxSizing: 'border-box' as any }}
-                        />
-                      </div>
-                    </div>
                   </div>
 
-                  {/* Kanan: Diagram + NOTE */}
-                  <div style={{ width: '260px', minWidth: '220px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ border: '2px solid #ddd6fe', borderRadius: '8px', padding: '6px', background: '#faf5ff' }}>
-                      <img src="/images/chuck-diagram.png" alt="Chuck Diagram" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '6px' }} />
+                  {/* JUDGE + REMARK */}
+                  <div style={{ marginTop: '14px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <div style={{ flex: '1', minWidth: '140px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 700, color: '#6d28d9', display: 'block', marginBottom: '4px' }}>JUDGE KESELURUHAN</label>
+                      <div style={{
+                        padding: '10px 14px', borderRadius: '8px', fontWeight: 800, fontSize: '15px', textAlign: 'center',
+                        background: BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => v === 'X') ? '#fee2e2'
+                          : BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => !!v) ? '#dcfce7' : '#f1f5f9',
+                        color: BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => v === 'X') ? '#b91c1c'
+                          : BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => !!v) ? '#15803d' : '#94a3b8',
+                        border: '1px solid #e2e8f0'
+                      }}>
+                        {BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => v === 'X') ? '❌ NG'
+                          : BM_CHUCK_ITEMS.map((_, i) => checklist[`bm_chuck|${i}`]?.judge).some(v => !!v) ? '✅ OK' : '—'}
+                      </div>
                     </div>
-                    <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px', fontSize: '12px', background: '#f8fafc' }}>
-                      <div style={{ fontWeight: 700, marginBottom: '6px' }}>NOTE :</div>
-                      <table style={{ borderCollapse: 'collapse', border: '1px solid #000' }}>
-                        <tbody>
-                          {[['G','Ganti','X','NG'],['R','Repair','O','OK'],['T/A','Tdk Pakai','','']].map(([k1,v1,k2,v2],i) => (
-                            <tr key={i}>
-                              <td style={{ border: '1px solid #000', padding: '2px 6px', fontWeight: 'bold' }}>{k1}</td>
-                              <td style={{ border: '1px solid #000', padding: '2px 6px' }}>: {v1}</td>
-                              {k2 ? <><td style={{ border: '1px solid #000', padding: '2px 6px', fontWeight: 'bold' }}>{k2}</td><td style={{ border: '1px solid #000', padding: '2px 6px' }}>: {v2}</td></> : <td colSpan={2} style={{ border: '1px solid #000' }}></td>}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div style={{ flex: '2', minWidth: '200px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: 700, color: '#6d28d9', display: 'block', marginBottom: '4px' }}>REMARK / CATATAN</label>
+                      <input
+                        type="text"
+                        placeholder="Ketik catatan / keterangan..."
+                        value={catatan || ''}
+                        onChange={(e) => setCatatan(e.target.value)}
+                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #ddd6fe', borderRadius: '8px', fontSize: '13px', boxSizing: 'border-box' as any }}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
+
 
             ) : (
               <>
