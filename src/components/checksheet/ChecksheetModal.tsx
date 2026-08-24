@@ -62,6 +62,19 @@ interface LaporanData {
   } | null
 }
 
+const BM_CHUCK_ITEMS = [
+  { label: 'Frame', standard: 'Tidak Bengkok' },
+  { label: 'Cilyder', standard: 'Tidak Bocor' },
+  { label: 'Vacum', standard: 'Tidak Cacat' },
+  { label: 'Lengan Chuck', standard: 'Tidak Cacat' },
+  { label: 'Guiden / Lock', standard: 'Tidak Cacat' },
+  { label: 'L/S', standard: 'Interlock OK' },
+  { label: 'Metacon', standard: 'Tidak Cacat' },
+  { label: 'Hose / Joint', standard: 'Tidak Bocor' },
+  { label: 'Handle', standard: 'Tidak Cacat' },
+  { label: 'Baut Ikat', standard: 'Tidak Kendor' }
+]
+
 const OH_SECTIONS_A = [
   {
     kode: 'A1', judul: '1. KELUHAN OPERATOR (diisi oleh operator produksi)',
@@ -717,6 +730,7 @@ ${_isOverhaul ? `
   }
 
   const isOverhaul = laporan.jenis === 'OH_MOLD' || laporan.jenis === 'OH MOLD' || laporan.jenis?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === 'OHMOLD'
+  const isBMChuck = laporan.jenis?.trim().toUpperCase() === 'BM CHUCK'
   const totalSparepart = getTotalSparepartCost()
   const totalMpCost = isOverhaul ? getOverhaulTotalMpCost() : Math.round(getDurasiJam() * 89595 * jumlahOrang)
   const totalCostCombined = totalMpCost + totalSparepart
