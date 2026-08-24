@@ -517,8 +517,306 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
     setFoto(foto.filter((_, i) => i !== idx))
   }
 
+  const handlePrintBMChuck = () => {
+    if (!laporan) return
+    const _totalSparepart = spareparts.reduce((s, sp) => s + (sp.qty * Number(sp.hargaSatuan)), 0)
+    const _totalMpCost = (() => {
+      if (!jamMulai || !jamSelesai) return 0
+      const [hS, mS] = jamMulai.split(':').map(Number)
+      const [hE, mE] = jamSelesai.split(':').map(Number)
+      let diff = (hE * 60 + mE) - (hS * 60 + mS)
+      if (diff < 0) diff += 24 * 60
+      return Math.round((diff / 60) * 89595 * jumlahOrang)
+    })()
+    const _totalCostCombined = _totalMpCost + _totalSparepart
+    const _approvals = laporan.checksheet?.approvals || []
+    const _picSign = _approvals.find((a) => a.role === 'PIC')
+    const _tlSign = _approvals.find((a) => a.role === 'TL')
+    const _glSign = _approvals.find((a) => a.role === 'GL')
+    const _admSign = _approvals.find((a) => a.role === 'ADM')
+
+    const allItems = getAllBMChuckItems()
+    const hasNG = allItems.some((item) => item.judge === 'X')
+    const hasAny = allItems.some((item) => !!item.judge)
+    const judgeVal = hasAny ? (hasNG ? 'NG' : 'OK') : ''
+
+    const sigBoxHtml = (sign?: ApprovalEntry | null) =>
+      sign?.signedAt
+        ? `${sign.user?.signature ? `<div style="text-align:center;margin-bottom:4px"><img src="${sign.user.signature}" alt="TTD" style="max-height:45px;display:block;margin:0 auto;object-fit:contain;" /></div>` : ''}<b>${sign.user?.nama || 'Verified'}</b><br><span style="font-size:9px;color:#666">${new Date(sign.signedAt).toLocaleDateString('id-ID')}</span>`
+        : `<span style="font-size:9px;color:#999">Belum TTD</span>`
+
+    const itemRowsHtml = allItems.map(item => `
+      <tr>
+        <td style="border:1px solid #000;padding:2px 4px;text-align:center">${item.no}.</td>
+        <td style="border:1px solid #000;padding:2px 4px">${item.label}</td>
+        <td style="border:1px solid #000;padding:2px 4px">${item.standard}</td>
+      </tr>
+    `).join('')
+
+    const itemHeaderColsHtml = allItems.map(item => `<th style="border:1px solid #000;padding:2px 1px">${item.no}</th>`).join('')
+
+    const itemDataColsHtml = allItems.map(item => `
+      <td style="border:1px solid #000;padding:2px;font-weight:bold;color:${item.judge === 'X' ? '#c00' : item.judge === 'O' ? '#006600' : '#000'}">
+        ${item.judge}
+      </td>
+    `).join('')
+
+    const itemEmptyColsHtml = allItems.map(() => `<td style="border:1px solid #000;padding:2px"></td>`).join('')
+
+    let emptyRowsHtml = ''
+    for (let r = 2; r <= 28; r++) {
+      emptyRowsHtml += `<tr style="height:18px">
+        <td style="border:1px solid #000;padding:2px">${r}</td>
+        <td style="border:1px solid #000;padding:2px"></td>
+        ${itemEmptyColsHtml}
+        <td style="border:1px solid #000;padding:2px"></td>
+        <td style="border:1px solid #000;padding:2px"></td>
+        <td style="border:1px solid #000;padding:2px"></td>
+      </tr>`
+    }
+
+    const sparepartRowsHtml = spareparts.length === 0
+      ? `<tr><td colspan="5" style="text-align:center;color:#666;padding:8px">Tidak ada pemakaian sparepart.</td></tr>`
+      : spareparts.map((sp, idx) => `
+        <tr>
+          <td style="border:1px solid #000;text-align:center;padding:4px">${idx + 1}</td>
+          <td style="border:1px solid #000;padding:4px;font-weight:bold">${sp.namaSparepart}</td>
+          <td style="border:1px solid #000;text-align:center;padding:4px">${sp.qty}</td>
+          <td style="border:1px solid #000;text-align:right;padding:4px">Rp ${Number(sp.hargaSatuan).toLocaleString('id-ID')}</td>
+          <td style="border:1px solid #000;text-align:right;padding:4px;font-weight:bold">Rp ${(sp.qty * Number(sp.hargaSatuan)).toLocaleString('id-ID')}</td>
+        </tr>
+      `).join('')
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <title>CHECK SHEET PEMERIKSAAN CHUCK - ${laporan.noMold}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 10px; color: #000; background: #fff; line-height: 1.2; }
+    @page { size: A4 portrait; margin: 6mm 8mm; }
+    .page { width: 100%; padding: 0; margin: 0; page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #000; padding: 3px 4px; }
+    .lbl { font-weight: bold; background: #f0f0f0; }
+  </style>
+</head>
+<body onload="window.print()">
+
+  <!-- HALAMAN 1: CHECKSHEET CHUCK -->
+  <div class="page">
+    <table style="margin-bottom:4px">
+      <tbody>
+        <tr>
+          <td style="width:22%;font-size:9px;font-weight:bold;vertical-align:top;padding:4px 6px">
+            PT.SUGITY CREATIVES<br/>
+            MOLD MAINTENANCE DEPT.
+          </td>
+          <td style="text-align:center;font-size:18px;font-weight:bold;letter-spacing:1px;padding:6px">
+            CHECK SHEET PEMERIKSAAN CHUCK
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table style="margin-bottom:6px;font-size:10px">
+      <thead>
+        <tr style="font-weight:bold;background:#f0f0f0">
+          <th style="width:15%;text-align:center">MOLD NO</th>
+          <th style="width:35%;text-align:center">MOLD NAME</th>
+          <th style="width:18%;text-align:center">MODEL</th>
+          <th style="width:18%;text-align:center">CUSTOMER</th>
+          <th style="width:14%;text-align:center">TON</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align:center;font-weight:bold">${laporan.noMold}</td>
+          <td style="text-align:center">${laporan.moldData?.part || laporan.part || '-'}</td>
+          <td style="text-align:center">${laporan.moldData?.model || '-'}</td>
+          <td style="text-align:center">${laporan.moldData?.customer || '-'}</td>
+          <td style="text-align:center">${laporan.moldData?.tonase || '-'}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table style="margin-bottom:6px">
+      <tbody>
+        <tr>
+          <td style="width:42%;vertical-align:top;padding:4px">
+            <img src="/images/chuck-diagram.png" alt="Chuck Diagram" style="width:100%;height:auto;display:block;margin-bottom:6px" />
+            <div style="font-size:9px">
+              <div style="font-weight:bold;margin-bottom:2px">NOTE :</div>
+              <table style="font-size:9px">
+                <tbody>
+                  <tr>
+                    <td style="font-weight:bold;width:15%">G</td>
+                    <td style="width:35%">: Ganti</td>
+                    <td style="font-weight:bold;width:15%">X</td>
+                    <td style="width:35%">: NG</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:bold">R</td>
+                    <td>: Repair</td>
+                    <td style="font-weight:bold">O</td>
+                    <td>: OK</td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:bold">T/A</td>
+                    <td colSpan="3">: Tdk Pakai</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </td>
+
+          <td style="width:58%;vertical-align:top;padding:0">
+            <table style="font-size:9.5px">
+              <thead>
+                <tr style="background:#f5f5f5">
+                  <th style="width:10%;text-align:center">NO</th>
+                  <th style="width:42%">ITEM</th>
+                  <th style="width:48%">STANDART</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemRowsHtml}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table style="font-size:9px;text-align:center">
+      <thead>
+        <tr>
+          <th rowSpan="2" style="width:28px">OH<br/>NO</th>
+          <th rowSpan="2" style="width:58px">TANGGAL</th>
+          <th colSpan="${allItems.length}">ITEM CHECK</th>
+          <th rowSpan="2" style="width:40px">JUDGE</th>
+          <th rowSpan="2">REMARK</th>
+          <th rowSpan="2" style="width:48px">PIC</th>
+        </tr>
+        <tr>
+          ${itemHeaderColsHtml}
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="height:22px">
+          <td>1</td>
+          <td style="font-size:8.5px">${new Date(laporan.tanggal).toLocaleDateString('id-ID')}</td>
+          ${itemDataColsHtml}
+          <td style="font-weight:bold;color:${judgeVal === 'NG' ? '#c00' : '#006600'}">${judgeVal}</td>
+          <td style="text-align:left">${catatan || ''}</td>
+          <td>${laporan.pic.nama.split(' ')[0]}</td>
+        </tr>
+        ${emptyRowsHtml}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- HALAMAN 2: SPAREPART, MAN POWER & APPROVAL -->
+  <div class="page" style="padding-top:10px">
+    <table style="margin-bottom:8px">
+      <tbody>
+        <tr>
+          <td style="width:22%;font-size:9px;font-weight:bold;vertical-align:top;padding:4px 6px">
+            PT.SUGITY CREATIVES<br/>
+            MOLD MAINTENANCE DEPT.
+          </td>
+          <td style="text-align:center;padding:6px">
+            <div style="font-size:16px;font-weight:bold">RINCIAN BIAYA & APPROVAL PEMERIKSAAN CHUCK</div>
+            <div style="font-size:10px;color:#444;margin-top:2px">
+              MOLD NO: <b>${laporan.noMold}</b> &nbsp;|&nbsp; PART: <b>${laporan.moldData?.part || laporan.part || '-'}</b> &nbsp;|&nbsp; TANGGAL: <b>${new Date(laporan.tanggal).toLocaleDateString('id-ID')}</b>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:11px;margin:12px 0 6px 0;color:#1e1b4b">F. PEMAKAIAN SPAREPART / ORDER SPARE PART</h3>
+    <table style="font-size:10px;margin-bottom:14px">
+      <thead>
+        <tr style="background:#f0f0f0">
+          <th style="width:36px;text-align:center">NO</th>
+          <th>NAMA SPAREPART</th>
+          <th style="width:70px;text-align:center">QTY</th>
+          <th style="width:130px;text-align:right">HARGA SATUAN</th>
+          <th style="width:140px;text-align:right">TOTAL BIAYA</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sparepartRowsHtml}
+      </tbody>
+    </table>
+
+    <h3 style="font-size:11px;margin:12px 0 6px 0;color:#1e1b4b">RINGKASAN BIAYA PEMELIHARAAN (COST SUMMARY)</h3>
+    <table style="font-size:10px;margin-bottom:14px">
+      <tbody>
+        <tr>
+          <td class="lbl" style="width:70%">Biaya Man Power (M/P Cost)</td>
+          <td style="text-align:right;font-weight:bold">Rp ${_totalMpCost.toLocaleString('id-ID')}</td>
+        </tr>
+        <tr>
+          <td class="lbl">Biaya Pemakaian Sparepart</td>
+          <td style="text-align:right;font-weight:bold">Rp ${_totalSparepart.toLocaleString('id-ID')}</td>
+        </tr>
+        <tr style="background:#e8e8e8;font-size:11px">
+          <td class="lbl" style="font-size:11px">TOTAL BIAYA PEMELIHARAAN (TOTAL COST)</td>
+          <td style="text-align:right;font-weight:bold;font-size:12px;color:#15803d">Rp ${_totalCostCombined.toLocaleString('id-ID')}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="border:1px solid #000;padding:8px;min-height:50px;margin-bottom:20px;font-size:10px">
+      <b>CATATAN TAMBAHAN / REMARK:</b>
+      <div style="margin-top:4px;white-space:pre-wrap;color:#333">${catatan || '(Tidak ada catatan)'}</div>
+    </div>
+
+    <h3 style="font-size:11px;margin:12px 0 6px 0;color:#1e1b4b">LEMBAR APPROVAL & TANDA TANGAN</h3>
+    <table style="font-size:10px">
+      <thead>
+        <tr style="background:#f0f0f0">
+          <th style="width:25%">Disiapkan Oleh (Member PIC)</th>
+          <th style="width:25%">Diperiksa Oleh (Team Leader)</th>
+          <th style="width:25%">Disetujui Oleh (Group Leader)</th>
+          <th style="width:25%">Diterima Oleh (ADM)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="height:70px">
+          <td style="vertical-align:bottom;text-align:center;padding:6px">${sigBoxHtml(_picSign)}</td>
+          <td style="vertical-align:bottom;text-align:center;padding:6px">${sigBoxHtml(_tlSign)}</td>
+          <td style="vertical-align:bottom;text-align:center;padding:6px">${sigBoxHtml(_glSign)}</td>
+          <td style="vertical-align:bottom;text-align:center;padding:6px">${sigBoxHtml(_admSign)}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>`
+
+    const win = window.open('', '_blank', 'width=1000,height=800')
+    if (!win) {
+      alert('Popup diblokir browser. Tolong izinkan popup untuk halaman ini.')
+      return
+    }
+    win.document.write(htmlContent)
+    win.document.close()
+    win.focus()
+  }
+
   const handlePrint = () => {
     if (!laporan) return
+
+    if (isBMChuck) {
+      handlePrintBMChuck()
+      return
+    }
 
     const _isOverhaul = laporan.jenis === 'OH_MOLD' || laporan.jenis === 'OH MOLD' || laporan.jenis?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === 'OHMOLD'
     const _totalSparepart = spareparts.reduce((s, sp) => s + (sp.qty * Number(sp.hargaSatuan)), 0)
@@ -1682,155 +1980,307 @@ ${_isOverhaul ? `
          ===== TAB PRINT - PRINT ONLY CONTAINER FOR PAPER =====
          ======================================================== */}
       {isBMChuck ? (
-        /* ===== BM CHUCK PRINT LAYOUT ===== */
-        <div className="cs-print-only" style={{ background: '#fff', color: '#000', fontFamily: 'Arial, sans-serif', fontSize: '11px' }}>
-          <style>{`
-            @media print {
-              body { margin: 0; padding: 0; }
-              .cs-print-only { padding: 10px 14px; }
-              .cs-print-only table { border-collapse: collapse; width: 100%; }
-              .cs-print-only th, .cs-print-only td { border: 1px solid #000; padding: 3px 5px; }
-            }
-          `}</style>
+        /* ===== BM CHUCK PRINT LAYOUT (HALAMAN 1 & HALAMAN 2) ===== */
+        (() => {
+          const allItems = getAllBMChuckItems()
+          const hasNG = allItems.some((item) => item.judge === 'X')
+          const hasAny = allItems.some((item) => !!item.judge)
+          const judgeVal = hasAny ? (hasNG ? 'NG' : 'OK') : ''
 
-          {/* Header */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '6px' }}>
-            <tbody>
-              <tr>
-                <td style={{ border: '1px solid #000', padding: '4px 8px', width: '20%', fontSize: '9px', fontWeight: 'bold', verticalAlign: 'top' }}>MOLD MAINTENANCE DEPT.</td>
-                <td style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontSize: '22px', fontWeight: 'bold', letterSpacing: '1px' }}>CHECK SHEET PEMERIKSAAN  CHUCK</td>
-              </tr>
-            </tbody>
-          </table>
+          return (
+            <div className="cs-print-only" style={{ background: '#fff', color: '#000', fontFamily: 'Arial, sans-serif', fontSize: '10px' }}>
+              <style>{`
+                @media print {
+                  @page { size: A4 portrait; margin: 6mm 8mm; }
+                  body { margin: 0; padding: 0; background: #fff; color: #000; }
+                  .cs-print-only { padding: 0; margin: 0; width: 100%; display: block !important; }
+                  .cs-print-only table { border-collapse: collapse; width: 100%; }
+                  .cs-print-only th, .cs-print-only td { border: 1px solid #000 !important; padding: 2px 4px; }
+                }
+              `}</style>
 
-          {/* Spesifikasi Mold */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '8px' }}>
-            <thead>
-              <tr style={{ fontWeight: 'bold', background: '#f0f0f0' }}>
-                <th style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center', width: '12%' }}>MOLD NO</th>
-                <th style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center', width: '28%' }}>MOLD NAME</th>
-                <th style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center', width: '15%' }}>MODEL</th>
-                <th style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center', width: '15%' }}>CUSTOMER</th>
-                <th style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center', width: '10%' }}>TON</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center', fontWeight: 'bold' }}>{laporan.noMold}</td>
-                <td style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center' }}>{laporan.moldData?.part || laporan.part || '-'}</td>
-                <td style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center' }}>{laporan.moldData?.model || '-'}</td>
-                <td style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center' }}>{laporan.moldData?.customer || '-'}</td>
-                <td style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'center' }}>{laporan.moldData?.tonase || '-'}</td>
-              </tr>
-            </tbody>
-          </table>
+              {/* ===== HALAMAN 1: CHECKSHEET CHUCK ===== */}
+              <div style={{ pageBreakAfter: 'always' }}>
+                {/* Header */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '4px' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ border: '1px solid #000', padding: '4px 6px', width: '22%', fontSize: '9px', fontWeight: 'bold', verticalAlign: 'top' }}>
+                        PT.SUGITY CREATIVES<br/>
+                        MOLD MAINTENANCE DEPT.
+                      </td>
+                      <td style={{ border: '1px solid #000', padding: '6px', textAlign: 'center', fontSize: '18px', fontWeight: 'bold', letterSpacing: '1px' }}>
+                        CHECK SHEET PEMERIKSAAN CHUCK
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
 
-          {/* Gambar Chuck + Tabel Item + Note */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '8px' }}>
-            <tbody>
-              <tr>
-                <td style={{ border: '1px solid #000', padding: '4px', width: '48%', verticalAlign: 'top' }}>
-                  <img src="/images/chuck-diagram.png" alt="Chuck Diagram" style={{ width: '100%', height: 'auto', display: 'block' }} />
-                </td>
-                <td style={{ border: '1px solid #000', padding: '0', width: '52%', verticalAlign: 'top' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px' }}>
-                    <thead>
-                      <tr>
-                        <th style={{ border: '1px solid #000', padding: '3px 4px', width: '10%', textAlign: 'center' }}>NO</th>
-                        <th style={{ border: '1px solid #000', padding: '3px 4px', width: '40%' }}>ITEM</th>
-                        <th style={{ border: '1px solid #000', padding: '3px 4px', width: '50%' }}>STANDART</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {BM_CHUCK_ITEMS.map((item, i) => (
-                        <tr key={i}>
-                          <td style={{ border: '1px solid #000', padding: '2px 4px', textAlign: 'center' }}>{i + 1}.</td>
-                          <td style={{ border: '1px solid #000', padding: '2px 4px' }}>{item.label}</td>
-                          <td style={{ border: '1px solid #000', padding: '2px 4px' }}>{item.standard}</td>
-                        </tr>
+                {/* Spesifikasi Mold */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '6px', fontSize: '10px' }}>
+                  <thead>
+                    <tr style={{ fontWeight: 'bold', background: '#f0f0f0' }}>
+                      <th style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', width: '15%' }}>MOLD NO</th>
+                      <th style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', width: '35%' }}>MOLD NAME</th>
+                      <th style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', width: '18%' }}>MODEL</th>
+                      <th style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', width: '18%' }}>CUSTOMER</th>
+                      <th style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', width: '14%' }}>TON</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', fontWeight: 'bold' }}>{laporan.noMold}</td>
+                      <td style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center' }}>{laporan.moldData?.part || laporan.part || '-'}</td>
+                      <td style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center' }}>{laporan.moldData?.model || '-'}</td>
+                      <td style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center' }}>{laporan.moldData?.customer || '-'}</td>
+                      <td style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center' }}>{laporan.moldData?.tonase || '-'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Gambar Chuck + NOTE Box (Kiri) | Tabel Items 1..N (Kanan) */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '6px' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ border: '1px solid #000', padding: '4px', width: '42%', verticalAlign: 'top' }}>
+                        <img
+                          src="/images/chuck-diagram.png"
+                          alt="Chuck Diagram"
+                          style={{ width: '100%', height: 'auto', display: 'block', marginBottom: '6px' }}
+                        />
+                        <div style={{ fontSize: '9px' }}>
+                          <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>NOTE :</div>
+                          <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '9px' }}>
+                            <tbody>
+                              <tr>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', width: '15%' }}>G</td>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px', width: '35%' }}>: Ganti</td>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold', width: '15%' }}>X</td>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px', width: '35%' }}>: NG</td>
+                              </tr>
+                              <tr>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold' }}>R</td>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px' }}>: Repair</td>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold' }}>O</td>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px' }}>: OK</td>
+                              </tr>
+                              <tr>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px', fontWeight: 'bold' }}>T/A</td>
+                                <td colSpan={3} style={{ border: '1px solid #000', padding: '2px 4px' }}>: Tdk Pakai</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                      <td style={{ border: '1px solid #000', padding: '0', width: '58%', verticalAlign: 'top' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5px' }}>
+                          <thead>
+                            <tr style={{ background: '#f5f5f5' }}>
+                              <th style={{ border: '1px solid #000', padding: '3px 4px', width: '10%', textAlign: 'center' }}>NO</th>
+                              <th style={{ border: '1px solid #000', padding: '3px 4px', width: '42%' }}>ITEM</th>
+                              <th style={{ border: '1px solid #000', padding: '3px 4px', width: '48%' }}>STANDART</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {allItems.map((item) => (
+                              <tr key={item.no}>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px', textAlign: 'center' }}>{item.no}.</td>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px' }}>{item.label}</td>
+                                <td style={{ border: '1px solid #000', padding: '2px 4px' }}>{item.standard}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Tabel Pengisian: OH NO | TANGGAL | ITEM CHECK 1..N | JUDGE | REMARK | PIC */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9px', textAlign: 'center' }}>
+                  <thead>
+                    <tr>
+                      <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px 2px', width: '28px' }}>OH<br/>NO</th>
+                      <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px 2px', width: '58px' }}>TANGGAL</th>
+                      <th colSpan={allItems.length} style={{ border: '1px solid #000', padding: '3px' }}>ITEM CHECK</th>
+                      <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px 2px', width: '40px' }}>JUDGE</th>
+                      <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px' }}>REMARK</th>
+                      <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px 2px', width: '48px' }}>PIC</th>
+                    </tr>
+                    <tr>
+                      {allItems.map((item) => (
+                        <th key={item.no} style={{ border: '1px solid #000', padding: '2px 1px' }}>{item.no}</th>
                       ))}
-                    </tbody>
-                  </table>
-                  <div style={{ padding: '6px 8px', fontSize: '10px' }}>
-                    <div style={{ fontWeight: 'bold', marginBottom: '3px' }}>NOTE :</div>
-                    <table style={{ borderCollapse: 'collapse', border: '1px solid #000' }}>
-                      <tbody>
-                        <tr>
-                          <td style={{ border: '1px solid #000', padding: '2px 8px', fontWeight: 'bold' }}>G</td>
-                          <td style={{ border: '1px solid #000', padding: '2px 8px' }}>: Ganti</td>
-                          <td style={{ border: '1px solid #000', padding: '2px 8px', fontWeight: 'bold' }}>X</td>
-                          <td style={{ border: '1px solid #000', padding: '2px 8px' }}>: NG</td>
-                        </tr>
-                        <tr>
-                          <td style={{ border: '1px solid #000', padding: '2px 8px', fontWeight: 'bold' }}>R</td>
-                          <td style={{ border: '1px solid #000', padding: '2px 8px' }}>: Repair</td>
-                          <td style={{ border: '1px solid #000', padding: '2px 8px', fontWeight: 'bold' }}>O</td>
-                          <td style={{ border: '1px solid #000', padding: '2px 8px' }}>: OK</td>
-                        </tr>
-                        <tr>
-                          <td style={{ border: '1px solid #000', padding: '2px 8px', fontWeight: 'bold' }}>T/A</td>
-                          <td colSpan={3} style={{ border: '1px solid #000', padding: '2px 8px' }}>: Tdk Pakai</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ height: '22px' }}>
+                      <td style={{ border: '1px solid #000', padding: '2px' }}>1</td>
+                      <td style={{ border: '1px solid #000', padding: '2px', fontSize: '8.5px' }}>{new Date(laporan.tanggal).toLocaleDateString('id-ID')}</td>
+                      {allItems.map((item) => (
+                        <td key={item.no} style={{ border: '1px solid #000', padding: '2px', fontWeight: 'bold', color: item.judge === 'X' ? '#c00' : item.judge === 'O' ? '#006600' : '#000' }}>
+                          {item.judge}
+                        </td>
+                      ))}
+                      <td style={{ border: '1px solid #000', padding: '2px', fontWeight: 'bold', color: judgeVal === 'NG' ? '#c00' : '#006600' }}>
+                        {judgeVal}
+                      </td>
+                      <td style={{ border: '1px solid #000', padding: '2px', textAlign: 'left' }}>{catatan || ''}</td>
+                      <td style={{ border: '1px solid #000', padding: '2px' }}>{laporan.pic.nama.split(' ')[0]}</td>
+                    </tr>
+                    {Array.from({ length: 27 }).map((_, rowIndex) => (
+                      <tr key={rowIndex + 2} style={{ height: '18px' }}>
+                        <td style={{ border: '1px solid #000', padding: '2px' }}>{rowIndex + 2}</td>
+                        <td style={{ border: '1px solid #000', padding: '2px' }}></td>
+                        {allItems.map((item) => (
+                          <td key={item.no} style={{ border: '1px solid #000', padding: '2px' }}></td>
+                        ))}
+                        <td style={{ border: '1px solid #000', padding: '2px' }}></td>
+                        <td style={{ border: '1px solid #000', padding: '2px' }}></td>
+                        <td style={{ border: '1px solid #000', padding: '2px' }}></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Tabel Pengisian OH NO | TANGGAL | 1-10 | JUDGE | REMARK | PIC */}
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px', textAlign: 'center' }}>
-            <thead>
-              <tr>
-                <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px 2px', width: '32px' }}>OH{`
-`}NO</th>
-                <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px 4px', width: '64px' }}>TANGGAL</th>
-                <th colSpan={10} style={{ border: '1px solid #000', padding: '3px' }}>ITEM CHECK</th>
-                <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px 2px', width: '44px' }}>JUDGE</th>
-                <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px' }}>REMARK</th>
-                <th rowSpan={2} style={{ border: '1px solid #000', padding: '3px 2px', width: '50px' }}>PIC</th>
-              </tr>
-              <tr>
-                {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                  <th key={n} style={{ border: '1px solid #000', padding: '3px 2px', width: '28px' }}>{n}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ height: '24px' }}>
-                <td style={{ border: '1px solid #000', padding: '2px' }}>1</td>
-                <td style={{ border: '1px solid #000', padding: '2px', fontSize: '9px' }}>{new Date(laporan.tanggal).toLocaleDateString('id-ID')}</td>
-                {[0,1,2,3,4,5,6,7,8,9].map(i => {
-                  const key = `bm_chuck|${i}`
-                  const val = checklist[key]?.judge || ''
-                  return <td key={i} style={{ border: '1px solid #000', padding: '2px', fontWeight: 'bold' }}>{val}</td>
-                })}
-                <td style={{ border: '1px solid #000', padding: '2px', fontWeight: 'bold' }}>
-                  {(() => {
-                    const hasNG = [0,1,2,3,4,5,6,7,8,9].some(i => checklist[`bm_chuck|${i}`]?.judge === 'X')
-                    const hasAny = [0,1,2,3,4,5,6,7,8,9].some(i => !!checklist[`bm_chuck|${i}`]?.judge)
-                    if (!hasAny) return ''
-                    return hasNG ? 'NG' : 'OK'
-                  })()}
-                </td>
-                <td style={{ border: '1px solid #000', padding: '2px', textAlign: 'left' }}>{catatan || ''}</td>
-                <td style={{ border: '1px solid #000', padding: '2px' }}>{laporan.pic.nama.split(' ')[0]}</td>
-              </tr>
-              {Array.from({ length: 27 }).map((_, rowIndex) => (
-                <tr key={rowIndex + 2} style={{ height: '22px' }}>
-                  <td style={{ border: '1px solid #000', padding: '2px' }}>{rowIndex + 2}</td>
-                  <td style={{ border: '1px solid #000', padding: '2px' }}></td>
-                  {[0,1,2,3,4,5,6,7,8,9].map(i => <td key={i} style={{ border: '1px solid #000', padding: '2px' }}></td>)}
-                  <td style={{ border: '1px solid #000', padding: '2px' }}></td>
-                  <td style={{ border: '1px solid #000', padding: '2px' }}></td>
-                  <td style={{ border: '1px solid #000', padding: '2px' }}></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              {/* ===== HALAMAN 2: BIAYA SPAREPART, MAN POWER & APPROVAL TTD ===== */}
+              <div style={{ paddingTop: '10px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '8px' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ border: '1px solid #000', padding: '4px 6px', width: '22%', fontSize: '9px', fontWeight: 'bold', verticalAlign: 'top' }}>
+                        PT.SUGITY CREATIVES<br/>
+                        MOLD MAINTENANCE DEPT.
+                      </td>
+                      <td style={{ border: '1px solid #000', padding: '6px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '16px', fontWeight: 'bold' }}>RINCIAN BIAYA & APPROVAL PEMERIKSAAN CHUCK</div>
+                        <div style={{ fontSize: '10px', color: '#444', marginTop: '2px' }}>
+                          MOLD NO: <b>{laporan.noMold}</b> &nbsp;|&nbsp; PART: <b>{laporan.moldData?.part || laporan.part || '-'}</b> &nbsp;|&nbsp; TANGGAL: <b>{new Date(laporan.tanggal).toLocaleDateString('id-ID')}</b>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* F. PEMAKAIAN SPAREPART */}
+                <div style={{ fontSize: '11px', fontWeight: 'bold', margin: '12px 0 6px 0', color: '#1e1b4b' }}>
+                  F. PEMAKAIAN SPAREPART / ORDER SPARE PART
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px', marginBottom: '14px' }}>
+                  <thead>
+                    <tr style={{ background: '#f0f0f0' }}>
+                      <th style={{ border: '1px solid #000', padding: '4px', width: '36px', textAlign: 'center' }}>NO</th>
+                      <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'left' }}>NAMA SPAREPART</th>
+                      <th style={{ border: '1px solid #000', padding: '4px', width: '70px', textAlign: 'center' }}>QTY</th>
+                      <th style={{ border: '1px solid #000', padding: '4px', width: '130px', textAlign: 'right' }}>HARGA SATUAN</th>
+                      <th style={{ border: '1px solid #000', padding: '4px', width: '140px', textAlign: 'right' }}>TOTAL BIAYA</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {spareparts.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} style={{ border: '1px solid #000', padding: '8px', textAlign: 'center', color: '#666' }}>
+                          Tidak ada pemakaian sparepart.
+                        </td>
+                      </tr>
+                    ) : (
+                      spareparts.map((sp, idx) => (
+                        <tr key={idx}>
+                          <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center' }}>{idx + 1}</td>
+                          <td style={{ border: '1px solid #000', padding: '4px', fontWeight: 'bold' }}>{sp.namaSparepart}</td>
+                          <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'center' }}>{sp.qty}</td>
+                          <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right' }}>Rp {Number(sp.hargaSatuan).toLocaleString('id-ID')}</td>
+                          <td style={{ border: '1px solid #000', padding: '4px', textAlign: 'right', fontWeight: 'bold' }}>Rp {(sp.qty * Number(sp.hargaSatuan)).toLocaleString('id-ID')}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+
+                {/* COST SUMMARY */}
+                <div style={{ fontSize: '11px', fontWeight: 'bold', margin: '12px 0 6px 0', color: '#1e1b4b' }}>
+                  RINGKASAN BIAYA PEMELIHARAAN (COST SUMMARY)
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px', marginBottom: '14px' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ border: '1px solid #000', padding: '4px 6px', fontWeight: 'bold', background: '#f0f0f0', width: '70%' }}>Biaya Man Power (M/P Cost)</td>
+                      <td style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'right', fontWeight: 'bold' }}>Rp {totalMpCost.toLocaleString('id-ID')}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ border: '1px solid #000', padding: '4px 6px', fontWeight: 'bold', background: '#f0f0f0' }}>Biaya Pemakaian Sparepart</td>
+                      <td style={{ border: '1px solid #000', padding: '4px 6px', textAlign: 'right', fontWeight: 'bold' }}>Rp {totalSparepart.toLocaleString('id-ID')}</td>
+                    </tr>
+                    <tr style={{ background: '#e8e8e8' }}>
+                      <td style={{ border: '1px solid #000', padding: '5px 6px', fontWeight: 'bold', fontSize: '11px' }}>TOTAL BIAYA PEMELIHARAAN (TOTAL COST)</td>
+                      <td style={{ border: '1px solid #000', padding: '5px 6px', textAlign: 'right', fontWeight: 'bold', fontSize: '12px', color: '#15803d' }}>Rp {totalCostCombined.toLocaleString('id-ID')}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* CATATAN REMARK */}
+                <div style={{ border: '1px solid #000', padding: '8px', minHeight: '50px', marginBottom: '20px', fontSize: '10px' }}>
+                  <b>CATATAN TAMBAHAN / REMARK:</b>
+                  <div style={{ marginTop: '4px', whiteSpace: 'pre-wrap', color: '#333' }}>{catatan || '(Tidak ada catatan)'}</div>
+                </div>
+
+                {/* APPROVAL SIGNATURES */}
+                <div style={{ fontSize: '11px', fontWeight: 'bold', margin: '12px 0 6px 0', color: '#1e1b4b' }}>
+                  LEMBAR APPROVAL & TANDA TANGAN
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px' }}>
+                  <thead>
+                    <tr style={{ background: '#f0f0f0' }}>
+                      <th style={{ border: '1px solid #000', padding: '4px', width: '25%' }}>Disiapkan Oleh (Member PIC)</th>
+                      <th style={{ border: '1px solid #000', padding: '4px', width: '25%' }}>Diperiksa Oleh (Team Leader)</th>
+                      <th style={{ border: '1px solid #000', padding: '4px', width: '25%' }}>Disetujui Oleh (Group Leader)</th>
+                      <th style={{ border: '1px solid #000', padding: '4px', width: '25%' }}>Diterima Oleh (ADM)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ height: '70px' }}>
+                      <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'bottom', textAlign: 'center' }}>
+                        {picSign?.signedAt ? (
+                          <>
+                            {picSign.user?.signature && <img src={picSign.user.signature} alt="TTD" style={{ maxHeight: '45px', display: 'block', margin: '0 auto 4px', objectFit: 'contain' }} />}
+                            <b>{picSign.user?.nama || 'Verified'}</b><br/><span style={{ fontSize: '9px', color: '#666' }}>{new Date(picSign.signedAt).toLocaleDateString('id-ID')}</span>
+                          </>
+                        ) : <span style={{ fontSize: '9px', color: '#999' }}>Belum TTD</span>}
+                      </td>
+                      <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'bottom', textAlign: 'center' }}>
+                        {tlSign?.signedAt ? (
+                          <>
+                            {tlSign.user?.signature && <img src={tlSign.user.signature} alt="TTD" style={{ maxHeight: '45px', display: 'block', margin: '0 auto 4px', objectFit: 'contain' }} />}
+                            <b>{tlSign.user?.nama || 'Verified'}</b><br/><span style={{ fontSize: '9px', color: '#666' }}>{new Date(tlSign.signedAt).toLocaleDateString('id-ID')}</span>
+                          </>
+                        ) : <span style={{ fontSize: '9px', color: '#999' }}>Belum TTD</span>}
+                      </td>
+                      <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'bottom', textAlign: 'center' }}>
+                        {glSign?.signedAt ? (
+                          <>
+                            {glSign.user?.signature && <img src={glSign.user.signature} alt="TTD" style={{ maxHeight: '45px', display: 'block', margin: '0 auto 4px', objectFit: 'contain' }} />}
+                            <b>{glSign.user?.nama || 'Verified'}</b><br/><span style={{ fontSize: '9px', color: '#666' }}>{new Date(glSign.signedAt).toLocaleDateString('id-ID')}</span>
+                          </>
+                        ) : <span style={{ fontSize: '9px', color: '#999' }}>Belum TTD</span>}
+                      </td>
+                      <td style={{ border: '1px solid #000', padding: '6px', verticalAlign: 'bottom', textAlign: 'center' }}>
+                        {admSign?.signedAt ? (
+                          <>
+                            {admSign.user?.signature && <img src={admSign.user.signature} alt="TTD" style={{ maxHeight: '45px', display: 'block', margin: '0 auto 4px', objectFit: 'contain' }} />}
+                            <b>{admSign.user?.nama || 'Verified'}</b><br/><span style={{ fontSize: '9px', color: '#666' }}>{new Date(admSign.signedAt).toLocaleDateString('id-ID')}</span>
+                          </>
+                        ) : <span style={{ fontSize: '9px', color: '#999' }}>Belum TTD</span>}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        })()
       ) : (
+
       <div className="cs-print-only" style={{ background: '#fff', color: '#000', fontFamily: 'Arial, sans-serif' }}>
         <h2 style={{ textAlign: 'center', margin: '0 0 16px 0', textTransform: 'uppercase', textDecoration: 'underline' }}>
           {isOverhaul ? 'DATA PEMERIKSAAN OVERHAUL MOLD' : `CM CARD (${laporan.jenis})`}
