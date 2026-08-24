@@ -9,6 +9,63 @@ interface SummarizeModalProps {
   initialDate?: string
 }
 
+function isReportInShift(lap: any, selectedShift: string): boolean {
+  if (!selectedShift || selectedShift === 'Semua Shift') return true
+
+  const lapShiftStr = (lap.shift || '').toLowerCase()
+  const jamMulai = lap.checksheet?.jamMulai || lap.jamMulai || ''
+
+  // Determine if work time falls in DayShift vs NightShift
+  let isTimeDay = false
+  let isTimeNight = false
+
+  if (jamMulai && jamMulai.includes(':')) {
+    const [h, m] = jamMulai.split(':').map(Number)
+    const minutes = h * 60 + (m || 0)
+    // DayShift: 07:15 (435 mins) to 20:40 (1240 mins)
+    if (minutes >= 435 && minutes <= 1240) {
+      isTimeDay = true
+    } else {
+      // NightShift: 21:00 (1260 mins) to 06:55 (415 mins)
+      isTimeNight = true
+    }
+  }
+
+  // Regu match (Shift A / Shift B / Nonshift)
+  const isShiftA = lapShiftStr.includes('shift a') || lapShiftStr.includes('shift_a') || lapShiftStr === 'a'
+  const isShiftB = lapShiftStr.includes('shift b') || lapShiftStr.includes('shift_b') || lapShiftStr === 'b'
+  const isNonShift = lapShiftStr.includes('nonshift')
+
+  const targetLower = selectedShift.toLowerCase()
+  const targetNeedsA = targetLower.includes('shift a')
+  const targetNeedsB = targetLower.includes('shift b')
+  const targetNeedsNonshift = targetLower.includes('nonshift')
+  const targetNeedsDay = targetLower.includes('dayshift')
+  const targetNeedsNight = targetLower.includes('nightshift')
+
+  // Regu filter check
+  if (targetNeedsA && !isShiftA && lapShiftStr !== '') return false
+  if (targetNeedsB && !isShiftB && lapShiftStr !== '') return false
+  if (targetNeedsNonshift && !isNonShift && lapShiftStr !== '') return false
+
+  // Waktu filter check
+  if (targetNeedsDay) {
+    if (lapShiftStr.includes('dayshift')) return true
+    if (isTimeDay) return true
+    if (!jamMulai && !lapShiftStr.includes('nightshift')) return true
+    return false
+  }
+
+  if (targetNeedsNight) {
+    if (lapShiftStr.includes('nightshift')) return true
+    if (isTimeNight) return true
+    if (!jamMulai && lapShiftStr.includes('nightshift')) return true
+    return false
+  }
+
+  return true
+}
+
 export default function SummarizeModal({ isOpen, onClose, initialDate }: SummarizeModalProps) {
   const todayStr = new Date().toISOString().split('T')[0]
   const [tanggal, setTanggal] = useState(initialDate || todayStr)
@@ -51,9 +108,12 @@ export default function SummarizeModal({ isOpen, onClose, initialDate }: Summari
     const namaHari = hariNames[d.getDay()] || 'Hari'
     const dateFormatted = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`
 
+    // 1. Filter reports matching the selected shift & time range
+    const filteredReports = laporanList.filter((lap) => isReportInShift(lap, shiftName))
+
     // Group by factory
     const groupedByFactory: Record<string, any[]> = {}
-    laporanList.forEach((lap) => {
+    filteredReports.forEach((lap) => {
       const f = lap.factory || 'F2'
       if (!groupedByFactory[f]) groupedByFactory[f] = []
       groupedByFactory[f].push(lap)
@@ -61,62 +121,69 @@ export default function SummarizeModal({ isOpen, onClose, initialDate }: Summari
 
     const factories = Object.keys(groupedByFactory).sort()
 
-    // 1. Header O/H per factory
+    // 2. Header O/H per factory
     let ohHeaderLines = ''
-    factories.forEach((fac) => {
-      const moldItems = groupedByFactory[fac].map((lap) => {
-        const isOH = lap.jenis === 'OH_MOLD' || lap.jenis === 'OH MOLD'
-        const tag = isOH ? '(Total)' : `(${lap.jenis})`
-        return `*${lap.noMold}${tag}*`
-      }).join(', ')
+    if (factories.length === 0) {
+      ohHeaderLines = 'Tidak ada aktivitas maintenance\n'
+    } else {
+      factories.forEach((fac) => {
+        const moldItems = groupedByFactory[fac].map((lap) => {
+          const isOH = lap.jenis === 'OH_MOLD' || lap.jenis === 'OH MOLD'
+          const tag = isOH ? '(Total)' : `(${lap.jenis})`
+          return `*${lap.noMold}${tag}*`
+        }).join(', ')
 
-      ohHeaderLines += `${fac} : ${moldItems}\n`
-    })
-
-    // 2. Detail Maintenance Per Factory
-    let detailLines = ''
-    factories.forEach((fac) => {
-      detailLines += `P/M ${fac}\n`
-      groupedByFactory[fac].forEach((lap) => {
-        const isOH = lap.jenis === 'OH_MOLD' || lap.jenis === 'OH MOLD'
-        const titleTag = isOH ? '#O/H Total' : `#Maintenance`
-        detailLines += `${titleTag} *Mold ${lap.noMold} ${lap.part || ''}*\n`
-
-        if (lap.info || lap.countermeasure) {
-          if (lap.info) {
-            lap.info.split('\n').forEach((line: string) => {
-              if (line.trim()) detailLines += `- ${line.trim()}\n`
-            })
-          }
-          if (lap.countermeasure) {
-            lap.countermeasure.split('\n').forEach((line: string) => {
-              if (line.trim()) detailLines += `- ${line.trim()}\n`
-            })
-          }
-          detailLines += `- Mold finish\n`
-        } else {
-          // Standard Overhaul Steps
-          detailLines += `- Cek eksternal mold\n`
-          detailLines += `- Cleaning P/L Core & Cavity\n`
-          detailLines += `- Dissassy E/J group\n`
-          detailLines += `- Cleaning + Greasse E/J group\n`
-          detailLines += `- Assy E/J group\n`
-          detailLines += `- Cek mekanisme, OK\n`
-          detailLines += `- Cek gaspring, OK\n`
-          detailLines += `- Mold finish\n`
-        }
-        detailLines += `\n`
+        ohHeaderLines += `${fac} : ${moldItems}\n`
       })
-    })
+    }
+
+    // 3. Detail Maintenance Per Factory
+    let detailLines = ''
+    if (factories.length > 0) {
+      factories.forEach((fac) => {
+        detailLines += `P/M ${fac}\n`
+        groupedByFactory[fac].forEach((lap) => {
+          const isOH = lap.jenis === 'OH_MOLD' || lap.jenis === 'OH MOLD'
+          const titleTag = isOH ? '#O/H Total' : `#Maintenance`
+          detailLines += `${titleTag} *Mold ${lap.noMold} ${lap.part || ''}*\n`
+
+          if (lap.info || lap.countermeasure) {
+            if (lap.info) {
+              lap.info.split('\n').forEach((line: string) => {
+                if (line.trim()) detailLines += `- ${line.trim()}\n`
+              })
+            }
+            if (lap.countermeasure) {
+              lap.countermeasure.split('\n').forEach((line: string) => {
+                if (line.trim()) detailLines += `- ${line.trim()}\n`
+              })
+            }
+            detailLines += `- Mold finish\n`
+          } else {
+            // Standard Overhaul Steps
+            detailLines += `- Cek eksternal mold\n`
+            detailLines += `- Cleaning P/L Core & Cavity\n`
+            detailLines += `- Dissassy E/J group\n`
+            detailLines += `- Cleaning + Greasse E/J group\n`
+            detailLines += `- Assy E/J group\n`
+            detailLines += `- Cek mekanisme, OK\n`
+            detailLines += `- Cek gaspring, OK\n`
+            detailLines += `- Mold finish\n`
+          }
+          detailLines += `\n`
+        })
+      })
+    }
+
+    const displayShiftTag = shiftName === 'Semua Shift' ? 'Semua Shift Maintenance' : shiftName
 
     return `*INFORMASI MOLD MAINTENANCE*
-           *${shiftName}*
+           *${displayShiftTag}*
           _${namaHari}_,${dateFormatted}
 
 *O/H*
-${ohHeaderLines || 'Tidak ada aktivitas maintenance\n'}
-${detailLines}
-Temuan OH
+${ohHeaderLines}
+${detailLines}Temuan OH
 ${temuanOH}
 
 *Lain - Lain*
@@ -181,12 +248,15 @@ ${lainLain}
               onChange={(e) => { setShiftName(e.target.value); setIsManualEdit(false) }}
               style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', fontWeight: 600 }}
             >
+              <option value="Semua Shift">Semua Shift (Hari Ini)</option>
               <option value="Shift B DayShift">Shift B DayShift (07:15 - 20:40)</option>
               <option value="Shift A DayShift">Shift A DayShift (07:15 - 20:40)</option>
               <option value="Shift B NightShift">Shift B NightShift (21:00 - 06:55)</option>
               <option value="Shift A NightShift">Shift A NightShift (21:00 - 06:55)</option>
-              <option value="Nonshift DayShift">Nonshift DayShift</option>
-              <option value="Nonshift NightShift">Nonshift NightShift</option>
+              <option value="Nonshift DayShift">Nonshift DayShift (07:15 - 20:40)</option>
+              <option value="Nonshift NightShift">Nonshift NightShift (21:00 - 06:55)</option>
+              <option value="DayShift">DayShift (Semua Regu: 07:15 - 20:40)</option>
+              <option value="NightShift">NightShift (Semua Regu: 21:00 - 06:55)</option>
             </select>
           </div>
         </div>
@@ -223,7 +293,7 @@ ${lainLain}
         <div style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
             <label style={{ fontSize: '12px', fontWeight: 700, color: '#4c1d95' }}>
-              📝 Preview Teks Rangkuman (Format WhatsApp)
+              📝 Preview Teks Rangkuman ({loading ? 'Memuat data...' : `${laporanList.filter((lap) => isReportInShift(lap, shiftName)).length} Mold ditemukan`})
             </label>
             {isManualEdit && (
               <button
