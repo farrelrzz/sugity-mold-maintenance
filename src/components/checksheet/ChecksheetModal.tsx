@@ -312,10 +312,26 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
           if (data.checksheet) {
             const rawChecklist = data.checksheet.checklist || {}
             setChecklist(rawChecklist.items || rawChecklist.checklist || {})
-            setCostBox(rawChecklist.costBox || {})
-            setJamMulai(data.checksheet.jamMulai || '')
-            setJamSelesai(data.checksheet.jamSelesai || '')
-            setJumlahOrang(data.checksheet.jumlahOrang || 1)
+
+            const masterJamMulai = data.checksheet.jamMulai || ''
+            const masterJamSelesai = data.checksheet.jamSelesai || ''
+            const masterJumlahOrang = data.checksheet.jumlahOrang || 1
+
+            const loadedCostBox = rawChecklist.costBox || {}
+            ;['b1', 'b2', 'b3', 'b4', 'b5'].forEach((key) => {
+              if (!loadedCostBox[key]) {
+                loadedCostBox[key] = { jamMulai: masterJamMulai, jamSelesai: masterJamSelesai, orang: masterJumlahOrang }
+              } else {
+                if (!loadedCostBox[key].jamMulai) loadedCostBox[key].jamMulai = masterJamMulai
+                if (!loadedCostBox[key].jamSelesai) loadedCostBox[key].jamSelesai = masterJamSelesai
+                if (!loadedCostBox[key].orang) loadedCostBox[key].orang = masterJumlahOrang
+              }
+            })
+            setCostBox(loadedCostBox)
+
+            setJamMulai(masterJamMulai)
+            setJamSelesai(masterJamSelesai)
+            setJumlahOrang(masterJumlahOrang)
             setCatatan(rawChecklist.catatan || '')
             setSpareparts(
               (data.checksheet.spareparts || []).map((sp: any) => ({
@@ -1236,6 +1252,13 @@ ${_isOverhaul ? `
                           name={`judge_${secKode}_${idx}`}
                           value="OK"
                           checked={val === 'OK'}
+                          onClick={(e) => {
+                            if (val === 'OK') {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleChecklistChange(key, 'judge', '')
+                            }
+                          }}
                           onChange={() => handleChecklistChange(key, 'judge', 'OK')}
                         /> OK
                       </label>
@@ -1253,6 +1276,13 @@ ${_isOverhaul ? `
                           name={`judge_${secKode}_${idx}`}
                           value="NG"
                           checked={val === 'NG'}
+                          onClick={(e) => {
+                            if (val === 'NG') {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleChecklistChange(key, 'judge', '')
+                            }
+                          }}
                           onChange={() => handleChecklistChange(key, 'judge', 'NG')}
                         /> NG
                       </label>

@@ -61,7 +61,8 @@ export default function LaporanBaruPage() {
 
   // Form states
   const [tanggal, setTanggal] = useState('')
-  const [shift, setShift] = useState('')
+  const [shiftRegu, setShiftRegu] = useState('Shift A')
+  const [shiftWaktu, setShiftWaktu] = useState('DayShift')
   const [jenis, setJenis] = useState('OH MOLD')
   const [jenisLainnya, setJenisLainnya] = useState('')
 
@@ -698,7 +699,7 @@ export default function LaporanBaruPage() {
       showToast('Tanggal belum dipilih!', 'info')
       return
     }
-    if (!shift) {
+    if (!shiftRegu || !shiftWaktu) {
       showToast('Shift belum dipilih!', 'error')
       document.getElementById('kartu-tanggal-shift')?.scrollIntoView({ behavior: 'smooth' })
       return
@@ -712,7 +713,7 @@ export default function LaporanBaruPage() {
       showToast('Mohon lengkapi Tanggal, Jenis Pekerjaan, dan Nomor Mold!', 'error')
       return
     }
-    if (!shift) {
+    if (!shiftRegu || !shiftWaktu) {
       showToast('Shift belum dipilih!', 'error')
       return
     }
@@ -723,7 +724,7 @@ export default function LaporanBaruPage() {
       noMold: selectedMold.noMold,
       jenis: jenis === 'LAINNYA' ? jenisLainnya || 'Lainnya' : jenis,
       factory: selectedMold.factory,
-      shift,
+      shift: `${shiftRegu} ${shiftWaktu}`,
       picId: session?.user?.id ? Number(session.user.id) : 1,
       tanggal,
       part: selectedMold.part,
@@ -868,27 +869,35 @@ export default function LaporanBaruPage() {
         {/* Section 1: Tanggal & Shift */}
         <div className="kartu" id="kartu-tanggal-shift">
           <p className="label-besar">1. Tanggal & Shift</p>
-          <div className="baris2" style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ width: '100%', boxSizing: 'border-box' }}>
               <label className="kecil" style={{ marginTop: 0 }}>Tanggal</label>
               <input
                 type="date"
                 value={tanggal}
                 onChange={(e) => setTanggal(e.target.value)}
-                style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
+                style={{ width: '100%', boxSizing: 'border-box' }}
               />
             </div>
-            <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
-              <label className="kecil" style={{ marginTop: 0 }}>Shift</label>
+            <div style={{ width: '100%', boxSizing: 'border-box' }}>
+              <label className="kecil" style={{ marginTop: 0 }}>Regu Shift</label>
               <select 
-                value={shift} 
-                onChange={(e) => setShift(e.target.value)}
-                style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
+                value={shiftRegu} 
+                onChange={(e) => setShiftRegu(e.target.value)}
+                style={{ width: '100%', boxSizing: 'border-box', fontWeight: 600 }}
               >
-                <option value="" disabled hidden>No Select</option>
-                <option value="Nonshift">Nonshift</option>
                 <option value="Shift A">Shift A</option>
                 <option value="Shift B">Shift B</option>
+                <option value="Nonshift">Nonshift</option>
+              </select>
+            </div>
+            <div style={{ width: '100%', boxSizing: 'border-box' }}>
+              <label className="kecil" style={{ marginTop: 0 }}>Waktu Shift</label>
+              <select 
+                value={shiftWaktu} 
+                onChange={(e) => setShiftWaktu(e.target.value)}
+                style={{ width: '100%', boxSizing: 'border-box', fontWeight: 600 }}
+              >
                 <option value="DayShift">DayShift (07:15 - 20:40)</option>
                 <option value="NightShift">NightShift (21:00 - 06:55)</option>
               </select>

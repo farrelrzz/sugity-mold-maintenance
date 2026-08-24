@@ -344,13 +344,16 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
             const masterJamSelesai = data.checksheet.jamSelesai || ''
             const loadedChecklist = (data.checksheet.checklist?.items || {}) as Record<string, any>
             
-            // Auto pre-fill untuk MP cost (b1-b5) jika belum ada jam
-            ['b1', 'b2', 'b3', 'b4', 'b5'].forEach(key => {
+            const masterJumlahOrang = data.checksheet.jumlahOrang || 1
+
+            // Auto pre-fill untuk MP cost (b1-b5) jika belum ada jam & orang
+            ;['b1', 'b2', 'b3', 'b4', 'b5'].forEach((key: string) => {
               if (!loadedChecklist[key]) {
-                loadedChecklist[key] = { jamMulai: masterJamMulai, jamSelesai: masterJamSelesai, orang: 1 }
+                loadedChecklist[key] = { jamMulai: masterJamMulai, jamSelesai: masterJamSelesai, orang: masterJumlahOrang }
               } else {
                 if (!loadedChecklist[key].jamMulai) loadedChecklist[key].jamMulai = masterJamMulai
                 if (!loadedChecklist[key].jamSelesai) loadedChecklist[key].jamSelesai = masterJamSelesai
+                if (!loadedChecklist[key].orang) loadedChecklist[key].orang = masterJumlahOrang
               }
             })
 
@@ -415,16 +418,25 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     setChecklist({ ...checklist, [key]: nextEntry })
   }
 
-  const handleMasterChecklistChange = (secKode: string, numItems: number, value: 'OK' | 'NG') => {
+  const handleMasterChecklistChange = (secKode: string, numItems: number, value: 'OK' | 'NG' | '') => {
     const newChecklist = { ...checklist }
-    newChecklist[`master_${secKode}`] = value
+    const currentMaster = newChecklist[`master_${secKode}`]
+    const targetVal = (currentMaster === value && value !== '') ? '' : value
+    newChecklist[`master_${secKode}`] = targetVal
 
-    if (value === 'OK') {
+    if (targetVal === 'OK') {
       for (let idx = 0; idx < numItems; idx++) {
         const key = `${secKode}|${idx}`
         if (!newChecklist[key]) newChecklist[key] = {}
         newChecklist[key].judge = 'OK'
         newChecklist[key].komentar = ''
+      }
+    } else if (targetVal === '') {
+      for (let idx = 0; idx < numItems; idx++) {
+        const key = `${secKode}|${idx}`
+        if (newChecklist[key]) {
+          newChecklist[key].judge = ''
+        }
       }
     }
     setChecklist(newChecklist)
@@ -2093,11 +2105,51 @@ ${hasCoolingOrHeater ? `
               <td colSpan={4} style={{ padding: '8px 10px', border: '1px solid #999' }}>{secJudul}</td>
               <td style={{ textAlign: 'center', padding: '8px 10px', border: '1px solid #999' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
-                    <input type="radio" checked={masterVal === 'OK'} onChange={() => handleMasterChecklistChange(secKode, secItems.length, 'OK')} /> OK ALL
+                  <label
+                    style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', cursor: 'pointer' }}
+                    onClick={(e) => {
+                      if (masterVal === 'OK') {
+                        e.preventDefault()
+                        handleMasterChecklistChange(secKode, secItems.length, '')
+                      }
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name={`master_radio_${secKode}`}
+                      checked={masterVal === 'OK'}
+                      onClick={(e) => {
+                        if (masterVal === 'OK') {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleMasterChecklistChange(secKode, secItems.length, '')
+                        }
+                      }}
+                      onChange={() => handleMasterChecklistChange(secKode, secItems.length, 'OK')}
+                    /> OK ALL
                   </label>
-                  <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
-                    <input type="radio" checked={masterVal === 'NG'} onChange={() => handleMasterChecklistChange(secKode, secItems.length, 'NG')} /> NG / Cek Manual
+                  <label
+                    style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap', cursor: 'pointer' }}
+                    onClick={(e) => {
+                      if (masterVal === 'NG') {
+                        e.preventDefault()
+                        handleMasterChecklistChange(secKode, secItems.length, '')
+                      }
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name={`master_radio_${secKode}`}
+                      checked={masterVal === 'NG'}
+                      onClick={(e) => {
+                        if (masterVal === 'NG') {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleMasterChecklistChange(secKode, secItems.length, '')
+                        }
+                      }}
+                      onChange={() => handleMasterChecklistChange(secKode, secItems.length, 'NG')}
+                    /> NG / Cek Manual
                   </label>
                 </div>
               </td>
@@ -2130,6 +2182,13 @@ ${hasCoolingOrHeater ? `
                           name={`judge_${secKode}_${idx}`}
                           value="OK"
                           checked={val === 'OK'}
+                          onClick={(e) => {
+                            if (val === 'OK') {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleChecklistChange(key, 'judge', '')
+                            }
+                          }}
                           onChange={() => handleChecklistChange(key, 'judge', 'OK')}
                         /> OK
                       </label>
@@ -2147,6 +2206,13 @@ ${hasCoolingOrHeater ? `
                           name={`judge_${secKode}_${idx}`}
                           value="NG"
                           checked={val === 'NG'}
+                          onClick={(e) => {
+                            if (val === 'NG') {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleChecklistChange(key, 'judge', '')
+                            }
+                          }}
                           onChange={() => handleChecklistChange(key, 'judge', 'NG')}
                         /> NG
                       </label>
