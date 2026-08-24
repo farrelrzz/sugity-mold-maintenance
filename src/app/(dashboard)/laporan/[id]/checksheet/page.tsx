@@ -75,6 +75,19 @@ interface LaporanData {
   } | null
 }
 
+const BM_CHUCK_ITEMS = [
+  { label: 'Frame', standard: 'Tidak Bengkok' },
+  { label: 'Cilyder', standard: 'Tidak Bocor' },
+  { label: 'Vacum', standard: 'Tidak Cacat' },
+  { label: 'Lengan Chuck', standard: 'Tidak Cacat' },
+  { label: 'Guiden / Lock', standard: 'Tidak Cacat' },
+  { label: 'L/S', standard: 'Interlock OK' },
+  { label: 'Metacon', standard: 'Tidak Cacat' },
+  { label: 'Hose / Joint', standard: 'Tidak Bocor' },
+  { label: 'Handle', standard: 'Tidak Cacat' },
+  { label: 'Baut Ikat', standard: 'Tidak Kendor' }
+]
+
 const OH_SECTIONS_A = [
   {
     kode: 'A1', judul: '1. KELUHAN OPERATOR (diisi oleh operator produksi)',
@@ -1615,6 +1628,7 @@ ${hasCoolingOrHeater ? `
   }
 
   const isOverhaul = laporan.jenis === 'OH MOLD' || laporan.jenis === 'OH_MOLD'
+  const isBMChuck = laporan.jenis === 'BM CHUCK'
   const totalSparepart = getTotalSparepartCost()
   const totalMpCost = isOverhaul ? getOverhaulTotalMpCost() : Math.round(getDurasiJam() * 89595 * jumlahOrang)
   const totalCostCombined = totalMpCost + totalSparepart
@@ -1838,6 +1852,205 @@ ${hasCoolingOrHeater ? `
     )
   }
 
+  const renderBMChuckEditor = () => (
+    <div className="kartu" style={{ borderLeft: '5px solid #8b5cf6', background: '#f5f3ff', padding: '16px 20px', marginBottom: '20px' }}>
+      <p style={{ fontWeight: 800, fontSize: '15px', color: '#6d28d9', marginBottom: '16px', marginTop: 0 }}>⚙️ FORM PEMERIKSAAN CHUCK</p>
+      
+      <div style={{ overflowX: 'auto', background: '#fff', borderRadius: '10px', border: '1px solid #ddd6fe', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: '#ede9fe', borderBottom: '2px solid #c4b5fd' }}>
+              <th style={{ padding: '12px', textAlign: 'center', fontWeight: 800, color: '#4c1d95', borderRight: '1px solid #ddd6fe', width: '50px' }}>NO</th>
+              <th style={{ padding: '12px', textAlign: 'left', fontWeight: 800, color: '#4c1d95', borderRight: '1px solid #ddd6fe' }}>ITEM</th>
+              <th style={{ padding: '12px', textAlign: 'left', fontWeight: 800, color: '#4c1d95', borderRight: '1px solid #ddd6fe' }}>STANDART</th>
+              <th style={{ padding: '12px', textAlign: 'center', fontWeight: 800, color: '#4c1d95', borderRight: '1px solid #ddd6fe', width: '150px' }}>JUDGE</th>
+              <th style={{ padding: '12px', textAlign: 'left', fontWeight: 800, color: '#4c1d95' }}>REMARK</th>
+            </tr>
+          </thead>
+          <tbody>
+            {BM_CHUCK_ITEMS.map((item, i) => {
+              const key = `bm_chuck|${i}`
+              const val = checklist[key] || {}
+              return (
+                <tr key={i} style={{ borderBottom: '1px solid #f1f5f9', background: i % 2 === 0 ? '#ffffff' : '#f8fafc' }}>
+                  <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700, color: '#64748b', borderRight: '1px solid #e2e8f0' }}>{i + 1}</td>
+                  <td style={{ padding: '12px', fontWeight: 600, color: '#334155', borderRight: '1px solid #e2e8f0' }}>{item.label}</td>
+                  <td style={{ padding: '12px', fontSize: '13px', color: '#475569', borderRight: '1px solid #e2e8f0' }}>{item.standard}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>
+                    <select
+                      value={val.judge || ''}
+                      onChange={(e) => handleChecklistChange(key, 'judge', e.target.value)}
+                      style={{
+                        width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none',
+                        fontWeight: 700, cursor: 'pointer',
+                        background: val.judge === 'O' ? '#dcfce7' : val.judge === 'X' ? '#fee2e2' : val.judge === 'G' ? '#fef3c7' : val.judge === 'R' ? '#e0f2fe' : val.judge === 'T/A' ? '#f1f5f9' : '#fff',
+                        color: val.judge === 'O' ? '#15803d' : val.judge === 'X' ? '#b91c1c' : val.judge === 'G' ? '#b45309' : val.judge === 'R' ? '#0369a1' : val.judge === 'T/A' ? '#64748b' : '#334155'
+                      }}
+                    >
+                      <option value="">-- Pilih --</option>
+                      <option value="O">O (OK)</option>
+                      <option value="X">X (NG)</option>
+                      <option value="G">G (Ganti)</option>
+                      <option value="R">R (Repair)</option>
+                      <option value="T/A">T/A (Tdk Pakai)</option>
+                    </select>
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    <input
+                      type="text"
+                      placeholder="Catatan..."
+                      value={val.komentar || ''}
+                      onChange={(e) => handleChecklistChange(key, 'komentar', e.target.value)}
+                      style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13px', outline: 'none' }}
+                    />
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+
+  const renderBMChuckPrint = () => (
+    <div className="cs-print-only" style={{ background: '#fff', color: '#000', fontFamily: 'Arial, sans-serif' }}>
+      <style>{`
+        @media print {
+          .cs-print-only table { border-collapse: collapse; }
+          .cs-print-only th, .cs-print-only td { border: 1px solid #000; padding: 4px; }
+        }
+      `}</style>
+      <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #000', paddingBottom: '10px', marginBottom: '10px' }}>
+        <h2 style={{ margin: 0, fontSize: '18px' }}>PT. SUGITY CREATIVES<br/>MOLD MAINTENANCE DEPT.</h2>
+        <h1 style={{ margin: 0, fontSize: '24px', textDecoration: 'underline' }}>CHECK SHEET PEMERIKSAAN CHUCK</h1>
+      </div>
+      
+      <table style={{ width: '100%', marginBottom: '15px', fontSize: '12px' }}>
+        <tbody>
+          <tr>
+            <td style={{ width: '15%', fontWeight: 'bold' }}>MOLD NO</td>
+            <td style={{ width: '35%' }}>{laporan.noMold}</td>
+            <td style={{ width: '15%', fontWeight: 'bold' }}>CUSTOMER</td>
+            <td style={{ width: '35%' }}>{laporan.moldData?.customer || '-'}</td>
+          </tr>
+          <tr>
+            <td style={{ fontWeight: 'bold' }}>MOLD NAME</td>
+            <td>{laporan.noMold}</td>
+            <td style={{ fontWeight: 'bold' }}>TON</td>
+            <td>{laporan.moldData?.tonase || '-'}</td>
+          </tr>
+          <tr>
+            <td style={{ fontWeight: 'bold' }}>MODEL</td>
+            <td colSpan={3}>{laporan.moldData?.model || laporan.part || '-'}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+        <div style={{ flex: '1', border: '1px solid #000', padding: '5px' }}>
+          <img src="/images/chuck-diagram.png" alt="Chuck Diagram" style={{ width: '100%', height: 'auto', display: 'block' }} />
+        </div>
+        <div style={{ flex: '1' }}>
+          <table style={{ width: '100%', fontSize: '11px', marginBottom: '10px' }}>
+            <thead>
+              <tr style={{ background: '#eee' }}>
+                <th>NO</th>
+                <th>ITEM</th>
+                <th>STANDART</th>
+              </tr>
+            </thead>
+            <tbody>
+              {BM_CHUCK_ITEMS.map((item, i) => (
+                <tr key={i}>
+                  <td style={{ textAlign: 'center' }}>{i + 1}.</td>
+                  <td>{item.label}</td>
+                  <td>{item.standard}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <table style={{ width: '100%', fontSize: '11px' }}>
+            <thead>
+              <tr><th colSpan={4} style={{ textAlign: 'left', borderBottom: 'none' }}>NOTE :</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ width: '15%', borderRight: 'none' }}>G</td>
+                <td style={{ width: '35%', borderLeft: 'none' }}>: Ganti</td>
+                <td style={{ width: '15%', borderRight: 'none' }}>X</td>
+                <td style={{ width: '35%', borderLeft: 'none' }}>: NG</td>
+              </tr>
+              <tr>
+                <td style={{ borderRight: 'none' }}>R</td>
+                <td style={{ borderLeft: 'none' }}>: Repair</td>
+                <td style={{ borderRight: 'none' }}>O</td>
+                <td style={{ borderLeft: 'none' }}>: OK</td>
+              </tr>
+              <tr>
+                <td style={{ borderRight: 'none' }}>T/A</td>
+                <td colSpan={3} style={{ borderLeft: 'none' }}>: Tdk Pakai</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <table style={{ width: '100%', fontSize: '10px', textAlign: 'center' }}>
+        <thead>
+          <tr>
+            <th rowSpan={2} style={{ width: '30px' }}>OH NO</th>
+            <th rowSpan={2} style={{ width: '70px' }}>TANGGAL</th>
+            <th colSpan={10}>ITEM CHECK</th>
+            <th rowSpan={2} style={{ width: '50px' }}>JUDGE</th>
+            <th rowSpan={2}>REMARK</th>
+            <th rowSpan={2} style={{ width: '60px' }}>PIC</th>
+          </tr>
+          <tr>
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => <th key={n}>{n}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 28 }).map((_, rowIndex) => {
+            if (rowIndex === 0) {
+              return (
+                <tr key={rowIndex} style={{ height: '22px' }}>
+                  <td>1</td>
+                  <td>{new Date(laporan.tanggal).toLocaleDateString('id-ID')}</td>
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => {
+                     const key = `bm_chuck|${i}`
+                     const val = checklist[key]?.judge || ''
+                     return <td key={i}>{val}</td>
+                  })}
+                  <td>
+                    {(() => {
+                      const hasNG = [0,1,2,3,4,5,6,7,8,9].some(i => checklist[`bm_chuck|${i}`]?.judge === 'X')
+                      const hasAny = [0,1,2,3,4,5,6,7,8,9].some(i => !!checklist[`bm_chuck|${i}`]?.judge)
+                      if (!hasAny) return ''
+                      return hasNG ? 'NG' : 'OK'
+                    })()}
+                  </td>
+                  <td>{catatan || '-'}</td>
+                  <td>{laporan.pic.nama.split(' ')[0]}</td>
+                </tr>
+              )
+            }
+            return (
+              <tr key={rowIndex} style={{ height: '22px' }}>
+                <td>{rowIndex + 1}</td>
+                <td></td>
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => <td key={i}></td>)}
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+
   return (
     <>
       {/* ===== TAB SCREEN / EDITOR ===== */}
@@ -2011,6 +2224,13 @@ ${hasCoolingOrHeater ? `
                 </div>
               )
             })}
+          </>
+        ) : isBMChuck ? (
+          /* ====================================
+             BM CHUCK CHECKSHEET TEMPLATE EDITOR
+             ==================================== */
+          <>
+            {renderBMChuckEditor()}
           </>
         ) : (
           /* ====================================
@@ -2774,6 +2994,7 @@ ${hasCoolingOrHeater ? `
       {/* ========================================================
          ===== TAB PRINT - PRINT ONLY CONTAINER FOR PAPER =====
          ======================================================== */}
+      {isBMChuck ? renderBMChuckPrint() : (
       <div className="cs-print-only" style={{ background: '#fff', color: '#000', fontFamily: 'Arial, sans-serif' }}>
         <h2 style={{ textAlign: 'center', margin: '0 0 16px 0', textTransform: 'uppercase', textDecoration: 'underline' }}>
           {isOverhaul ? 'DATA PEMERIKSAAN OVERHAUL MOLD' : `CM CARD (${laporan.jenis})`}
@@ -3120,6 +3341,7 @@ ${hasCoolingOrHeater ? `
           </tbody>
         </table>
       </div>
+      )}
 
       {isKatalogModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
