@@ -86,6 +86,22 @@ export default function LaporanBaruPage() {
   const [tempProblems, setTempProblems] = useState<string[]>([])
   const [tempCms, setTempCms] = useState<string[]>([])
 
+  const syncScalingToInfo = (newCore: string, newCav: string) => {
+    const coreStr = newCore ? `(Before core ${newCore}${newCore.toLowerCase().includes('l') ? '' : ' L/M'})` : ''
+    const cavStr = newCav ? `(Before cav ${newCav}${newCav.toLowerCase().includes('l') ? '' : ' L/M'})` : ''
+    const scalingText = [coreStr, cavStr].filter(Boolean).join(' ')
+
+    setInfo((prevInfo) => {
+      const cleanPrev = prevInfo
+        .replace(/\(Before core [^)]+\)\s*/gi, '')
+        .replace(/\(Before cav [^)]+\)\s*/gi, '')
+        .trim()
+
+      if (!scalingText) return cleanPrev
+      return cleanPrev ? `${scalingText} ${cleanPrev}` : scalingText
+    })
+  }
+
   // PIC & Time
   const [picOptions, setPicOptions] = useState<UserOption[]>([]) // all PICs
   const [selectedPics, setSelectedPics] = useState<{ nama: string; shift: string }[]>([])
@@ -1041,9 +1057,13 @@ export default function LaporanBaruPage() {
                     <label className="kecil" style={{ marginTop: 0 }}>Actual (isi manual)</label>
                     <input
                       type="text"
-                      placeholder="cth: 12.5"
+                      placeholder="cth: 22 L/M"
                       value={coreActual}
-                      onChange={(e) => setCoreActual(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setCoreActual(val)
+                        syncScalingToInfo(val, cavActual)
+                      }}
                     />
                   </div>
                 </div>
@@ -1061,9 +1081,13 @@ export default function LaporanBaruPage() {
                     <label className="kecil" style={{ marginTop: 0 }}>Actual (isi manual)</label>
                     <input
                       type="text"
-                      placeholder="cth: 6.5"
+                      placeholder="cth: 20.3 L/M"
                       value={cavActual}
-                      onChange={(e) => setCavActual(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setCavActual(val)
+                        syncScalingToInfo(coreActual, val)
+                      }}
                     />
                   </div>
                 </div>

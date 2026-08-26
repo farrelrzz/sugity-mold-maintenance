@@ -140,6 +140,14 @@ export async function POST(req: Request) {
     const jumlahOrang = Math.max(1, picPendamping.length)
 
     const result = await prisma.$transaction(async (tx) => {
+      const coreStr = coreActual ? `(Before core ${coreActual}${String(coreActual).toLowerCase().includes('l') ? '' : ' L/M'})` : ''
+      const cavStr = cavActual ? `(Before cav ${cavActual}${String(cavActual).toLowerCase().includes('l') ? '' : ' L/M'})` : ''
+      const scalingText = [coreStr, cavStr].filter(Boolean).join(' ')
+      let finalInfo = cleanTextPayload(info)
+      if (scalingText && (!finalInfo || !finalInfo.includes('Before core'))) {
+        finalInfo = finalInfo ? `${scalingText}\n${finalInfo}` : scalingText
+      }
+
       // 1. Simpan Laporan dengan optimasi penyimpanan TiDB Cloud
       const laporan = await tx.laporan.create({
         data: {
@@ -156,7 +164,7 @@ export async function POST(req: Request) {
           heaterActual: compactJsonPayload(heaterActual),
           shotCycle: cleanTextPayload(shotCycle),
           shotMonth: cleanTextPayload(shotMonth),
-          info: cleanTextPayload(info),
+          info: finalInfo,
           countermeasure: cleanTextPayload(countermeasure),
         },
       })

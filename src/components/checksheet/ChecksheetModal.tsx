@@ -37,6 +37,9 @@ interface LaporanData {
   part: string | null
   info: string | null
   countermeasure: string | null
+  coreActual?: string | null
+  cavActual?: string | null
+  heaterActual?: any
   pic: {
     nama: string
   }
@@ -48,6 +51,7 @@ interface LaporanData {
     part?: string | null
     coreStd: string | null
     cavStd: string | null
+    heaterStd?: any
     shotCycle: string | null
     shotMonth: string | null
   } | null
@@ -967,56 +971,177 @@ ${_isOverhaul ? `
   <thead><tr><th style="width:35px">No</th><th>Item Pemeriksaan</th><th style="width:90px">Metode</th><th style="width:110px">Standar</th><th style="width:50px">Judge</th><th style="width:120px">Comment</th></tr></thead>
   <tbody>${ohSectionEGRows}</tbody>
 </table>
+
+<h3>C. HASIL VERIFIKASI COOLING CORE & CAVITY</h3>
+<table>
+  <thead>
+    <tr style="background:#e8e8e8;font-weight:bold;text-align:center">
+      <td>POSISI COOLING</td>
+      <td>STANDAR DEBIT (L/MNT)</td>
+      <td>BEFORE (L/MNT)</td>
+      <td>AFTER / FINISHING (L/MNT)</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="text-align:center">
+      <td style="font-weight:bold;text-align:left">Cooling Core</td>
+      <td>${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L/mnt` : '25 L/mnt'}</td>
+      <td style="font-weight:bold;color:#006600">${laporan.coreActual ? `${laporan.coreActual} L/mnt` : '-'}</td>
+      <td style="font-weight:bold;color:#006600">${checklist.core_after ? `${checklist.core_after} L/mnt` : (laporan.coreActual ? `${laporan.coreActual} L/mnt` : '-')}</td>
+    </tr>
+    <tr style="text-align:center">
+      <td style="font-weight:bold;text-align:left">Cooling Cavity</td>
+      <td>${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L/mnt` : '24.2 L/mnt'}</td>
+      <td style="font-weight:bold;color:#006600">${laporan.cavActual ? `${laporan.cavActual} L/mnt` : '-'}</td>
+      <td style="font-weight:bold;color:#006600">${checklist.cav_after ? `${checklist.cav_after} L/mnt` : (laporan.cavActual ? `${laporan.cavActual} L/mnt` : '-')}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>D. HASIL VERIFIKASI HEATER MOLD (OHM / Ω)</h3>
+<table>
+  <thead>
+    <tr style="background:#e8e8e8;font-weight:bold;text-align:center">
+      <td style="width:15%">NO HEATER</td>
+      <td style="width:30%">STANDAR RESISTANSI (Ω)</td>
+      <td style="width:27.5%">BEFORE (Ω)</td>
+      <td style="width:27.5%">AFTER / FINISHING (Ω)</td>
+    </tr>
+  </thead>
+  <tbody>
+    ${(() => {
+      const stdHeaters = Array.isArray(laporan.moldData?.heaterStd) ? laporan.moldData.heaterStd : []
+      const actHeaters = Array.isArray(laporan.heaterActual) ? laporan.heaterActual : (laporan.heaterActual ? [laporan.heaterActual] : [])
+      const afterHeaters = Array.isArray(checklist.heater_after) ? checklist.heater_after : []
+      const count = Math.max(stdHeaters.length, actHeaters.length, 4)
+      let rows = ''
+      for (let i = 0; i < count; i++) {
+        const stdVal = stdHeaters[i] !== undefined && stdHeaters[i] !== null ? `${stdHeaters[i]} Ω` : '-'
+        const actVal = actHeaters[i] !== undefined && actHeaters[i] !== null && actHeaters[i] !== '' ? `${actHeaters[i]} Ω` : '-'
+        const afterVal = afterHeaters[i] !== undefined && afterHeaters[i] !== null && afterHeaters[i] !== '' ? `${afterHeaters[i]} Ω` : actVal
+        rows += `<tr style="text-align:center">
+          <td style="font-weight:bold">H${i + 1}</td>
+          <td>${stdVal}</td>
+          <td style="font-weight:bold;color:${actVal !== '-' ? '#006600' : '#000'}">${actVal}</td>
+          <td style="font-weight:bold;color:${afterVal !== '-' ? '#006600' : '#000'}">${afterVal}</td>
+        </tr>`
+      }
+      return rows
+    })()}
+  </tbody>
+</table>
 ` : `
 <h3>INFORMASI PERBAIKAN CM CARD</h3>
 <table><tbody>${cmRows}</tbody></table>
+
+<h3>HASIL VERIFIKASI COOLING CORE & CAVITY</h3>
+<table>
+  <thead>
+    <tr style="background:#e8e8e8;font-weight:bold;text-align:center">
+      <td>POSISI COOLING</td>
+      <td>STANDAR DEBIT (L/MNT)</td>
+      <td>BEFORE SCALING (L/MNT)</td>
+      <td>AFTER SCALING / FINISH (L/MNT)</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="text-align:center">
+      <td style="font-weight:bold;text-align:left">Cooling Core</td>
+      <td>${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L/mnt` : '25 L/mnt'}</td>
+      <td style="font-weight:bold;color:#006600">${laporan.coreActual ? `${laporan.coreActual} L/mnt` : '-'}</td>
+      <td style="font-weight:bold;color:#006600">${checklist.core_after ? `${checklist.core_after} L/mnt` : (laporan.coreActual ? `${laporan.coreActual} L/mnt` : '-')}</td>
+    </tr>
+    <tr style="text-align:center">
+      <td style="font-weight:bold;text-align:left">Cooling Cavity</td>
+      <td>${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L/mnt` : '24.2 L/mnt'}</td>
+      <td style="font-weight:bold;color:#006600">${laporan.cavActual ? `${laporan.cavActual} L/mnt` : '-'}</td>
+      <td style="font-weight:bold;color:#006600">${checklist.cav_after ? `${checklist.cav_after} L/mnt` : (laporan.cavActual ? `${laporan.cavActual} L/mnt` : '-')}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>HASIL VERIFIKASI HEATER MOLD (OHM / Ω)</h3>
+<table>
+  <thead>
+    <tr style="background:#e8e8e8;font-weight:bold;text-align:center">
+      <td style="width:15%">NO HEATER</td>
+      <td style="width:30%">STANDAR RESISTANSI (Ω)</td>
+      <td style="width:27.5%">BEFORE MAINTENANCE (Ω)</td>
+      <td style="width:27.5%">AFTER MAINTENANCE (Ω)</td>
+    </tr>
+  </thead>
+  <tbody>
+    ${(() => {
+      const stdHeaters = Array.isArray(laporan.moldData?.heaterStd) ? laporan.moldData.heaterStd : []
+      const actHeaters = Array.isArray(laporan.heaterActual) ? laporan.heaterActual : (laporan.heaterActual ? [laporan.heaterActual] : [])
+      const afterHeaters = Array.isArray(checklist.heater_after) ? checklist.heater_after : []
+      const count = Math.max(stdHeaters.length, actHeaters.length, 4)
+      let rows = ''
+      for (let i = 0; i < count; i++) {
+        const stdVal = stdHeaters[i] !== undefined && stdHeaters[i] !== null ? `${stdHeaters[i]} Ω` : '-'
+        const actVal = actHeaters[i] !== undefined && actHeaters[i] !== null && actHeaters[i] !== '' ? `${actHeaters[i]} Ω` : '-'
+        const afterVal = afterHeaters[i] !== undefined && afterHeaters[i] !== null && afterHeaters[i] !== '' ? `${afterHeaters[i]} Ω` : actVal
+        rows += `<tr style="text-align:center">
+          <td style="font-weight:bold">H${i + 1}</td>
+          <td>${stdVal}</td>
+          <td style="font-weight:bold;color:${actVal !== '-' ? '#006600' : '#000'}">${actVal}</td>
+          <td style="font-weight:bold;color:${afterVal !== '-' ? '#006600' : '#000'}">${afterVal}</td>
+        </tr>`
+      }
+      return rows
+    })()}
+  </tbody>
+</table>
 `}
 
-<h3>F. PEMAKAIAN SPAREPART</h3>
-<table>
-  <thead><tr><th>Nama Sparepart</th><th style="width:60px">Qty</th><th style="width:140px">Harga Satuan</th><th style="width:140px">Total Biaya</th></tr></thead>
-  <tbody>${spRows}</tbody>
-</table>
+<div style="${laporan.jenis?.toUpperCase().includes('PM') ? 'page-break-before:always;padding-top:12px' : ''}">
+  <h3>F. PEMAKAIAN SPAREPART / ORDER SPARE PART</h3>
+  <table>
+    <thead><tr><th>Nama Sparepart</th><th style="width:60px">Qty</th><th style="width:140px">Harga Satuan</th><th style="width:140px">Total Biaya</th></tr></thead>
+    <tbody>${spRows}</tbody>
+  </table>
 
-<h3>ESTIMASI MAN POWER COST</h3>
-<table>
-  <thead><tr><th>Nama PIC</th><th>Shift</th><th>Tanggal</th><th>Jam Mulai</th><th>Jam Selesai</th><th>Total Orang</th><th style="text-align:right">Total Cost</th></tr></thead>
-  <tbody><tr>
-    <td>${laporan.pic.nama}</td>
-    <td style="text-align:center">${laporan.shift || '-'}</td>
-    <td style="text-align:center">${new Date(laporan.tanggal).toLocaleDateString('id-ID')}</td>
-    <td style="text-align:center">${jamMulai || '-'}</td>
-    <td style="text-align:center">${jamSelesai || '-'}</td>
-    <td style="text-align:center">${jumlahOrang}</td>
-    <td style="text-align:right">Rp ${_totalMpCost.toLocaleString('id-ID')}</td>
-  </tr></tbody>
-</table>
+  <h3>RINGKASAN BIAYA PEMELIHARAAN (COST SUMMARY)</h3>
+  <table>
+    <thead><tr><th>Nama PIC</th><th>Shift</th><th>Tanggal</th><th>Jam Mulai</th><th>Jam Selesai</th><th>Total Orang</th><th style="text-align:right">Total Cost</th></tr></thead>
+    <tbody><tr>
+      <td>${laporan.pic.nama}</td>
+      <td style="text-align:center">${laporan.shift || '-'}</td>
+      <td style="text-align:center">${new Date(laporan.tanggal).toLocaleDateString('id-ID')}</td>
+      <td style="text-align:center">${jamMulai || '-'}</td>
+      <td style="text-align:center">${jamSelesai || '-'}</td>
+      <td style="text-align:center">${jumlahOrang}</td>
+      <td style="text-align:right">Rp ${_totalMpCost.toLocaleString('id-ID')}</td>
+    </tr></tbody>
+  </table>
 
-<table><tbody>
-  <tr><td class="summary-lbl" style="width:75%">Total Sparepart Cost</td><td style="text-align:right">Rp ${_totalSparepart.toLocaleString('id-ID')}</td></tr>
-  <tr><td class="summary-lbl">Total Man Power Cost</td><td style="text-align:right">Rp ${_totalMpCost.toLocaleString('id-ID')}</td></tr>
-  <tr style="background:#e8e8e8"><td class="summary-lbl" style="font-size:12px">TOTAL BIAYA PEMELIHARAAN</td><td style="text-align:right;font-weight:bold;font-size:12px">Rp ${_totalCostCombined.toLocaleString('id-ID')}</td></tr>
-</tbody></table>
+  <table><tbody>
+    <tr><td class="summary-lbl" style="width:75%">Total Sparepart Cost</td><td style="text-align:right">Rp ${_totalSparepart.toLocaleString('id-ID')}</td></tr>
+    <tr><td class="summary-lbl">Total Man Power Cost</td><td style="text-align:right">Rp ${_totalMpCost.toLocaleString('id-ID')}</td></tr>
+    <tr style="background:#e8e8e8"><td class="summary-lbl" style="font-size:12px">TOTAL BIAYA PEMELIHARAAN</td><td style="text-align:right;font-weight:bold;font-size:12px">Rp ${_totalCostCombined.toLocaleString('id-ID')}</td></tr>
+  </tbody></table>
 
-<div style="border:1px solid #333;padding:8px;min-height:55px;margin-bottom:14px">
-  <b>Catatan Tambahan:</b>
-  <div style="margin-top:4px;white-space:pre-wrap">${catatan || '(Tidak ada catatan)'}</div>
+  <div style="border:1px solid #333;padding:8px;min-height:55px;margin-bottom:14px">
+    <b>Catatan Tambahan / Remark:</b>
+    <div style="margin-top:4px;white-space:pre-wrap">${catatan || '(Tidak ada catatan)'}</div>
+  </div>
+
+  <h3>LEMBAR APPROVAL & TANDA TANGAN</h3>
+  <table>
+    <thead><tr>
+      <th style="width:25%">Disiapkan Oleh (Member PIC)</th>
+      <th style="width:25%">Diperiksa Oleh (Team Leader)</th>
+      <th style="width:25%">Disetujui Oleh (Group Leader)</th>
+      <th style="width:25%">Diterima Oleh (ADM)</th>
+    </tr></thead>
+    <tbody><tr style="height:60px">
+      <td style="vertical-align:bottom">${sigBox(_picSign)}</td>
+      <td style="vertical-align:bottom">${sigBox(_tlSign)}</td>
+      <td style="vertical-align:bottom">${sigBox(_glSign)}</td>
+      <td style="vertical-align:bottom">${sigBox(_admSign)}</td>
+    </tr></tbody>
+  </table>
 </div>
-
-<table>
-  <thead><tr>
-    <th style="width:25%">Disiapkan Oleh (Member PIC)</th>
-    <th style="width:25%">Diperiksa Oleh (Team Leader)</th>
-    <th style="width:25%">Disetujui Oleh (Group Leader)</th>
-    <th style="width:25%">Diterima Oleh (ADM)</th>
-  </tr></thead>
-  <tbody><tr style="height:60px">
-    <td style="vertical-align:bottom">${sigBox(_picSign)}</td>
-    <td style="vertical-align:bottom">${sigBox(_tlSign)}</td>
-    <td style="vertical-align:bottom">${sigBox(_glSign)}</td>
-    <td style="vertical-align:bottom">${sigBox(_admSign)}</td>
-  </tr></tbody>
-</table>
 </body></html>`
 
     const win = window.open('', '_blank', 'width=900,height=700')

@@ -992,7 +992,8 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
   </tr>
 </table>
 
-<!-- SECTION 12 & 13: M/P COST & PEMAKAIAN SPARE PARTS -->
+<!-- SECTION 12 & 13: M/P COST & PEMAKAIAN SPARE PARTS (NON-PM CARD) -->
+${cardType !== 'PM' ? `
 <table class="table-main" style="margin-bottom: 2px; width: 100%;">
   <tr>
     <td style="width: 45%; vertical-align: top; padding: 0;">
@@ -1049,6 +1050,182 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     </td>
   </tr>
 </table>
+` : `
+<!-- TABEL VERIFIKASI COOLING & HEATER UNTUK PM -->
+<table class="table-main" style="margin-bottom: 4px; width: 100%;">
+  <tr style="background: #eee; font-weight: bold; font-size: 8px;">
+    <td colspan="4" style="padding: 2px 5px;">12. DATA VERIFIKASI COOLING CORE & CAVITY (PM)</td>
+  </tr>
+  <tr style="background: #f5f5f5; font-size: 7.5px; text-align: center; font-weight: bold;">
+    <td style="width: 25%; text-align: left; padding: 2px 4px;">POSISI COOLING</td>
+    <td style="width: 25%;">STANDAR DEBIT (L/MNT)</td>
+    <td style="width: 25%;">BEFORE SCALING (L/MNT)</td>
+    <td style="width: 25%;">AFTER SCALING / FINISH (L/MNT)</td>
+  </tr>
+  <tr style="font-size: 8px; text-align: center;">
+    <td style="font-weight: bold; text-align: left; padding: 3px 5px;">Cooling Core</td>
+    <td>${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L/mnt` : '25 L/mnt'}</td>
+    <td style="font-weight: bold; color: #006600;">${laporan.coreActual ? `${laporan.coreActual}${String(laporan.coreActual).toLowerCase().includes('l') ? '' : ' L/mnt'}` : '-'}</td>
+    <td style="font-weight: bold; color: #006600;">${checklist.core_after ? `${checklist.core_after}${String(checklist.core_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : (laporan.coreActual ? `${laporan.coreActual}${String(laporan.coreActual).toLowerCase().includes('l') ? '' : ' L/mnt'}` : '-')}</td>
+  </tr>
+  <tr style="font-size: 8px; text-align: center;">
+    <td style="font-weight: bold; text-align: left; padding: 3px 5px;">Cooling Cavity</td>
+    <td>${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L/mnt` : '24.2 L/mnt'}</td>
+    <td style="font-weight: bold; color: #006600;">${laporan.cavActual ? `${laporan.cavActual}${String(laporan.cavActual).toLowerCase().includes('l') ? '' : ' L/mnt'}` : '-'}</td>
+    <td style="font-weight: bold; color: #006600;">${checklist.cav_after ? `${checklist.cav_after}${String(checklist.cav_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : (laporan.cavActual ? `${laporan.cavActual}${String(laporan.cavActual).toLowerCase().includes('l') ? '' : ' L/mnt'}` : '-')}</td>
+  </tr>
+</table>
+
+<table class="table-main" style="margin-bottom: 2px; width: 100%;">
+  <tr style="background: #eee; font-weight: bold; font-size: 8px;">
+    <td colspan="4" style="padding: 2px 5px;">13. DATA VERIFIKASI HEATER MOLD (OHM / Ω)</td>
+  </tr>
+  <tr style="background: #f5f5f5; font-size: 7.5px; text-align: center; font-weight: bold;">
+    <td style="width: 15%;">NO HEATER</td>
+    <td style="width: 30%;">STANDAR RESISTANSI (Ω)</td>
+    <td style="width: 27.5%;">BEFORE MAINTENANCE (Ω)</td>
+    <td style="width: 27.5%;">AFTER MAINTENANCE (Ω)</td>
+  </tr>
+  ${(() => {
+    const stdHeaters = Array.isArray(laporan.moldData?.heaterStd) ? laporan.moldData.heaterStd : []
+    const actHeaters = Array.isArray(laporan.heaterActual) ? laporan.heaterActual : (laporan.heaterActual ? [laporan.heaterActual] : [])
+    const afterHeaters = Array.isArray(checklist.heater_after) ? checklist.heater_after : []
+    const count = Math.max(stdHeaters.length, actHeaters.length, 4)
+    let rows = ''
+    for (let i = 0; i < count; i++) {
+      const stdVal = stdHeaters[i] !== undefined && stdHeaters[i] !== null ? `${stdHeaters[i]} Ω` : '-'
+      const actVal = actHeaters[i] !== undefined && actHeaters[i] !== null && actHeaters[i] !== '' ? `${actHeaters[i]} Ω` : '-'
+      const afterVal = afterHeaters[i] !== undefined && afterHeaters[i] !== null && afterHeaters[i] !== '' ? `${afterHeaters[i]} Ω` : actVal
+      rows += `<tr style="font-size:7.5px;text-align:center">
+        <td style="font-weight:bold;padding:2px 4px">H${i + 1}</td>
+        <td>${stdVal}</td>
+        <td style="font-weight:bold;color:${actVal !== '-' ? '#006600' : '#000'}">${actVal}</td>
+        <td style="font-weight:bold;color:${afterVal !== '-' ? '#006600' : '#000'}">${afterVal}</td>
+      </tr>`
+    }
+    return rows
+  })()}
+</table>
+
+<!-- HALAMAN 2 UNTUK PREVENTIVE MAINTENANCE (PM) -->
+<div style="page-break-before: always; padding-top: 12px;">
+  <table class="table-main" style="margin-bottom: 6px; width: 100%;">
+    <tr>
+      <td style="width: 28%; padding: 4px 6px; font-size: 8.5px; font-weight: bold; vertical-align: top;">
+        PT SUGITY CREATIVES<br/>
+        MOLD MAINTENANCE DEPT.
+      </td>
+      <td style="width: 72%; text-align: center; vertical-align: middle; padding: 6px;">
+        <div style="font-size: 14px; font-weight: bold;">RINCIAN BIAYA, REMARK & APPROVAL PREVENTIVE MAINTENANCE (PM)</div>
+        <div style="font-size: 9px; color: #333; margin-top: 2px;">
+          MOLD NO: <b>${laporan.noMold}</b> &nbsp;|&nbsp; PART: <b>${laporan.part || '-'}</b> &nbsp;|&nbsp; TANGGAL: <b>${dateFormatted}</b> &nbsp;|&nbsp; SHIFT: <b>${laporan.shift || '-'}</b>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- SPAREPART TABLE -->
+  <div style="font-weight: bold; font-size: 9px; margin-bottom: 4px; color: #1e1b4b;">F. PEMAKAIAN SPAREPART / ORDER SPARE PART</div>
+  <table class="table-main" style="margin-bottom: 8px; width: 100%; font-size: 8px;">
+    <thead>
+      <tr style="background: #eee; text-align: center; font-weight: bold;">
+        <th style="width: 30px; padding: 3px;">NO</th>
+        <th style="padding: 3px;">NAMA SPAREPART</th>
+        <th style="width: 60px; padding: 3px;">QTY</th>
+        <th style="width: 120px; padding: 3px; text-align: right;">HARGA SATUAN</th>
+        <th style="width: 130px; padding: 3px; text-align: right;">TOTAL BIAYA</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${spareparts.length === 0 ? `
+        <tr><td colspan="5" style="text-align: center; color: #666; padding: 6px;">Tidak ada pemakaian sparepart.</td></tr>
+      ` : spareparts.map((sp, idx) => `
+        <tr>
+          <td style="text-align: center; padding: 3px;">${idx + 1}</td>
+          <td style="padding: 3px; font-weight: bold;">${sp.namaSparepart}</td>
+          <td style="text-align: center; padding: 3px;">${sp.qty}</td>
+          <td style="text-align: right; padding: 3px;">Rp ${Number(sp.hargaSatuan).toLocaleString('id-ID')}</td>
+          <td style="text-align: right; padding: 3px; font-weight: bold;">Rp ${(sp.qty * Number(sp.hargaSatuan)).toLocaleString('id-ID')}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+
+  <!-- MAN POWER COST & COST SUMMARY -->
+  <div style="font-weight: bold; font-size: 9px; margin-bottom: 4px; color: #1e1b4b;">RINGKASAN BIAYA PEMELIHARAAN (COST SUMMARY)</div>
+  <table class="table-main" style="margin-bottom: 8px; width: 100%; font-size: 8.5px;">
+    <tbody>
+      <tr>
+        <td style="padding: 4px; font-weight: bold; width: 65%;">Biaya Man Power (M/P Cost: ${totDecimal} Jam x ${jumlahOrang} MP x Rp 89.595)</td>
+        <td style="padding: 4px; text-align: right; font-weight: bold;">Rp ${inHouseCost.toLocaleString('id-ID')}</td>
+      </tr>
+      <tr>
+        <td style="padding: 4px; font-weight: bold;">Biaya Pemakaian Sparepart</td>
+        <td style="padding: 4px; text-align: right; font-weight: bold;">Rp ${_totalSparepart.toLocaleString('id-ID')}</td>
+      </tr>
+      <tr style="background: #e8e8e8; font-weight: bold; font-size: 9.5px;">
+        <td style="padding: 5px; font-size: 9.5px;">TOTAL BIAYA PEMELIHARAAN (TOTAL COST)</td>
+        <td style="padding: 5px; text-align: right; font-weight: bold; font-size: 10.5px; color: #15803d;">Rp ${grandTotalCost.toLocaleString('id-ID')}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- REMARK / CATATAN -->
+  <div style="border: 1px solid #000; padding: 6px; min-height: 45px; margin-bottom: 12px; font-size: 8.5px;">
+    <b>CATATAN TAMBAHAN / REMARK:</b>
+    <div style="margin-top: 3px; white-space: pre-wrap; color: #333;">${catatan || '(Tidak ada catatan)'}</div>
+  </div>
+
+  <!-- APPROVAL SIGNATURES -->
+  <div style="font-weight: bold; font-size: 9px; margin-bottom: 4px; color: #1e1b4b;">LEMBAR APPROVAL & TANDA TANGAN</div>
+  <table class="table-main" style="width: 100%; font-size: 8px; text-align: center;">
+    <thead>
+      <tr style="background: #eee;">
+        <th style="width: 25%; padding: 4px;">Disiapkan Oleh (Member PIC)</th>
+        <th style="width: 25%; padding: 4px;">Diperiksa Oleh (Team Leader)</th>
+        <th style="width: 25%; padding: 4px;">Disetujui Oleh (Group Leader)</th>
+        <th style="width: 25%; padding: 4px;">Diterima Oleh (ADM)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="height: 60px;">
+        <td style="vertical-align: bottom; padding: 4px;">
+          ${(() => {
+            const picSign = approvals.find(a => a.role === 'PIC')
+            return picSign?.signedAt && picSign.user?.signature
+              ? `<div style="text-align:center;margin-bottom:2px"><img src="${picSign.user.signature}" alt="TTD" style="max-height:35px;display:block;margin:0 auto;object-fit:contain;" /></div><b>${picSign.user?.nama || 'Verified'}</b><br><span style="font-size:7px;color:#777">${new Date(picSign.signedAt).toLocaleDateString('id-ID')}</span>`
+              : `<b>${laporan.pic.nama}</b><br><span style="font-size:7px;color:#777">Member PIC</span>`
+          })()}
+        </td>
+        <td style="vertical-align: bottom; padding: 4px;">
+          ${(() => {
+            const tlSign = approvals.find(a => a.role === 'TL')
+            return tlSign?.signedAt && tlSign.user?.signature
+              ? `<div style="text-align:center;margin-bottom:2px"><img src="${tlSign.user.signature}" alt="TTD" style="max-height:35px;display:block;margin:0 auto;object-fit:contain;" /></div><b>${tlSign.user?.nama || 'Verified'}</b><br><span style="font-size:7px;color:#777">${new Date(tlSign.signedAt).toLocaleDateString('id-ID')}</span>`
+              : `<span style="font-size:7px;color:#999">Belum TTD</span>`
+          })()}
+        </td>
+        <td style="vertical-align: bottom; padding: 4px;">
+          ${(() => {
+            const glSign = approvals.find(a => a.role === 'GL')
+            return glSign?.signedAt && glSign.user?.signature
+              ? `<div style="text-align:center;margin-bottom:2px"><img src="${glSign.user.signature}" alt="TTD" style="max-height:35px;display:block;margin:0 auto;object-fit:contain;" /></div><b>${glSign.user?.nama || 'Verified'}</b><br><span style="font-size:7px;color:#777">${new Date(glSign.signedAt).toLocaleDateString('id-ID')}</span>`
+              : `<span style="font-size:7px;color:#999">Belum TTD</span>`
+          })()}
+        </td>
+        <td style="vertical-align: bottom; padding: 4px;">
+          ${(() => {
+            const admSign = approvals.find(a => a.role === 'ADM')
+            return admSign?.signedAt && admSign.user?.signature
+              ? `<div style="text-align:center;margin-bottom:2px"><img src="${admSign.user.signature}" alt="TTD" style="max-height:35px;display:block;margin:0 auto;object-fit:contain;" /></div><b>${admSign.user?.nama || 'Verified'}</b><br><span style="font-size:7px;color:#777">${new Date(admSign.signedAt).toLocaleDateString('id-ID')}</span>`
+              : `<span style="font-size:7px;color:#999">Belum TTD</span>`
+          })()}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+`}
 
 </body>
 </html>`
@@ -1682,13 +1859,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
         </tr>
       </table>`
 
-    const hasCoolingOrHeater = Boolean(
-      (laporan.coreActual && laporan.coreActual !== '') ||
-      (laporan.cavActual && laporan.cavActual !== '') ||
-      (laporan.heaterActual && (Array.isArray(laporan.heaterActual) ? (laporan.heaterActual as any[]).some(x => x && x !== '') : Boolean(laporan.heaterActual))) ||
-      (laporan.moldData?.heaterStd && Array.isArray(laporan.moldData.heaterStd) && laporan.moldData.heaterStd.length > 0)
-    )
-    const totalPages = hasCoolingOrHeater ? 3 : 2
+    const totalPages = 3
 
     const buildHeaterSection = () => {
       const stdHeaters = Array.isArray(laporan.moldData?.heaterStd) ? laporan.moldData.heaterStd : []
@@ -1881,9 +2052,8 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
   </div>
 </div>
 
-${hasCoolingOrHeater ? `
 <div class="pg" style="page-break-before:always">
-  ${pageHdr(`3 / ${totalPages}`)}
+  ${pageHdr(`3 / 3`)}
   ${infoBarHtml}
   <div style="border:1px solid #333;margin-top:4px">
     <div style="background:#555;color:#fff;font-weight:bold;font-size:8px;padding:2px 4px">G. DATA PEMERIKSAAN COOLING (CORE & CAVITY)</div>
@@ -1917,7 +2087,6 @@ ${hasCoolingOrHeater ? `
     <span>Audrey 28/02/18 &nbsp; QF/MOLD-009/01</span>
   </div>
 </div>
-` : ''}
 
 </body>
 </html>`
