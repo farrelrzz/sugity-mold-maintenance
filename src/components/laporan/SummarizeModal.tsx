@@ -66,6 +66,58 @@ function isReportInShift(lap: any, selectedShift: string): boolean {
   return true
 }
 
+function parseScalingForSummary(lap: any) {
+  const probText = lap.info || lap.komentar || ''
+  
+  let coreVal = lap.coreActual || ''
+  let cavVal = lap.cavActual || ''
+
+  if (probText) {
+    const coreMatch = probText.match(/(?:before\s+core|core\s+before)\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i) ||
+                      probText.match(/core\s*[:=]?\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i)
+    if (coreMatch && coreMatch[1]) {
+      coreVal = coreMatch[1].trim()
+    }
+
+    const cavMatch = probText.match(/(?:before\s+cav(?:ity)?|cav(?:ity)?\s+before)\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i) ||
+                     probText.match(/cav(?:ity)?\s*[:=]?\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i)
+    if (cavMatch && cavMatch[1]) {
+      cavVal = cavMatch[1].trim()
+    }
+  }
+
+  const fmt = (v: string) => {
+    if (!v || v === '-' || v.trim() === '') return '-'
+    const clean = v.trim()
+    if (clean.toLowerCase().includes('l')) return clean
+    return `${clean} L/mnt`
+  }
+
+  const coreBefore = fmt(coreVal)
+  const cavBefore = fmt(cavVal)
+
+  const coreAfterVal = lap.checksheet?.checklist?.core_after || lap.coreActual || coreVal
+  const cavAfterVal = lap.checksheet?.checklist?.cav_after || lap.cavActual || cavVal
+
+  const coreAfter = fmt(coreAfterVal)
+  const cavAfter = fmt(cavAfterVal)
+
+  const coreStd = lap.moldData?.coreStd ? `${lap.moldData.coreStd} L/mnt` : (lap.coreStd ? `${lap.coreStd} L/mnt` : '25 L/mnt')
+  const cavStd = lap.moldData?.cavStd ? `${lap.moldData.cavStd} L/mnt` : (lap.cavStd ? `${lap.cavStd} L/mnt` : '24.2 L/mnt')
+
+  const hasScalingData = Boolean(coreBefore !== '-' || cavBefore !== '-' || lap.jenis === 'SCALING' || lap.jenis === 'PM')
+
+  return {
+    hasScalingData,
+    coreBefore,
+    coreAfter: coreAfter !== '-' ? coreAfter : coreBefore,
+    coreStd,
+    cavBefore,
+    cavAfter: cavAfter !== '-' ? cavAfter : cavBefore,
+    cavStd,
+  }
+}
+
 export default function SummarizeModal({ isOpen, onClose, initialDate }: SummarizeModalProps) {
   const todayStr = new Date().toISOString().split('T')[0]
   const [tanggal, setTanggal] = useState(initialDate || todayStr)
@@ -144,10 +196,48 @@ export default function SummarizeModal({ isOpen, onClose, initialDate }: Summari
         detailLines += `P/M ${fac}\n`
         groupedByFactory[fac].forEach((lap) => {
           const isOH = lap.jenis === 'OH_MOLD' || lap.jenis === 'OH MOLD'
-          const titleTag = isOH ? '#O/H Total' : `#Maintenance`
-          detailLines += `${titleTag} *Mold ${lap.noMold} ${lap.part || ''}*\n`
+          const scalingInfo = parseScalingForSummary(lap)
 
-          if (lap.info || lap.countermeasure) {
+          if (isOH) {
+            detailLines += `#O/H Total *Mold ${lap.noMold} ${lap.part || ''}*\n`
+            if (lap.info || lap.countermeasure) {
+              if (lap.info) {
+                lap.info.split('\n').forEach((line: string) => {
+                  if (line.trim()) detailLines += `- ${line.trim()}\n`
+                })
+              }
+              if (lap.countermeasure) {
+                lap.countermeasure.split('\n').forEach((line: string) => {
+                  if (line.trim()) detailLines += `- ${line.trim()}\n`
+                })
+              }
+              detailLines += `- Mold finish\n`
+            } else {
+              detailLines += `- Cek eksternal mold\n`
+              detailLines += `- Cleaning P/L Core & Cavity\n`
+              detailLines += `- Dissassy E/J group\n`
+              detailLines += `- Cleaning + Greasse E/J group\n`
+              detailLines += `- Assy E/J group\n`
+              detailLines += `- Cek mekanisme, OK\n`
+              detailLines += `- Cek gaspring, OK\n`
+              detailLines += `- Mold finish\n`
+            }
+          }
+
+          // Render Scaling block if scaling data is present
+          if (scalingInfo.hasScalingData && (scalingInfo.coreBefore !== '-' || scalingInfo.cavBefore !== '-')) {
+            detailLines += `#Scalling *Mold ${lap.noMold} ${lap.part || ''}*\n`
+            detailLines += `core \n`
+            detailLines += `- Before : ${scalingInfo.coreBefore}\n`
+            detailLines += `- After : ${scalingInfo.coreAfter}\n`
+            detailLines += `- Std : ${scalingInfo.coreStd}\n`
+            detailLines += `Cavity\n`
+            detailLines += `- Before : ${scalingInfo.cavBefore}\n`
+            detailLines += `- After : ${scalingInfo.cavAfter}\n`
+            detailLines += `- Std : ${scalingInfo.cavStd}\n`
+          } else if (!isOH) {
+            // General maintenance report
+            detailLines += `#Maintenance *Mold ${lap.noMold} ${lap.part || ''}*\n`
             if (lap.info) {
               lap.info.split('\n').forEach((line: string) => {
                 if (line.trim()) detailLines += `- ${line.trim()}\n`
@@ -159,17 +249,8 @@ export default function SummarizeModal({ isOpen, onClose, initialDate }: Summari
               })
             }
             detailLines += `- Mold finish\n`
-          } else {
-            // Standard Overhaul Steps
-            detailLines += `- Cek eksternal mold\n`
-            detailLines += `- Cleaning P/L Core & Cavity\n`
-            detailLines += `- Dissassy E/J group\n`
-            detailLines += `- Cleaning + Greasse E/J group\n`
-            detailLines += `- Assy E/J group\n`
-            detailLines += `- Cek mekanisme, OK\n`
-            detailLines += `- Cek gaspring, OK\n`
-            detailLines += `- Mold finish\n`
           }
+
           detailLines += `\n`
         })
       })
