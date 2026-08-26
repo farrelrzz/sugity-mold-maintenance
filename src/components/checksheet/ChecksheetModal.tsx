@@ -1015,10 +1015,9 @@ ${_isOverhaul ? `
 <table>
   <thead>
     <tr style="background:#e8e8e8;font-weight:bold;text-align:center">
-      <td style="width:15%">NO HEATER</td>
-      <td style="width:30%">STANDAR RESISTANSI (Ω)</td>
-      <td style="width:27.5%">BEFORE (Ω)</td>
-      <td style="width:27.5%">AFTER / FINISHING (Ω)</td>
+      <td style="width:20%">NO HEATER</td>
+      <td style="width:40%">STANDAR RESISTANSI (Ω)</td>
+      <td style="width:40%">AFTER / FINISHING (Ω)</td>
     </tr>
   </thead>
   <tbody>
@@ -1035,7 +1034,6 @@ ${_isOverhaul ? `
         rows += `<tr style="text-align:center">
           <td style="font-weight:bold">H${i + 1}</td>
           <td>${stdVal}</td>
-          <td style="font-weight:bold;color:${actVal !== '-' ? '#006600' : '#000'}">${actVal}</td>
           <td style="font-weight:bold;color:${afterVal !== '-' ? '#006600' : '#000'}">${afterVal}</td>
         </tr>`
       }
@@ -1074,10 +1072,9 @@ ${_isOverhaul ? `
 <table>
   <thead>
     <tr style="background:#e8e8e8;font-weight:bold;text-align:center">
-      <td style="width:15%">NO HEATER</td>
-      <td style="width:30%">STANDAR RESISTANSI (Ω)</td>
-      <td style="width:27.5%">BEFORE MAINTENANCE (Ω)</td>
-      <td style="width:27.5%">AFTER MAINTENANCE (Ω)</td>
+      <td style="width:20%">NO HEATER</td>
+      <td style="width:40%">STANDAR RESISTANSI (Ω)</td>
+      <td style="width:40%">AFTER MAINTENANCE (Ω)</td>
     </tr>
   </thead>
   <tbody>
@@ -1094,7 +1091,6 @@ ${_isOverhaul ? `
         rows += `<tr style="text-align:center">
           <td style="font-weight:bold">H${i + 1}</td>
           <td>${stdVal}</td>
-          <td style="font-weight:bold;color:${actVal !== '-' ? '#006600' : '#000'}">${actVal}</td>
           <td style="font-weight:bold;color:${afterVal !== '-' ? '#006600' : '#000'}">${afterVal}</td>
         </tr>`
       }

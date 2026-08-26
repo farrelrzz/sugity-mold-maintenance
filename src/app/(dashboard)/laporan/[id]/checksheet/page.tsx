@@ -1107,13 +1107,12 @@ ${cardType !== 'PM' ? `
 
 <table class="table-main" style="margin-bottom: 2px; width: 100%;">
   <tr style="background: #eee; font-weight: bold; font-size: 8px;">
-    <td colspan="4" style="padding: 2px 5px;">13. DATA VERIFIKASI HEATER MOLD (OHM / Ω)</td>
+    <td colspan="3" style="padding: 2px 5px;">13. DATA VERIFIKASI HEATER MOLD (OHM / Ω)</td>
   </tr>
   <tr style="background: #f5f5f5; font-size: 7.5px; text-align: center; font-weight: bold;">
-    <td style="width: 15%;">NO HEATER</td>
-    <td style="width: 30%;">STANDAR RESISTANSI (Ω)</td>
-    <td style="width: 27.5%;">BEFORE MAINTENANCE (Ω)</td>
-    <td style="width: 27.5%;">AFTER MAINTENANCE (Ω)</td>
+    <td style="width: 20%;">NO HEATER</td>
+    <td style="width: 40%;">STANDAR RESISTANSI (Ω)</td>
+    <td style="width: 40%;">AFTER MAINTENANCE (Ω)</td>
   </tr>
   ${(() => {
     const stdHeaters = Array.isArray(laporan.moldData?.heaterStd) ? laporan.moldData.heaterStd : []
@@ -1128,7 +1127,6 @@ ${cardType !== 'PM' ? `
       rows += `<tr style="font-size:7.5px;text-align:center">
         <td style="font-weight:bold;padding:2px 4px">H${i + 1}</td>
         <td>${stdVal}</td>
-        <td style="font-weight:bold;color:${actVal !== '-' ? '#006600' : '#000'}">${actVal}</td>
         <td style="font-weight:bold;color:${afterVal !== '-' ? '#006600' : '#000'}">${afterVal}</td>
       </tr>`
     }
