@@ -225,14 +225,12 @@ export default function SummarizeModal({ isOpen, onClose, initialDate }: Summari
           }
 
           // Render Scaling block if scaling data is present
-          if (scalingInfo.hasScalingData && (scalingInfo.coreBefore !== '-' || scalingInfo.cavBefore !== '-')) {
+          if (scalingInfo.hasScalingData && (scalingInfo.coreBefore !== '-' || scalingInfo.cavBefore !== '-' || scalingInfo.coreAfter !== '-' || scalingInfo.cavAfter !== '-')) {
             detailLines += `#Scalling *Mold ${lap.noMold} ${lap.part || ''}*\n`
             detailLines += `core \n`
-            detailLines += `- Before : ${scalingInfo.coreBefore}\n`
             detailLines += `- After : ${scalingInfo.coreAfter}\n`
             detailLines += `- Std : ${scalingInfo.coreStd}\n`
             detailLines += `Cavity\n`
-            detailLines += `- Before : ${scalingInfo.cavBefore}\n`
             detailLines += `- After : ${scalingInfo.cavAfter}\n`
             detailLines += `- Std : ${scalingInfo.cavStd}\n`
           } else if (!isOH) {

@@ -994,7 +994,6 @@ ${_isOverhaul ? `
     <tr style="background:#e8e8e8;font-weight:bold;text-align:center">
       <td>POSISI COOLING</td>
       <td>STANDAR DEBIT (L/MNT)</td>
-      <td>BEFORE (L/MNT)</td>
       <td>AFTER / FINISHING (L/MNT)</td>
     </tr>
   </thead>
@@ -1002,13 +1001,11 @@ ${_isOverhaul ? `
     <tr style="text-align:center">
       <td style="font-weight:bold;text-align:left">Cooling Core</td>
       <td>${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L/mnt` : '25 L/mnt'}</td>
-      <td style="font-weight:bold;color:#006600">${scalingCoreBefore}</td>
       <td style="font-weight:bold;color:#006600">${checklist.core_after ? fmtVal(checklist.core_after) : scalingCoreBefore}</td>
     </tr>
     <tr style="text-align:center">
       <td style="font-weight:bold;text-align:left">Cooling Cavity</td>
       <td>${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L/mnt` : '24.2 L/mnt'}</td>
-      <td style="font-weight:bold;color:#006600">${scalingCavBefore}</td>
       <td style="font-weight:bold;color:#006600">${checklist.cav_after ? fmtVal(checklist.cav_after) : scalingCavBefore}</td>
     </tr>
   </tbody>
@@ -1056,7 +1053,6 @@ ${_isOverhaul ? `
     <tr style="background:#e8e8e8;font-weight:bold;text-align:center">
       <td>POSISI COOLING</td>
       <td>STANDAR DEBIT (L/MNT)</td>
-      <td>BEFORE SCALING (L/MNT)</td>
       <td>AFTER SCALING / FINISH (L/MNT)</td>
     </tr>
   </thead>
@@ -1064,13 +1060,11 @@ ${_isOverhaul ? `
     <tr style="text-align:center">
       <td style="font-weight:bold;text-align:left">Cooling Core</td>
       <td>${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L/mnt` : '25 L/mnt'}</td>
-      <td style="font-weight:bold;color:#006600">${scalingCoreBefore}</td>
       <td style="font-weight:bold;color:#006600">${checklist.core_after ? fmtVal(checklist.core_after) : scalingCoreBefore}</td>
     </tr>
     <tr style="text-align:center">
       <td style="font-weight:bold;text-align:left">Cooling Cavity</td>
       <td>${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L/mnt` : '24.2 L/mnt'}</td>
-      <td style="font-weight:bold;color:#006600">${scalingCavBefore}</td>
       <td style="font-weight:bold;color:#006600">${checklist.cav_after ? fmtVal(checklist.cav_after) : scalingCavBefore}</td>
     </tr>
   </tbody>

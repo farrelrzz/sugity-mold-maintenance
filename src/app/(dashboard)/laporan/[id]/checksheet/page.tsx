@@ -1086,24 +1086,21 @@ ${cardType !== 'PM' ? `
 <!-- TABEL VERIFIKASI COOLING & HEATER UNTUK PM -->
 <table class="table-main" style="margin-bottom: 4px; width: 100%;">
   <tr style="background: #eee; font-weight: bold; font-size: 8px;">
-    <td colspan="4" style="padding: 2px 5px;">12. DATA VERIFIKASI COOLING CORE & CAVITY (PM)</td>
+    <td colspan="3" style="padding: 2px 5px;">12. DATA VERIFIKASI COOLING CORE & CAVITY (PM)</td>
   </tr>
   <tr style="background: #f5f5f5; font-size: 7.5px; text-align: center; font-weight: bold;">
-    <td style="width: 25%; text-align: left; padding: 2px 4px;">POSISI COOLING</td>
-    <td style="width: 25%;">STANDAR DEBIT (L/MNT)</td>
-    <td style="width: 25%;">BEFORE SCALING (L/MNT)</td>
-    <td style="width: 25%;">AFTER SCALING / FINISH (L/MNT)</td>
+    <td style="width: 34%; text-align: left; padding: 2px 4px;">POSISI COOLING</td>
+    <td style="width: 33%;">STANDAR DEBIT (L/MNT)</td>
+    <td style="width: 33%;">AFTER SCALING / FINISH (L/MNT)</td>
   </tr>
   <tr style="font-size: 8px; text-align: center;">
     <td style="font-weight: bold; text-align: left; padding: 3px 5px;">Cooling Core</td>
     <td>${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L/mnt` : '25 L/mnt'}</td>
-    <td style="font-weight: bold; color: #006600;">${scalingBefore.core}</td>
     <td style="font-weight: bold; color: #006600;">${checklist.core_after ? `${checklist.core_after}${String(checklist.core_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : scalingBefore.core}</td>
   </tr>
   <tr style="font-size: 8px; text-align: center;">
     <td style="font-weight: bold; text-align: left; padding: 3px 5px;">Cooling Cavity</td>
     <td>${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L/mnt` : '24.2 L/mnt'}</td>
-    <td style="font-weight: bold; color: #006600;">${scalingBefore.cav}</td>
     <td style="font-weight: bold; color: #006600;">${checklist.cav_after ? `${checklist.cav_after}${String(checklist.cav_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : scalingBefore.cav}</td>
   </tr>
 </table>
@@ -2101,12 +2098,12 @@ ${cardType !== 'PM' ? `
         <tr style="font-size:7.5px">
           <td style="border:1px solid #333;padding:3px 6px;font-weight:bold">COOLING CORE</td>
           <td style="border:1px solid #333;padding:3px 6px;text-align:center">${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L / mnt` : '25 L / mnt (Std)'}</td>
-          <td style="border:1px solid #333;padding:3px 6px;text-align:center;font-weight:bold;color:green">${getParsedScalingBefore(laporan.info, laporan.coreActual, laporan.cavActual).core}</td>
+          <td style="border:1px solid #333;padding:3px 6px;text-align:center;font-weight:bold;color:green">${checklist.core_after ? `${checklist.core_after}${String(checklist.core_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : getParsedScalingBefore(laporan.info, laporan.coreActual, laporan.cavActual).core}</td>
         </tr>
         <tr style="font-size:7.5px">
           <td style="border:1px solid #333;padding:3px 6px;font-weight:bold">COOLING CAVITY</td>
           <td style="border:1px solid #333;padding:3px 6px;text-align:center">${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L / mnt` : '24,2 L / mnt (Std)'}</td>
-          <td style="border:1px solid #333;padding:3px 6px;text-align:center;font-weight:bold;color:green">${getParsedScalingBefore(laporan.info, laporan.coreActual, laporan.cavActual).cav}</td>
+          <td style="border:1px solid #333;padding:3px 6px;text-align:center;font-weight:bold;color:green">${checklist.cav_after ? `${checklist.cav_after}${String(checklist.cav_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : getParsedScalingBefore(laporan.info, laporan.coreActual, laporan.cavActual).cav}</td>
         </tr>
       </tbody>
     </table>
