@@ -10,10 +10,30 @@ interface SummarizeModalProps {
 }
 
 function isReportInShift(lap: any, selectedShift: string): boolean {
-  if (!selectedShift || selectedShift === 'Semua Shift') return true
+  if (!selectedShift || selectedShift === 'Semua Shift' || selectedShift.toLowerCase().includes('semua shift')) return true
 
   const lapShiftStr = (lap.shift || '').toLowerCase()
   const jamMulai = lap.checksheet?.jamMulai || lap.jamMulai || ''
+
+  // Regu match (Shift A / Shift B / Nonshift)
+  const isShiftA = lapShiftStr.includes('shift a') || lapShiftStr.includes('shift_a') || lapShiftStr === 'a'
+  const isShiftB = lapShiftStr.includes('shift b') || lapShiftStr.includes('shift_b') || lapShiftStr === 'b'
+  const isNonShift = lapShiftStr.includes('nonshift') || lapShiftStr === ''
+
+  const targetLower = selectedShift.toLowerCase()
+  const targetNeedsA = targetLower.includes('shift a')
+  const targetNeedsB = targetLower.includes('shift b')
+  const targetNeedsNonshift = targetLower.includes('nonshift')
+  const targetNeedsDay = targetLower.includes('dayshift')
+  const targetNeedsNight = targetLower.includes('nightshift')
+
+  // Regu filter check:
+  // If target specifically asks for Shift A, reject if report is explicitly Shift B
+  if (targetNeedsA && isShiftB) return false
+  // If target specifically asks for Shift B, reject if report is explicitly Shift A
+  if (targetNeedsB && isShiftA) return false
+  // If target specifically asks for Nonshift, reject if report is explicitly Shift A or Shift B
+  if (targetNeedsNonshift && (isShiftA || isShiftB)) return false
 
   // Determine if work time falls in DayShift vs NightShift
   let isTimeDay = false
@@ -30,23 +50,6 @@ function isReportInShift(lap: any, selectedShift: string): boolean {
       isTimeNight = true
     }
   }
-
-  // Regu match (Shift A / Shift B / Nonshift)
-  const isShiftA = lapShiftStr.includes('shift a') || lapShiftStr.includes('shift_a') || lapShiftStr === 'a'
-  const isShiftB = lapShiftStr.includes('shift b') || lapShiftStr.includes('shift_b') || lapShiftStr === 'b'
-  const isNonShift = lapShiftStr.includes('nonshift')
-
-  const targetLower = selectedShift.toLowerCase()
-  const targetNeedsA = targetLower.includes('shift a')
-  const targetNeedsB = targetLower.includes('shift b')
-  const targetNeedsNonshift = targetLower.includes('nonshift')
-  const targetNeedsDay = targetLower.includes('dayshift')
-  const targetNeedsNight = targetLower.includes('nightshift')
-
-  // Regu filter check
-  if (targetNeedsA && !isShiftA && lapShiftStr !== '') return false
-  if (targetNeedsB && !isShiftB && lapShiftStr !== '') return false
-  if (targetNeedsNonshift && !isNonShift && lapShiftStr !== '') return false
 
   // Waktu filter check
   if (targetNeedsDay) {

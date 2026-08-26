@@ -5,9 +5,13 @@ import { compactJsonPayload, cleanTextPayload } from '@/lib/optimizeStorage'
 
 function toPrismaShift(s: string | null | undefined): Shift | null {
   if (!s) return null
-  const clean = s.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
-  if (clean === 'SHIFTA' || clean === 'A') return 'Shift_A'
-  if (clean === 'SHIFTB' || clean === 'B') return 'Shift_B'
+  const str = s.toLowerCase()
+  if (str.includes('shift b') || str.includes('shift_b') || str.includes('regu b') || str.includes('shiftb') || str.trim() === 'b') {
+    return 'Shift_B'
+  }
+  if (str.includes('shift a') || str.includes('shift_a') || str.includes('regu a') || str.includes('shifta') || str.trim() === 'a') {
+    return 'Shift_A'
+  }
   return 'Nonshift'
 }
 
