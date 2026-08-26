@@ -937,6 +937,22 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
         ? `${sign.user?.signature ? `<div style="text-align:center;margin-bottom:4px"><img src="${sign.user.signature}" alt="TTD" style="max-height:45px;display:block;margin:0 auto;object-fit:contain;" /></div>` : ''}<b>${sign.user?.nama || 'Verified'}</b><br><span style="font-size:10px;color:#666">${new Date(sign.signedAt).toLocaleDateString('id-ID')}</span>`
         : `<span style="font-size:10px;color:#999">Belum TTD</span>`
 
+    const probText = checklist.cm_problem || laporan.info || ''
+    const coreMatch = probText.match(/(?:before\s+core|core\s+before)\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i) ||
+                      probText.match(/core\s*[:=]?\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i)
+    const cavMatch = probText.match(/(?:before\s+cav(?:ity)?|cav(?:ity)?\s+before)\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i) ||
+                     probText.match(/cav(?:ity)?\s*[:=]?\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i)
+
+    const fmtVal = (v?: string | null) => {
+      if (!v || v === '-' || v.trim() === '') return '-'
+      const clean = v.trim()
+      if (clean.toLowerCase().includes('l')) return clean
+      return `${clean} L/mnt`
+    }
+
+    const scalingCoreBefore = coreMatch ? fmtVal(coreMatch[1]) : fmtVal(laporan.coreActual)
+    const scalingCavBefore = cavMatch ? fmtVal(cavMatch[1]) : fmtVal(laporan.cavActual)
+
     const html = `<!DOCTYPE html>
 <html lang="id"><head><meta charset="UTF-8"/>
 <title>${_isOverhaul ? 'CHECKSHEET OVERHAUL MOLD' : 'CM CARD'} - ${laporan.noMold}</title>
@@ -986,14 +1002,14 @@ ${_isOverhaul ? `
     <tr style="text-align:center">
       <td style="font-weight:bold;text-align:left">Cooling Core</td>
       <td>${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L/mnt` : '25 L/mnt'}</td>
-      <td style="font-weight:bold;color:#006600">${laporan.coreActual ? `${laporan.coreActual} L/mnt` : '-'}</td>
-      <td style="font-weight:bold;color:#006600">${checklist.core_after ? `${checklist.core_after} L/mnt` : (laporan.coreActual ? `${laporan.coreActual} L/mnt` : '-')}</td>
+      <td style="font-weight:bold;color:#006600">${scalingCoreBefore}</td>
+      <td style="font-weight:bold;color:#006600">${checklist.core_after ? fmtVal(checklist.core_after) : scalingCoreBefore}</td>
     </tr>
     <tr style="text-align:center">
       <td style="font-weight:bold;text-align:left">Cooling Cavity</td>
       <td>${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L/mnt` : '24.2 L/mnt'}</td>
-      <td style="font-weight:bold;color:#006600">${laporan.cavActual ? `${laporan.cavActual} L/mnt` : '-'}</td>
-      <td style="font-weight:bold;color:#006600">${checklist.cav_after ? `${checklist.cav_after} L/mnt` : (laporan.cavActual ? `${laporan.cavActual} L/mnt` : '-')}</td>
+      <td style="font-weight:bold;color:#006600">${scalingCavBefore}</td>
+      <td style="font-weight:bold;color:#006600">${checklist.cav_after ? fmtVal(checklist.cav_after) : scalingCavBefore}</td>
     </tr>
   </tbody>
 </table>
@@ -1048,14 +1064,14 @@ ${_isOverhaul ? `
     <tr style="text-align:center">
       <td style="font-weight:bold;text-align:left">Cooling Core</td>
       <td>${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L/mnt` : '25 L/mnt'}</td>
-      <td style="font-weight:bold;color:#006600">${laporan.coreActual ? `${laporan.coreActual} L/mnt` : '-'}</td>
-      <td style="font-weight:bold;color:#006600">${checklist.core_after ? `${checklist.core_after} L/mnt` : (laporan.coreActual ? `${laporan.coreActual} L/mnt` : '-')}</td>
+      <td style="font-weight:bold;color:#006600">${scalingCoreBefore}</td>
+      <td style="font-weight:bold;color:#006600">${checklist.core_after ? fmtVal(checklist.core_after) : scalingCoreBefore}</td>
     </tr>
     <tr style="text-align:center">
       <td style="font-weight:bold;text-align:left">Cooling Cavity</td>
       <td>${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L/mnt` : '24.2 L/mnt'}</td>
-      <td style="font-weight:bold;color:#006600">${laporan.cavActual ? `${laporan.cavActual} L/mnt` : '-'}</td>
-      <td style="font-weight:bold;color:#006600">${checklist.cav_after ? `${checklist.cav_after} L/mnt` : (laporan.cavActual ? `${laporan.cavActual} L/mnt` : '-')}</td>
+      <td style="font-weight:bold;color:#006600">${scalingCavBefore}</td>
+      <td style="font-weight:bold;color:#006600">${checklist.cav_after ? fmtVal(checklist.cav_after) : scalingCavBefore}</td>
     </tr>
   </tbody>
 </table>

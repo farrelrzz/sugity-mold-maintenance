@@ -670,6 +670,37 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     }
   }
 
+  const getParsedScalingBefore = (probText?: string | null, dbCore?: string | null, dbCav?: string | null) => {
+    let coreVal = dbCore || ''
+    let cavVal = dbCav || ''
+
+    if (probText) {
+      const coreMatch = probText.match(/(?:before\s+core|core\s+before)\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i) ||
+                        probText.match(/core\s*[:=]?\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i)
+      if (coreMatch && coreMatch[1]) {
+        coreVal = coreMatch[1].trim()
+      }
+
+      const cavMatch = probText.match(/(?:before\s+cav(?:ity)?|cav(?:ity)?\s+before)\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i) ||
+                       probText.match(/cav(?:ity)?\s*[:=]?\s*([\d.,]+\s*(?:l\/m(?:nt)?)?)/i)
+      if (cavMatch && cavMatch[1]) {
+        cavVal = cavMatch[1].trim()
+      }
+    }
+
+    const fmtVal = (v: string) => {
+      if (!v || v === '-' || v.trim() === '') return '-'
+      const clean = v.trim()
+      if (clean.toLowerCase().includes('l')) return clean
+      return `${clean} L/mnt`
+    }
+
+    return {
+      core: fmtVal(coreVal),
+      cav: fmtVal(cavVal),
+    }
+  }
+
   // Print function specifically for CM CARD (PM, BM, IM - Mold Problem) QF/MOLD-013
   const handlePrintCmCard = () => {
     if (!laporan) return
@@ -679,6 +710,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     const month2 = String(tglKerja.getMonth() + 1).padStart(2, '0')
     const day2 = String(tglKerja.getDate()).padStart(2, '0')
     const dateFormatted = tglKerja.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const scalingBefore = getParsedScalingBefore(checklist.cm_problem || laporan.info, laporan.coreActual, laporan.cavActual)
 
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
     
@@ -1065,14 +1097,14 @@ ${cardType !== 'PM' ? `
   <tr style="font-size: 8px; text-align: center;">
     <td style="font-weight: bold; text-align: left; padding: 3px 5px;">Cooling Core</td>
     <td>${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L/mnt` : '25 L/mnt'}</td>
-    <td style="font-weight: bold; color: #006600;">${laporan.coreActual ? `${laporan.coreActual}${String(laporan.coreActual).toLowerCase().includes('l') ? '' : ' L/mnt'}` : '-'}</td>
-    <td style="font-weight: bold; color: #006600;">${checklist.core_after ? `${checklist.core_after}${String(checklist.core_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : (laporan.coreActual ? `${laporan.coreActual}${String(laporan.coreActual).toLowerCase().includes('l') ? '' : ' L/mnt'}` : '-')}</td>
+    <td style="font-weight: bold; color: #006600;">${scalingBefore.core}</td>
+    <td style="font-weight: bold; color: #006600;">${checklist.core_after ? `${checklist.core_after}${String(checklist.core_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : scalingBefore.core}</td>
   </tr>
   <tr style="font-size: 8px; text-align: center;">
     <td style="font-weight: bold; text-align: left; padding: 3px 5px;">Cooling Cavity</td>
     <td>${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L/mnt` : '24.2 L/mnt'}</td>
-    <td style="font-weight: bold; color: #006600;">${laporan.cavActual ? `${laporan.cavActual}${String(laporan.cavActual).toLowerCase().includes('l') ? '' : ' L/mnt'}` : '-'}</td>
-    <td style="font-weight: bold; color: #006600;">${checklist.cav_after ? `${checklist.cav_after}${String(checklist.cav_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : (laporan.cavActual ? `${laporan.cavActual}${String(laporan.cavActual).toLowerCase().includes('l') ? '' : ' L/mnt'}` : '-')}</td>
+    <td style="font-weight: bold; color: #006600;">${scalingBefore.cav}</td>
+    <td style="font-weight: bold; color: #006600;">${checklist.cav_after ? `${checklist.cav_after}${String(checklist.cav_after).toLowerCase().includes('l') ? '' : ' L/mnt'}` : scalingBefore.cav}</td>
   </tr>
 </table>
 
@@ -2069,12 +2101,12 @@ ${cardType !== 'PM' ? `
         <tr style="font-size:7.5px">
           <td style="border:1px solid #333;padding:3px 6px;font-weight:bold">COOLING CORE</td>
           <td style="border:1px solid #333;padding:3px 6px;text-align:center">${laporan.moldData?.coreStd ? `${laporan.moldData.coreStd} L / mnt` : '25 L / mnt (Std)'}</td>
-          <td style="border:1px solid #333;padding:3px 6px;text-align:center;font-weight:bold;color:${laporan.coreActual ? 'green' : '#333'}">${laporan.coreActual ? `${laporan.coreActual} L / mnt` : '-'}</td>
+          <td style="border:1px solid #333;padding:3px 6px;text-align:center;font-weight:bold;color:green">${getParsedScalingBefore(laporan.info, laporan.coreActual, laporan.cavActual).core}</td>
         </tr>
         <tr style="font-size:7.5px">
           <td style="border:1px solid #333;padding:3px 6px;font-weight:bold">COOLING CAVITY</td>
           <td style="border:1px solid #333;padding:3px 6px;text-align:center">${laporan.moldData?.cavStd ? `${laporan.moldData.cavStd} L / mnt` : '24,2 L / mnt (Std)'}</td>
-          <td style="border:1px solid #333;padding:3px 6px;text-align:center;font-weight:bold;color:${laporan.cavActual ? 'green' : '#333'}">${laporan.cavActual ? `${laporan.cavActual} L / mnt` : '-'}</td>
+          <td style="border:1px solid #333;padding:3px 6px;text-align:center;font-weight:bold;color:green">${getParsedScalingBefore(laporan.info, laporan.coreActual, laporan.cavActual).cav}</td>
         </tr>
       </tbody>
     </table>
