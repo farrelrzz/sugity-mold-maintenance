@@ -195,37 +195,90 @@ export default function RiwayatMoldPage() {
       {/* ================= PRINT ONLY AREA (HIDDEN BY DEFAULT) ================= */}
       <style jsx global>{`
         @media print {
-          body * {
-            visibility: hidden;
-          }
-          #print-area, #print-area * {
-            visibility: visible;
-          }
-          #print-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          .no-print {
+          /* Hide non-printable elements */
+          header, nav, aside, .no-print, .toast, .modal-overlay, button, select, [role="navigation"] {
             display: none !important;
           }
+
+          html, body, .app-layout, .app-main, main.konten {
+            position: static !important;
+            display: block !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+            background: #fff !important;
+            color: #000 !important;
+            box-shadow: none !important;
+          }
+
+          #print-area {
+            position: static !important;
+            display: block !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          .tabel-scroll {
+            overflow: visible !important;
+            height: auto !important;
+            max-height: none !important;
+            border-radius: 0 !important;
+            border: none !important;
+          }
+
+          .tabel-biasa {
+            width: 100% !important;
+            border-collapse: collapse !important;
+          }
+
+          .tabel-biasa th, .tabel-biasa td {
+            border: 1px solid #333 !important;
+            padding: 6px 8px !important;
+            font-size: 11px !important;
+            color: #000 !important;
+            background: #fff !important;
+          }
+
+          .tabel-biasa thead {
+            display: table-header-group !important;
+          }
+
+          .tabel-biasa tr {
+            page-break-inside: avoid !important;
+            page-break-after: auto !important;
+          }
+
           .kartu {
             border: 1px solid #ccc !important;
             box-shadow: none !important;
             background: #fff !important;
-            margin-bottom: 12px !important;
-            padding: 10px !important;
+            margin-bottom: 14px !important;
+            padding: 12px !important;
+            page-break-inside: avoid !important;
           }
+
           .tag {
             border: 1px solid #333 !important;
             color: #000 !important;
             background: transparent !important;
           }
+
           .cs-section-title {
             color: #000 !important;
             background: #f0f0f0 !important;
             border: 1px solid #ccc !important;
+          }
+
+          @page {
+            size: A4 portrait;
+            margin: 12mm 10mm;
           }
         }
       `}</style>
