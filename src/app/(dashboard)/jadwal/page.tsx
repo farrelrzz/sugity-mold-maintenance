@@ -430,7 +430,7 @@ export default function JadwalPage() {
                 <option value="B/M">B/M</option>
                 <option value="I/M">I/M</option>
                 <option value="PM">PM</option>
-                <option value="BM CHUCK">BM CHUCK</option>
+                <option value="CHUCK">CHUCK</option>
                 <option value="LAINNYA">LAINNYA</option>
               </select>
             </div>

@@ -22,7 +22,7 @@ function toPrismaJenis(j: string | null | undefined): JenisLaporan {
   if (clean === 'BM') return 'BM'
   if (clean === 'IM') return 'IM'
   if (clean === 'PM') return 'PM'
-  if (clean === 'BMCHUCK') return 'BM_CHUCK'
+  if (clean === 'BMCHUCK' || clean === 'CHUCK') return 'BM_CHUCK'
   return 'LAINNYA'
 }
 

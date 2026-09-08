@@ -925,7 +925,7 @@ export default function LaporanBaruPage() {
         <div className="kartu">
           <p className="label-besar">2. Jenis Pekerjaan</p>
           <div className="grid-pilih lebar">
-            {['OH MOLD', 'B/M', 'I/M', 'PM', 'BM CHUCK', 'LAINNYA'].map((val) => (
+            {['OH MOLD', 'B/M', 'I/M', 'PM', 'CHUCK', 'LAINNYA'].map((val) => (
               <button
                 key={val}
                 type="button"

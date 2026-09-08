@@ -1220,7 +1220,7 @@ ${_isOverhaul ? `
   }
 
   const isOverhaul = laporan.jenis === 'OH_MOLD' || laporan.jenis === 'OH MOLD' || laporan.jenis?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === 'OHMOLD'
-  const isBMChuck = laporan.jenis === 'BM CHUCK' || laporan.jenis === 'BM_CHUCK'
+  const isBMChuck = laporan.jenis === 'CHUCK' || laporan.jenis === 'BM CHUCK' || laporan.jenis === 'BM_CHUCK' || laporan.jenis?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === 'CHUCK' || laporan.jenis?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === 'BMCHUCK'
   const totalSparepart = getTotalSparepartCost()
   const totalMpCost = isOverhaul ? getOverhaulTotalMpCost() : Math.round(getDurasiJam() * 89595 * jumlahOrang)
   const totalCostCombined = totalMpCost + totalSparepart
