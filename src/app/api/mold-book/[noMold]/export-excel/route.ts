@@ -11,13 +11,21 @@ function hitungHistoryCosts(lap: any) {
   if (cs) {
     if (isOh) {
       const rawChecklist = cs.checklist || {}
-      const items = rawChecklist.items || {}
+      const items = rawChecklist.items || rawChecklist.costBox || {}
+      const b1 = items['b1'] || {}
+      const b1Mulai = b1.jamMulai || ''
+      const b1Selesai = b1.jamSelesai || ''
+      const b1Orang = Number(b1.orang) || 0
+
       const costKeys = ['b1', 'b2', 'b3', 'b4', 'b5']
       costKeys.forEach((key) => {
         const cb = items[key] || {}
         const start = cb.jamMulai || ''
         const end = cb.jamSelesai || ''
         const people = Number(cb.orang) || 0
+        if (key !== 'b1' && start === b1Mulai && end === b1Selesai && people === b1Orang) {
+          return
+        }
         if (start && end) {
           const [hStart, minStart] = start.split(':').map(Number)
           const [hEnd, minEnd] = end.split(':').map(Number)

@@ -346,14 +346,29 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
             
             const masterJumlahOrang = data.checksheet.jumlahOrang || 1
 
-            // Auto pre-fill untuk MP cost (b1-b5) jika belum ada jam & orang
-            ;['b1', 'b2', 'b3', 'b4', 'b5'].forEach((key: string) => {
-              if (!loadedChecklist[key]) {
-                loadedChecklist[key] = { jamMulai: masterJamMulai, jamSelesai: masterJamSelesai, orang: masterJumlahOrang }
-              } else {
-                if (!loadedChecklist[key].jamMulai) loadedChecklist[key].jamMulai = masterJamMulai
-                if (!loadedChecklist[key].jamSelesai) loadedChecklist[key].jamSelesai = masterJamSelesai
-                if (!loadedChecklist[key].orang) loadedChecklist[key].orang = masterJumlahOrang
+            // Auto pre-fill HANYA untuk b1 (b2-b5 dibiarkan kosong agar MP cost tidak ter-kali 5)
+            if (!loadedChecklist['b1']) {
+              loadedChecklist['b1'] = { jamMulai: masterJamMulai, jamSelesai: masterJamSelesai, orang: masterJumlahOrang }
+            } else {
+              if (!loadedChecklist['b1'].jamMulai) loadedChecklist['b1'].jamMulai = masterJamMulai
+              if (!loadedChecklist['b1'].jamSelesai) loadedChecklist['b1'].jamSelesai = masterJamSelesai
+              if (!loadedChecklist['b1'].orang) loadedChecklist['b1'].orang = masterJumlahOrang
+            }
+
+            const b1Mulai = loadedChecklist['b1'].jamMulai
+            const b1Selesai = loadedChecklist['b1'].jamSelesai
+            const b1Orang = loadedChecklist['b1'].orang
+
+            // Untuk b2-b5: jika nilai b2-b5 sama persis dengan b1 (akibat bug auto pre-fill lama), bersihkan agar tidak menggandakan total cost
+            ;['b2', 'b3', 'b4', 'b5'].forEach((key: string) => {
+              if (loadedChecklist[key]) {
+                const isDup =
+                  loadedChecklist[key].jamMulai === b1Mulai &&
+                  loadedChecklist[key].jamSelesai === b1Selesai &&
+                  Number(loadedChecklist[key].orang) === Number(b1Orang)
+                if (isDup) {
+                  loadedChecklist[key] = { jamMulai: '', jamSelesai: '', orang: 0 }
+                }
               }
             })
 
@@ -442,9 +457,23 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     setChecklist(newChecklist)
   }
 
-  // Calculate Total MP Cost (Overhaul b1-b5)
+  // Calculate Total MP Cost (Overhaul b1-b5, abaikan duplikat b1 pada b2-b5)
   const getOverhaulTotalMpCost = () => {
-    return ['b1', 'b2', 'b3', 'b4', 'b5'].reduce((s, k) => s + getMpCostFromBox(k), 0)
+    const b1 = checklist['b1'] || {}
+    const b1Mulai = b1.jamMulai || ''
+    const b1Selesai = b1.jamSelesai || ''
+    const b1Orang = Number(b1.orang) || 0
+
+    return ['b1', 'b2', 'b3', 'b4', 'b5'].reduce((s, k) => {
+      if (k !== 'b1' && checklist[k]) {
+        const isDup =
+          checklist[k].jamMulai === b1Mulai &&
+          checklist[k].jamSelesai === b1Selesai &&
+          Number(checklist[k].orang) === b1Orang
+        if (isDup) return s
+      }
+      return s + getMpCostFromBox(k)
+    }, 0)
   }
 
   // Calculate Total Sparepart
@@ -1589,7 +1618,22 @@ ${cardType !== 'PM' ? `
     }
 
     const _totalMpCost = _isOverhaul
-      ? (['b1','b2','b3','b4','b5'] as const).reduce((s, k) => s + calcMpCost(k), 0)
+      ? (() => {
+          const b1 = checklist['b1'] || {}
+          const b1Mulai = b1.jamMulai || ''
+          const b1Selesai = b1.jamSelesai || ''
+          const b1Orang = Number(b1.orang) || 0
+          return (['b1', 'b2', 'b3', 'b4', 'b5'] as const).reduce((s, k) => {
+            if (k !== 'b1' && checklist[k]) {
+              const isDup =
+                checklist[k].jamMulai === b1Mulai &&
+                checklist[k].jamSelesai === b1Selesai &&
+                Number(checklist[k].orang) === b1Orang
+              if (isDup) return s
+            }
+            return s + calcMpCost(k)
+          }, 0)
+        })()
       : (() => {
           if (!jamMulai || !jamSelesai) return 0
           const [hS, mS] = jamMulai.split(':').map(Number)

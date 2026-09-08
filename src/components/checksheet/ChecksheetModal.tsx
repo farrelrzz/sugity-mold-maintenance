@@ -321,14 +321,30 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
             const masterJamSelesai = data.checksheet.jamSelesai || ''
             const masterJumlahOrang = data.checksheet.jumlahOrang || 1
 
-            const loadedCostBox = rawChecklist.costBox || {}
-            ;['b1', 'b2', 'b3', 'b4', 'b5'].forEach((key) => {
-              if (!loadedCostBox[key]) {
-                loadedCostBox[key] = { jamMulai: masterJamMulai, jamSelesai: masterJamSelesai, orang: masterJumlahOrang }
-              } else {
-                if (!loadedCostBox[key].jamMulai) loadedCostBox[key].jamMulai = masterJamMulai
-                if (!loadedCostBox[key].jamSelesai) loadedCostBox[key].jamSelesai = masterJamSelesai
-                if (!loadedCostBox[key].orang) loadedCostBox[key].orang = masterJumlahOrang
+            const loadedCostBox = (rawChecklist.costBox || {}) as Record<string, any>
+            // Auto pre-fill HANYA untuk b1 (b2-b5 dibiarkan kosong agar MP cost tidak ter-kali 5)
+            if (!loadedCostBox['b1']) {
+              loadedCostBox['b1'] = { jamMulai: masterJamMulai, jamSelesai: masterJamSelesai, orang: masterJumlahOrang }
+            } else {
+              if (!loadedCostBox['b1'].jamMulai) loadedCostBox['b1'].jamMulai = masterJamMulai
+              if (!loadedCostBox['b1'].jamSelesai) loadedCostBox['b1'].jamSelesai = masterJamSelesai
+              if (!loadedCostBox['b1'].orang) loadedCostBox['b1'].orang = masterJumlahOrang
+            }
+
+            const b1Mulai = loadedCostBox['b1'].jamMulai
+            const b1Selesai = loadedCostBox['b1'].jamSelesai
+            const b1Orang = loadedCostBox['b1'].orang
+
+            // Untuk b2-b5: jika nilai sama persis dengan b1 (bug lama), bersihkan agar tidak menggandakan total cost
+            ;['b2', 'b3', 'b4', 'b5'].forEach((key) => {
+              if (loadedCostBox[key]) {
+                const isDup =
+                  loadedCostBox[key].jamMulai === b1Mulai &&
+                  loadedCostBox[key].jamSelesai === b1Selesai &&
+                  Number(loadedCostBox[key].orang) === Number(b1Orang)
+                if (isDup) {
+                  loadedCostBox[key] = { jamMulai: '', jamSelesai: '', orang: 0 }
+                }
               }
             })
             setCostBox(loadedCostBox)
@@ -382,7 +398,21 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
   }
 
   const getOverhaulTotalMpCost = () => {
-    return ['b1', 'b2', 'b3', 'b4', 'b5'].reduce((s, k) => s + getMpCostFromBox(k), 0)
+    const b1 = costBox['b1'] || {}
+    const b1Mulai = b1.jamMulai || ''
+    const b1Selesai = b1.jamSelesai || ''
+    const b1Orang = Number(b1.orang) || 0
+
+    return ['b1', 'b2', 'b3', 'b4', 'b5'].reduce((s, k) => {
+      if (k !== 'b1' && costBox[k]) {
+        const isDup =
+          costBox[k].jamMulai === b1Mulai &&
+          costBox[k].jamSelesai === b1Selesai &&
+          Number(costBox[k].orang) === b1Orang
+        if (isDup) return s
+      }
+      return s + getMpCostFromBox(k)
+    }, 0)
   }
 
   const getTotalSparepartCost = () => {
@@ -845,17 +875,27 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
     const _isOverhaul = laporan.jenis === 'OH_MOLD' || laporan.jenis === 'OH MOLD' || laporan.jenis?.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === 'OHMOLD'
     const _totalSparepart = spareparts.reduce((s, sp) => s + (sp.qty * Number(sp.hargaSatuan)), 0)
     const _totalMpCost = _isOverhaul
-      ? (['b1', 'b2', 'b3', 'b4', 'b5'] as const).reduce((s, k) => {
-          const box = checklist[k] || {}
-          const start = box.jamMulai || ''; const end = box.jamSelesai || ''
-          const people = Number(box.orang) || 0
-          if (!start || !end) return s
-          const [hS, mS] = start.split(':').map(Number)
-          const [hE, mE] = end.split(':').map(Number)
-          let diff = (hE * 60 + mE) - (hS * 60 + mS)
-          if (diff < 0) diff += 24 * 60
-          return s + Math.round((diff / 60) * 89595 * people)
-        }, 0)
+      ? (() => {
+          const b1 = costBox['b1'] || checklist['b1'] || {}
+          const b1Mulai = b1.jamMulai || ''
+          const b1Selesai = b1.jamSelesai || ''
+          const b1Orang = Number(b1.orang) || 0
+          return (['b1', 'b2', 'b3', 'b4', 'b5'] as const).reduce((s, k) => {
+            const box = costBox[k] || checklist[k] || {}
+            const start = box.jamMulai || ''; const end = box.jamSelesai || ''
+            const people = Number(box.orang) || 0
+            if (!start || !end) return s
+            if (k !== 'b1') {
+              const isDup = start === b1Mulai && end === b1Selesai && people === b1Orang
+              if (isDup) return s
+            }
+            const [hS, mS] = start.split(':').map(Number)
+            const [hE, mE] = end.split(':').map(Number)
+            let diff = (hE * 60 + mE) - (hS * 60 + mS)
+            if (diff < 0) diff += 24 * 60
+            return s + Math.round((diff / 60) * 89595 * people)
+          }, 0)
+        })()
       : (() => {
           if (!jamMulai || !jamSelesai) return 0
           const [hS, mS] = jamMulai.split(':').map(Number)
