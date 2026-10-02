@@ -304,6 +304,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
 
   // Katalog Modal States
   const [isKatalogModalOpen, setIsKatalogModalOpen] = useState(false)
+  const [katalogModalSearch, setKatalogModalSearch] = useState('')
   const [newKatalogNama, setNewKatalogNama] = useState('')
   const [newKatalogHarga, setNewKatalogHarga] = useState('')
   const [isSubmittingKatalog, setIsSubmittingKatalog] = useState(false)
@@ -4368,13 +4369,22 @@ ${cardType !== 'PM' ? `
 
             <div style={{ borderTop: '1px dashed #ccc', margin: '20px 0', padding: '0' }} />
 
-            <h4 style={{ color: 'var(--hijau-tua)', marginBottom: '12px', fontSize: '14px' }}>Katalog Saat Ini</h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h4 style={{ color: 'var(--hijau-tua)', fontSize: '14px', margin: 0 }}>Katalog Saat Ini ({katalogList.length})</h4>
+              <input
+                type="text"
+                placeholder="🔍 Cari katalog..."
+                value={katalogModalSearch}
+                onChange={e => setKatalogModalSearch(e.target.value)}
+                style={{ padding: '4px 8px', fontSize: '12px', border: '1px solid #ccc', borderRadius: '4px', maxWidth: '180px' }}
+              />
+            </div>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>
-              {katalogList.length === 0 ? (
-                <div style={{ fontSize: '13px', color: '#888', textAlign: 'center', padding: '10px' }}>Katalog masih kosong</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+              {katalogList.filter(k => k.nama.toLowerCase().includes(katalogModalSearch.toLowerCase())).length === 0 ? (
+                <div style={{ fontSize: '13px', color: '#888', textAlign: 'center', padding: '10px' }}>Tidak ada katalog yang sesuai</div>
               ) : (
-                katalogList.map(k => (
+                katalogList.filter(k => k.nama.toLowerCase().includes(katalogModalSearch.toLowerCase())).map(k => (
                   <div key={k.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f9f9f9', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontWeight: 'bold' }}>{k.nama}</span>

@@ -9,6 +9,11 @@ export default function SparepartPage() {
   const [spareparts, setSpareparts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<{ msg: string, type: 'sukses' | 'error' } | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredSpareparts = spareparts.filter(sp => 
+    sp.nama.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const [form, setForm] = useState({ id: 0, nama: '', hargaSatuan: '' })
   const [isEditing, setIsEditing] = useState(false)
@@ -162,24 +167,36 @@ export default function SparepartPage() {
 
         {/* LIST SECTION */}
         <div className="kartu" style={{ flex: '2 1 600px' }}>
-          <p className="label-besar">Daftar Sparepart Tersimpan</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+            <p className="label-besar" style={{ marginBottom: 0 }}>
+              Daftar Sparepart Tersimpan <span style={{ fontSize: '13px', fontWeight: 'normal', color: 'var(--teks-redup)' }}>({filteredSpareparts.length} dari {spareparts.length})</span>
+            </p>
+            <input 
+              type="text" 
+              className="input-field" 
+              placeholder="🔍 Cari Deskripsi, Type, Grouping..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ maxWidth: '280px', padding: '8px 12px', fontSize: '13px' }}
+            />
+          </div>
           {loading ? (
             <p style={{ color: 'var(--teks-redup)' }}>Memuat data...</p>
-          ) : spareparts.length === 0 ? (
-            <p style={{ color: 'var(--teks-redup)' }}>Belum ada data sparepart.</p>
+          ) : filteredSpareparts.length === 0 ? (
+            <p style={{ color: 'var(--teks-redup)' }}>Tidak ada data sparepart yang sesuai pencarian.</p>
           ) : (
-            <div className="table-responsive">
+            <div className="table-responsive" style={{ maxHeight: '600px', overflowY: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '500px' }}>
                 <thead>
-                  <tr style={{ borderBottom: '2px solid var(--garis)', color: 'var(--teks-redup)' }}>
+                  <tr style={{ borderBottom: '2px solid var(--garis)', color: 'var(--teks-redup)', position: 'sticky', top: 0, background: '#fff', zIndex: 1 }}>
                     <th style={{ padding: '12px 8px' }}>No</th>
-                    <th style={{ padding: '12px 8px' }}>Nama Sparepart</th>
+                    <th style={{ padding: '12px 8px' }}>Nama / Deskripsi / Type / Grouping Sparepart</th>
                     <th style={{ padding: '12px 8px' }}>Harga Satuan</th>
                     {canEdit && <th style={{ padding: '12px 8px', textAlign: 'center' }}>Aksi</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {spareparts.map((sp, idx) => (
+                  {filteredSpareparts.map((sp, idx) => (
                     <tr key={sp.id} style={{ borderBottom: '1px solid var(--garis-halus)' }}>
                       <td style={{ padding: '12px 8px', width: '50px' }}>{idx + 1}</td>
                       <td style={{ padding: '12px 8px', fontWeight: 600 }}>{sp.nama}</td>
