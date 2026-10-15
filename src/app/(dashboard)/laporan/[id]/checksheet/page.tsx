@@ -822,10 +822,10 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
       return img.startsWith('/') ? origin + img : origin + '/' + img
     }
 
-    let photoHtml = '<div style="color: #777; font-style: italic; padding: 25px 0; text-align: center; font-size: 8px;">( Tidak ada foto terlampir / sketsa manual )</div>'
+    let photoHtml = '<div style="color: #777; font-style: italic; padding: 35px 0; text-align: center; font-size: 8px;">( Tidak ada foto terlampir / sketsa manual )</div>'
     if (foto && foto.length > 0) {
-      photoHtml = `<div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap; padding: 4px;">
-        ${foto.slice(0, 2).map(f => `<div style="border: 1px solid #aaa; padding: 2px; background: #fff; display: flex; align-items: center; justify-content: center;"><img src="${getPrintImgSrc(f)}" style="max-height: 85px; max-width: 135px; object-fit: contain; display: block;" /></div>`).join('')}
+      photoHtml = `<div style="display: flex; gap: 6px; justify-content: center; align-items: flex-start; flex-wrap: wrap; padding: 6px;">
+        ${foto.slice(0, 4).map(f => `<div style="border: 1px solid #aaa; padding: 3px; background: #fff; display: flex; align-items: center; justify-content: center;"><img src="${getPrintImgSrc(f)}" style="max-height: 145px; max-width: 200px; object-fit: contain; display: block;" /></div>`).join('')}
       </div>`
     }
 
@@ -929,7 +929,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
     <td style="width: 45%; vertical-align: top; padding: 4px 5px;">
       <div style="font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 1px; margin-bottom: 3px;">4. LOKASI</div>
       <div style="margin-bottom: 3px;"><b>Factory / Lokasi :</b> ${checklist.cm_lokasi || laporan.moldData?.lokasiMold || laporan.moldData?.factory || laporan.factory || '-'}</div>
-      <div style="margin-bottom: 3px;"><b>Mold Name :</b> ${checklist.cm_mold_name || laporan.moldData?.noMold || laporan.noMold || '-'}</div>
+      <div style="margin-bottom: 3px;"><b>Mold Name :</b> ${checklist.cm_mold_name || laporan.moldData?.part || laporan.part || laporan.moldData?.noMold || laporan.noMold || '-'}</div>
       <div style="margin-bottom: 3px;"><b>Model :</b> ${checklist.cm_model || laporan.moldData?.model || laporan.moldData?.part || laporan.part || '-'}</div>
       <div><b>Customer :</b> ${checklist.cm_customer || laporan.moldData?.customer || '-'}</div>
     </td>
@@ -953,7 +953,7 @@ export default function ChecksheetPage({ params }: { params: Promise<{ id: strin
   <tr>
     <td style="width: 48%; vertical-align: top; padding: 0;">
       <div style="background: #eee; font-weight: bold; padding: 2px 5px; border-bottom: 1px solid #000;">6. PHOTO / SKETSA PROBLEM</div>
-      <div style="min-height: 85px; padding: 4px; display: flex; align-items: center; justify-content: center;">
+      <div style="min-height: 160px; padding: 4px; display: flex; align-items: center; justify-content: center;">
         ${photoHtml}
       </div>
       <table style="width: 100%; border-top: 1px solid #000; font-size: 7.5px; table-layout: fixed;">
@@ -3285,7 +3285,7 @@ ${cardType !== 'PM' ? `
                     <input
                       type="text"
                       placeholder="Nama / No Mold..."
-                      value={checklist.cm_mold_name !== undefined ? checklist.cm_mold_name : (laporan.moldData?.noMold || laporan.noMold || '')}
+                      value={checklist.cm_mold_name !== undefined ? checklist.cm_mold_name : (laporan.moldData?.part || laporan.part || laporan.moldData?.noMold || laporan.noMold || '')}
                       onChange={(e) => setChecklist({ ...checklist, cm_mold_name: e.target.value })}
                       style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13.5px', marginTop: '4px' }}
                     />

@@ -550,22 +550,59 @@ export default function ChecksheetModal({ laporanId, onClose, onSaved }: Checksh
     const files = e.target.files
     if (!files) return
 
-    const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
+    const MAX_SIZE = 5 * 1024 * 1024 // 5 MB (pre-check on original)
+    const MAX_DIM = 1920 // max dimension in px
+    const QUALITY = 0.82 // JPEG quality (0–1)
 
-    Array.from(files).forEach((file) => {
-      if (file.size > MAX_SIZE) {
-        showToast(`Foto Checksheet "${file.name}" ditolak! Ukuran maksimal foto adalah 5 MB (Ukuran saat ini: ${(file.size / (1024 * 1024)).toFixed(2)} MB).`, 'error')
-        return
-      }
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setFoto((prev) => [...prev, reader.result as string])
+    const compressImage = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        if (file.size > MAX_SIZE) {
+          showToast(`Foto "${file.name}" ditolak! Ukuran maksimal foto adalah 5 MB (Ukuran saat ini: ${(file.size / (1024 * 1024)).toFixed(2)} MB).`, 'error')
+          reject(new Error('File too large'))
+          return
         }
+
+        const reader = new FileReader()
+        reader.onload = (ev) => {
+          const img = new Image()
+          img.onload = () => {
+            let { width, height } = img
+            if (width > MAX_DIM || height > MAX_DIM) {
+              if (width > height) {
+                height = Math.round((height / width) * MAX_DIM)
+                width = MAX_DIM
+              } else {
+                width = Math.round((width / height) * MAX_DIM)
+                height = MAX_DIM
+              }
+            }
+            const canvas = document.createElement('canvas')
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext('2d')
+            if (!ctx) { reject(new Error('No canvas context')); return }
+            ctx.drawImage(img, 0, 0, width, height)
+            const compressed = canvas.toDataURL('image/jpeg', QUALITY)
+            resolve(compressed)
+          }
+          img.onerror = reject
+          img.src = ev.target?.result as string
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(file)
+      })
+    }
+
+    Array.from(files).forEach(async (file) => {
+      try {
+        const compressed = await compressImage(file)
+        setFoto((prev) => [...prev, compressed])
+      } catch {
+        // error already shown in compressImage
       }
-      reader.readAsDataURL(file)
     })
   }
+
 
   const handleRemoveFoto = (idx: number) => {
     setFoto(foto.filter((_, i) => i !== idx))
