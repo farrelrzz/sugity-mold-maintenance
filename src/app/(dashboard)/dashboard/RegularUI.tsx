@@ -723,7 +723,7 @@ export default function RegularUI({
           <div className="kartu" style={{ margin: 0, padding: '22px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
-                <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Tren Biaya & Kegiatan YTD</h3>
+                <h3 className="tv-chart-title" style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>Tren Biaya & Kegiatan</h3>
                 <span className="tv-chart-sub" style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>Perbandingan akumulasi cost vs frekuensi pekerjaan bulanan</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: '#475569' }}>
