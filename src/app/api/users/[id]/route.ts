@@ -17,32 +17,114 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ error: 'ID tidak valid' }, { status: 400 })
     }
 
+    const sessionUserId = Number((session?.user as any)?.id)
+    if (!isNaN(sessionUserId) && sessionUserId === userId) {
+      return NextResponse.json({ error: 'Anda tidak dapat menghapus akun Anda sendiri saat sedang login.' }, { status: 400 })
+    }
+
     const userToDelete = await prisma.user.findUnique({ where: { id: userId } })
     if (!userToDelete) {
       return NextResponse.json({ error: 'User tidak ditemukan' }, { status: 404 })
     }
 
-    const userRole = (session?.user as any)?.role
-    if (!['SUPER_ADMIN', 'SUPERADMIN', 'ADM'].includes(userRole)) {
-      if (userRole === 'PIC' && userToDelete.role === 'PIC') {
+    const rawRole = String((session?.user as any)?.role || '').trim().toUpperCase().replace(/[\s-]/g, '_')
+    const isAdminOrSuper = ['SUPER_ADMIN', 'SUPERADMIN', 'ADM'].includes(rawRole)
+    if (!isAdminOrSuper) {
+      if (rawRole === 'PIC' && userToDelete.role === 'PIC') {
         // PIC diizinkan menghapus PIC (terutama untuk hapus PIC temporary)
       } else {
         return NextResponse.json({ error: 'Unauthorized. Hanya Super Admin & Admin yang diizinkan.' }, { status: 403 })
       }
     }
 
+    if (userToDelete.role === 'SUPER_ADMIN' && rawRole !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Hanya Super Admin yang dapat menghapus sesama akun Super Admin.' }, { status: 403 })
+    }
 
+    // Temukan user fallback jika ada relasi NOT-NULL
+    let fallbackId = !isNaN(sessionUserId) && sessionUserId > 0 && sessionUserId !== userId ? sessionUserId : null
+    if (!fallbackId) {
+      const fallbackUser = await prisma.user.findFirst({
+        where: { id: { not: userId } }
+      })
+      fallbackId = fallbackUser?.id || null
+    }
 
-    const deletedUser = await prisma.user.delete({
-      where: { id: userId }
+    await prisma.$transaction(async (tx) => {
+      // 1. Hapus notifikasi milik user
+      await tx.notifikasi.deleteMany({
+        where: { userId }
+      })
+
+      // 2. Putus relasi audit log (set null)
+      await tx.auditLog.updateMany({
+        where: { userId },
+        data: { userId: null }
+      })
+
+      // 3. Putus relasi approval checksheet (set null agar riwayat ttd tetap tercatat)
+      await tx.checksheetApproval.updateMany({
+        where: { userId },
+        data: { userId: null }
+      })
+
+      // 4. Hapus entri overtime user jika ada
+      await tx.overtimeEntry.deleteMany({
+        where: { userId }
+      })
+
+      // 5. Putus relasi pembaruan MoldBook (set null)
+      await tx.moldBook.updateMany({
+        where: { updatedBy: userId },
+        data: { updatedBy: null }
+      })
+
+      // 6. Putus relasi respons revisi checksheet (set null)
+      await tx.checksheetRevisi.updateMany({
+        where: { respondedById: userId },
+        data: { respondedById: null }
+      })
+
+      // 7. Alihkan relasi NOT NULL ke fallback user jika ada
+      if (fallbackId) {
+        await tx.laporan.updateMany({
+          where: { picId: userId },
+          data: { picId: fallbackId }
+        })
+
+        await tx.jadwalMingguan.updateMany({
+          where: { picId: userId },
+          data: { picId: fallbackId }
+        })
+
+        await tx.checksheetRevisi.updateMany({
+          where: { requestById: userId },
+          data: { requestById: fallbackId }
+        })
+
+        await tx.safetyRecord.updateMany({
+          where: { updatedBy: userId },
+          data: { updatedBy: fallbackId }
+        })
+
+        await tx.safetyHistory.updateMany({
+          where: { modifiedBy: userId },
+          data: { modifiedBy: fallbackId }
+        })
+      }
+
+      // 8. Hapus user secara tuntas dan permanen
+      await tx.user.delete({
+        where: { id: userId }
+      })
     })
 
     try {
-      const sessionId = Number((session?.user as any)?.id)
+      const auditUserId = !isNaN(sessionUserId) && sessionUserId > 0 ? sessionUserId : null
       await prisma.auditLog.create({
         data: {
-          userId: !isNaN(sessionId) && sessionId > 0 ? sessionId : null,
-          aktivitas: `User dihapus: ${deletedUser.nama} (${deletedUser.username})`
+          userId: auditUserId,
+          aktivitas: `User dihapus: ${userToDelete.nama} (${userToDelete.username})`
         }
       })
     } catch (logErr) {

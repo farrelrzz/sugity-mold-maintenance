@@ -173,21 +173,22 @@ export default function KelolaAkunPage() {
     })
     if (!isConfirmed) return
 
-    // Optimistic Update
+    // Optimistic Update: langsung sembunyikan akun dari daftar tampilan
     setUsers(prev => prev.filter(u => u.id !== id))
 
     try {
       const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
+      const data = await res.json()
       if (res.ok) {
-        showToast('Akun berhasil dihapus', 'sukses')
+        showToast('Akun berhasil dihapus permanen! ✓', 'sukses')
+        fetchUsers()
       } else {
-        const data = await res.json()
         showToast(data.error || 'Gagal menghapus akun', 'error')
-        fetchUsers() // Revert state
+        fetchUsers() // Revert state jika ada error dari server
       }
     } catch (err) {
-      showToast('Terjadi kesalahan jaringan', 'error')
-      fetchUsers() // Revert state
+      showToast('Terjadi kesalahan jaringan saat menghapus akun', 'error')
+      fetchUsers() // Revert state jika terjadi error jaringan
     }
   }
 
@@ -482,7 +483,7 @@ export default function KelolaAkunPage() {
                               </span>
                             )}
                           </div>
-                          {u.id !== session?.user?.id && (
+                          {Number(u.id) !== Number(session?.user?.id) && (
                             <button 
                               onClick={(e) => { e.stopPropagation(); handleDelete(u.id); }}
                               style={{
