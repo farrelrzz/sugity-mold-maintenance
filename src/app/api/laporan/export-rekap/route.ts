@@ -5,10 +5,12 @@ import ExcelJS from 'exceljs'
 function hitungHistoryCosts(lap: any) {
   let mpCost = 0
   let spCost = 0
+  let durasiMenit = 0
   const isOh = lap.jenis === 'OH_MOLD' || lap.jenis === 'OH MOLD'
   const cs = lap.checksheet
 
   if (cs) {
+    const tarif = Number(cs.tarifPerJam || 89595)
     if (isOh) {
       const rawChecklist = cs.checklist || {}
       const items = rawChecklist.items || rawChecklist.costBox || {}
@@ -17,6 +19,7 @@ function hitungHistoryCosts(lap: any) {
       const b1Selesai = b1.jamSelesai || ''
       const b1Orang = Number(b1.orang) || 0
 
+      let totalOhMinutes = 0
       const costKeys = ['b1', 'b2', 'b3', 'b4', 'b5']
       costKeys.forEach((key) => {
         const cb = items[key] || {}
@@ -31,10 +34,12 @@ function hitungHistoryCosts(lap: any) {
           const [hEnd, minEnd] = end.split(':').map(Number)
           let diffMinutes = (hEnd * 60 + minEnd) - (hStart * 60 + minStart)
           if (diffMinutes < 0) diffMinutes += 24 * 60
+          totalOhMinutes += diffMinutes
           const hours = diffMinutes / 60
-          mpCost += Math.round(hours * 89595 * people)
+          mpCost += Math.round(hours * tarif * people)
         }
       })
+      durasiMenit = totalOhMinutes
     } else {
       const start = cs.jamMulai || ''
       const end = cs.jamSelesai || ''
@@ -44,10 +49,11 @@ function hitungHistoryCosts(lap: any) {
         const [hEnd, minEnd] = end.split(':').map(Number)
         let diffMinutes = (hEnd * 60 + minEnd) - (hStart * 60 + minStart)
         if (diffMinutes < 0) diffMinutes += 24 * 60
+        durasiMenit = diffMinutes
         const hours = diffMinutes / 60
-        mpCost += Math.round(hours * 89595 * people)
+        mpCost += Math.round(hours * tarif * people)
       } else {
-        mpCost += Math.round(1 * 89595 * people)
+        mpCost += Math.round(1 * tarif * people)
       }
     }
     if (Array.isArray(cs.spareparts)) {
@@ -55,10 +61,21 @@ function hitungHistoryCosts(lap: any) {
         spCost += sp.qty * Number(sp.hargaSatuan || 0)
       })
     }
+
+    if (durasiMenit === 0 && mpCost > 0) {
+      const people = Math.max(1, Number(cs.jumlahOrang || 1))
+      durasiMenit = Math.round((mpCost / (tarif * people)) * 60)
+    }
   } else {
     mpCost = Math.round(1 * 89595 * 1)
+    durasiMenit = 60
   }
-  return { mpCost, spCost, totalCost: mpCost + spCost }
+
+  if (durasiMenit === 0 && mpCost > 0) {
+    durasiMenit = Math.round((mpCost / 89595) * 60)
+  }
+
+  return { mpCost, spCost, totalCost: mpCost + spCost, durasiMenit }
 }
 
 export async function GET(req: Request) {
@@ -119,6 +136,7 @@ export async function GET(req: Request) {
         { header: 'Jenis Perawatan', key: 'jenis', width: 15 },
         { header: 'Detail Problem', key: 'problem', width: 30 },
         { header: 'Countermeasure', key: 'cm', width: 30 },
+        { header: 'Durasi (Menit)', key: 'durasi', width: 14 },
         { header: 'M/P Cost (Rp)', key: 'mpcost', width: 15 },
         { header: 'S/P Cost (Rp)', key: 'spcost', width: 15 },
         { header: 'Total Cost (Rp)', key: 'totalcost', width: 15 },
@@ -158,6 +176,7 @@ export async function GET(req: Request) {
           jenis: lap.jenis,
           problem: lap.info || '-',
           cm: lap.countermeasure || '-',
+          durasi: cost.durasiMenit,
           mpcost: cost.mpCost,
           spcost: cost.spCost,
           totalcost: cost.totalCost,

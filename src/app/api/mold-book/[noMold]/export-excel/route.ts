@@ -5,10 +5,12 @@ import ExcelJS from 'exceljs'
 function hitungHistoryCosts(lap: any) {
   let mpCost = 0
   let spCost = 0
+  let durasiMenit = 0
   const isOh = lap.jenis === 'OH_MOLD' || lap.jenis === 'OH MOLD'
   const cs = lap.checksheet
 
   if (cs) {
+    const tarif = Number(cs.tarifPerJam || 89595)
     if (isOh) {
       const rawChecklist = cs.checklist || {}
       const items = rawChecklist.items || rawChecklist.costBox || {}
@@ -17,6 +19,7 @@ function hitungHistoryCosts(lap: any) {
       const b1Selesai = b1.jamSelesai || ''
       const b1Orang = Number(b1.orang) || 0
 
+      let totalOhMinutes = 0
       const costKeys = ['b1', 'b2', 'b3', 'b4', 'b5']
       costKeys.forEach((key) => {
         const cb = items[key] || {}
@@ -31,10 +34,12 @@ function hitungHistoryCosts(lap: any) {
           const [hEnd, minEnd] = end.split(':').map(Number)
           let diffMinutes = (hEnd * 60 + minEnd) - (hStart * 60 + minStart)
           if (diffMinutes < 0) diffMinutes += 24 * 60
+          totalOhMinutes += diffMinutes
           const hours = diffMinutes / 60
-          mpCost += Math.round(hours * 89595 * people)
+          mpCost += Math.round(hours * tarif * people)
         }
       })
+      durasiMenit = totalOhMinutes
     } else {
       const start = cs.jamMulai || ''
       const end = cs.jamSelesai || ''
@@ -44,21 +49,36 @@ function hitungHistoryCosts(lap: any) {
         const [hEnd, minEnd] = end.split(':').map(Number)
         let diffMinutes = (hEnd * 60 + minEnd) - (hStart * 60 + minStart)
         if (diffMinutes < 0) diffMinutes += 24 * 60
+        durasiMenit = diffMinutes
         const hours = diffMinutes / 60
-        mpCost += Math.round(hours * 89595 * people)
+        mpCost += Math.round(hours * tarif * people)
       } else {
-        mpCost += Math.round(1 * 89595 * people)
+        mpCost += Math.round(1 * tarif * people)
       }
     }
+
     if (Array.isArray(cs.spareparts)) {
       cs.spareparts.forEach((sp: any) => {
         spCost += sp.qty * Number(sp.hargaSatuan || 0)
       })
     }
+
+    // Fallback durasi dari mpCost jika durasiMenit belum terhitung tapi ada mpCost
+    if (durasiMenit === 0 && mpCost > 0) {
+      const people = Math.max(1, Number(cs.jumlahOrang || 1))
+      durasiMenit = Math.round((mpCost / (tarif * people)) * 60)
+    }
   } else {
     mpCost = Math.round(1 * 89595 * 1)
+    durasiMenit = 60
   }
-  return { mpCost, spCost, totalCost: mpCost + spCost }
+
+  // Final fallback jika durasiMenit masih 0 namun mpCost > 0
+  if (durasiMenit === 0 && mpCost > 0) {
+    durasiMenit = Math.round((mpCost / 89595) * 60)
+  }
+
+  return { mpCost, spCost, totalCost: mpCost + spCost, durasiMenit }
 }
 
 export async function GET(req: Request, { params }: { params: Promise<{ noMold: string }> }) {
@@ -101,18 +121,19 @@ export async function GET(req: Request, { params }: { params: Promise<{ noMold: 
 
     const sheet = workbook.addWorksheet('Riwayat Tahunan')
 
-    // Set Column Widths
+    // Set Column Widths (9 columns: A to I)
     sheet.getColumn('A').width = 5   // DD
     sheet.getColumn('B').width = 5   // MM
     sheet.getColumn('C').width = 5   // YY
-    sheet.getColumn('D').width = 50  // O/H & BM, PM CARD (Description)
-    sheet.getColumn('E').width = 20  // M/P COST
-    sheet.getColumn('F').width = 20  // S/P COST
-    sheet.getColumn('G').width = 20  // TOTAL COST
-    sheet.getColumn('H').width = 30  // COMMENT
+    sheet.getColumn('D').width = 48  // O/H & BM, PM CARD (Description)
+    sheet.getColumn('E').width = 14  // DURASI (MENIT)
+    sheet.getColumn('F').width = 20  // M/P COST
+    sheet.getColumn('G').width = 20  // S/P COST (OUT HOUSE)
+    sheet.getColumn('H').width = 20  // TOTAL COST
+    sheet.getColumn('I').width = 28  // COMMENT
 
     // TITLE ROW
-    sheet.mergeCells('A1:D1')
+    sheet.mergeCells('A1:E1')
     sheet.getCell('A1').value = `HISTORY O/H & BM , PM CARD         YEAR : ${targetYear}`
     sheet.getCell('A1').font = { bold: true, size: 14 }
     sheet.getCell('A1').alignment = { vertical: 'middle', horizontal: 'left' }
@@ -122,33 +143,33 @@ export async function GET(req: Request, { params }: { params: Promise<{ noMold: 
     sheet.getCell('C2').value = mold.noMold
     sheet.mergeCells('A2:B2')
     sheet.mergeCells('C2:D2')
-    sheet.mergeCells('E2:H2')
+    sheet.mergeCells('E2:I2')
     sheet.getCell('E2').value = 'PIC :'
 
     sheet.getCell('A3').value = 'MACHINE/MOLD NAME :'
     sheet.getCell('C3').value = mold.part || '-'
     sheet.mergeCells('A3:B3')
     sheet.mergeCells('C3:D3')
-    sheet.mergeCells('E3:H3')
+    sheet.mergeCells('E3:I3')
     sheet.getCell('E3').value = 'PROD PLAN :'
 
     sheet.getCell('A4').value = 'CUST :'
     sheet.getCell('B4').value = mold.customer || '-'
     sheet.getCell('C4').value = 'MODEL :'
     sheet.getCell('D4').value = mold.model || '-'
-    sheet.mergeCells('E4:H4')
+    sheet.mergeCells('E4:I4')
     sheet.getCell('E4').value = 'O/H PLAN :'
 
     sheet.getCell('A5').value = 'SVP :'
     sheet.getCell('B5').value = '-'
     sheet.getCell('C5').value = 'MAKER :'
     sheet.getCell('D5').value = mold.maker || '-'
-    sheet.mergeCells('E5:H5')
+    sheet.mergeCells('E5:I5')
     sheet.getCell('E5').value = 'O/H CYCLE :'
 
     // Apply borders to the info section
     for (let r = 2; r <= 5; r++) {
-      for (let c = 1; c <= 8; c++) {
+      for (let c = 1; c <= 9; c++) {
         const cell = sheet.getCell(r, c)
         cell.border = {
           top: { style: 'thin' },
@@ -170,18 +191,22 @@ export async function GET(req: Request, { params }: { params: Promise<{ noMold: 
     sheet.mergeCells('D6:D7')
     sheet.getCell('D6').value = 'O/H & BM , PM CARD'
 
-    sheet.mergeCells('E6:G6')
-    sheet.getCell('E6').value = 'TOTAL COST'
-    sheet.getCell('E7').value = 'M/P COST Rp(89,595/H)'
-    sheet.getCell('F7').value = 'OUT HOUSE COST (Rp)'
-    sheet.getCell('G7').value = '(Rp)'
+    // DURASI COLUMN
+    sheet.mergeCells('E6:E7')
+    sheet.getCell('E6').value = 'DURASI\n(MENIT)'
 
-    sheet.mergeCells('H6:H7')
-    sheet.getCell('H6').value = 'COMMENT'
+    sheet.mergeCells('F6:H6')
+    sheet.getCell('F6').value = 'TOTAL COST'
+    sheet.getCell('F7').value = 'M/P COST Rp(89,595/H)'
+    sheet.getCell('G7').value = 'OUT HOUSE COST (Rp)'
+    sheet.getCell('H7').value = '(Rp)'
+
+    sheet.mergeCells('I6:I7')
+    sheet.getCell('I6').value = 'COMMENT'
 
     // Style table headers
     for (let r = 6; r <= 7; r++) {
-      for (let c = 1; c <= 8; c++) {
+      for (let c = 1; c <= 9; c++) {
         const cell = sheet.getCell(r, c)
         cell.border = {
           top: { style: 'thin' },
@@ -195,14 +220,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ noMold: 
     }
 
     // FILL DATA
-    let startRow = 8
-    let totalMpYear = 0
-    let totalSpYear = 0
-
     laporanList.forEach(lap => {
       const cost = hitungHistoryCosts(lap)
-      totalMpYear += cost.mpCost
-      totalSpYear += cost.spCost
 
       const d = new Date(lap.tanggal)
       const dd = String(d.getDate()).padStart(2, '0')
@@ -218,6 +237,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ noMold: 
         mm,
         yy,
         desc,
+        cost.durasiMenit,
         cost.mpCost,
         cost.spCost,
         cost.totalCost,
@@ -227,8 +247,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ noMold: 
       row.getCell(5).numFmt = '#,##0'
       row.getCell(6).numFmt = '#,##0'
       row.getCell(7).numFmt = '#,##0'
+      row.getCell(8).numFmt = '#,##0'
 
-      for (let c = 1; c <= 8; c++) {
+      for (let c = 1; c <= 9; c++) {
         row.getCell(c).border = {
           top: { style: 'thin' },
           left: { style: 'thin' },
@@ -239,18 +260,19 @@ export async function GET(req: Request, { params }: { params: Promise<{ noMold: 
         row.getCell(c).font = { size: 10 }
       }
       
-      // Center align dates
+      // Center align dates and durasi
       row.getCell(1).alignment = { vertical: 'top', horizontal: 'center' }
       row.getCell(2).alignment = { vertical: 'top', horizontal: 'center' }
       row.getCell(3).alignment = { vertical: 'top', horizontal: 'center' }
+      row.getCell(5).alignment = { vertical: 'top', horizontal: 'center' }
     })
 
     // Add empty rows if less than 20 rows to make it look like a form
     const minRows = 20
     if (laporanList.length < minRows) {
       for (let i = 0; i < minRows - laporanList.length; i++) {
-        const row = sheet.addRow(['', '', '', '', '', '', '', ''])
-        for (let c = 1; c <= 8; c++) {
+        const row = sheet.addRow(['', '', '', '', '', '', '', '', ''])
+        for (let c = 1; c <= 9; c++) {
           row.getCell(c).border = {
             top: { style: 'thin' },
             left: { style: 'thin' },

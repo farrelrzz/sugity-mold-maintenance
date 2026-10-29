@@ -12,6 +12,7 @@ interface HistoryEntry {
   pic: string
   info: string | null
   countermeasure: string | null
+  durasi?: number
   mpCost: number
   spCost: number
   totalCost: number
@@ -509,20 +510,21 @@ export default function RiwayatMoldPage() {
                 <table className="tabel-biasa">
                   <thead>
                     <tr>
-                      <th style={{ width: '110px' }}>Tanggal</th>
-                      <th style={{ width: '100px' }}>Jenis</th>
+                      <th style={{ width: '100px' }}>Tanggal</th>
+                      <th style={{ width: '90px' }}>Jenis</th>
                       <th>Detail Problem / Penjelasan</th>
-                      <th style={{ width: '110px', textAlign: 'right' }}>M/P Cost</th>
-                      <th style={{ width: '110px', textAlign: 'right' }}>Spareparts</th>
-                      <th style={{ width: '120px', textAlign: 'right' }}>Total Biaya</th>
-                      <th style={{ width: '140px', textAlign: 'center' }}>Status</th>
-                      <th style={{ width: '90px' }} className="no-print">Aksi</th>
+                      <th style={{ width: '90px', textAlign: 'center' }}>Durasi</th>
+                      <th style={{ width: '105px', textAlign: 'right' }}>M/P Cost</th>
+                      <th style={{ width: '105px', textAlign: 'right' }}>Spareparts</th>
+                      <th style={{ width: '115px', textAlign: 'right' }}>Total Biaya</th>
+                      <th style={{ width: '135px', textAlign: 'center' }}>Status</th>
+                      <th style={{ width: '85px' }} className="no-print">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
                     {data.history.length === 0 ? (
                       <tr>
-                        <td colSpan={7} style={{ textAlign: 'center', padding: '14px', color: 'var(--teks-redup)' }}>
+                        <td colSpan={8} style={{ textAlign: 'center', padding: '14px', color: 'var(--teks-redup)' }}>
                           Belum ada kegiatan perbaikan terdaftar untuk mold ini.
                         </td>
                       </tr>
@@ -545,6 +547,9 @@ export default function RiwayatMoldPage() {
                                 CM: {row.countermeasure}
                               </div>
                             )}
+                          </td>
+                          <td style={{ textAlign: 'center', fontWeight: 600, color: '#0f172a' }}>
+                            {row.durasi !== undefined && row.durasi !== null ? `${row.durasi} menit` : '-'}
                           </td>
                           <td style={{ textAlign: 'right' }}>Rp {row.mpCost.toLocaleString('id-ID')}</td>
                           <td style={{ textAlign: 'right' }}>Rp {row.spCost.toLocaleString('id-ID')}</td>
